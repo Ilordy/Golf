@@ -5,27 +5,27 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     Rigidbody rb;
+
+    Vector3 initialPos;
+
     float speed;
 
-    float timer;
     float limit;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         speed = 25f;
-        limit = 10f;
-        timer = limit;
+        limit = 300f;
+
+        initialPos = transform.position;
     }
 
     void Update()
     {
-        timer -= Time.deltaTime;
-        //rb.velocity = transform.forward * speed;
         rb.useGravity = false;
 
-        if (timer <= 0) {
-            timer = limit;
+        if (Vector3.Distance(initialPos, transform.position) > limit) {
             Destroy(gameObject);
         }
     }
