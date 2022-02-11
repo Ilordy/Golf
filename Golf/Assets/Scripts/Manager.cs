@@ -17,7 +17,11 @@ public class Manager : MonoBehaviour {
 
     [HideInInspector]
     public int enemiesKilled = 0;
-    public int powerUpReq = 5;
+
+    private bool    powerUpEnabled = false;
+    private float   powerUpTimer = 0f;
+    public float    powerUpChargeTime = 1f;
+    public int      powerUpReq = 5;
 
     float enemySpawnTimer = 0f;
     float enemySpawnInterval = 1f;
@@ -25,7 +29,7 @@ public class Manager : MonoBehaviour {
     float fireRateCounter = 0f;
     float fireRate = 0.2f;
 
-    float powerUpTimer = 0f;
+    float pot = 0f;
 
     void Start() {
         enemySpawnTimer = enemySpawnInterval;
@@ -41,13 +45,21 @@ public class Manager : MonoBehaviour {
             Instantiate(enemy, new Vector3(-20+Random.Range(-10,10),2,Random.Range(-7,7)), Quaternion.identity);
         }
 
-        // Projectile Shooting
-        powerUpSlider.value = enemiesKilled;
+        if (enemiesKilled >= powerUpReq) {
+            powerUpEnabled = true;
+        } else {
+            powerUpSlider.value = enemiesKilled;
+        }
+
         if (Input.GetMouseButton(0)) {
             powerUpTimer += Time.deltaTime;
+            if (powerUpEnabled == true && powerUpTimer > 0.2f) {
+                pot += Time.deltaTime;
+                powerUpSlider.value = Mathf.Lerp(powerUpReq, 0, pot / 1f);
+            }
         }
         if (Input.GetMouseButtonUp(0)) {
-            if (enemiesKilled >= powerUpReq && powerUpTimer >= 5f) {
+            if (enemiesKilled >= powerUpReq && powerUpTimer >= powerUpChargeTime) {
                 enemies = GameObject.FindGameObjectsWithTag("Enemy");
                 powerUpProjectiles = new GameObject[enemies.Length];
                 for (int i = 0; i <= enemies.Length - 1; i++) {
@@ -59,9 +71,15 @@ public class Manager : MonoBehaviour {
                     powerUpProjectiles[i].GetComponent<Rigidbody>().useGravity = true;
                     powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = powerUpProjectiles[i].transform.forward * 50f;
                 }
+                enemiesKilled = 0;
+                powerUpTimer = 0f;
+                powerUpEnabled = false;
+                pot = 0;
             } else {
                 fireProjectile(ref fireRateCounter, fireRate);
                 powerUpTimer = 0f;
+                powerUpSlider.value = enemiesKilled;
+                pot = 0;
             }
         }
     }

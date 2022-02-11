@@ -12,5 +12,9 @@ public class Enemy : MonoBehaviour
     void Update()
     {
         transform.Translate(0.02f,0,0);
+
+        if(transform.position.x > 22) {
+            Destroy(gameObject);
+        }
     }
 }
