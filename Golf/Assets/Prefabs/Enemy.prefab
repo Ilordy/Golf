@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2713379972947047447}
   - component: {fileID: 6846939960426943441}
   - component: {fileID: 1222133999896109088}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Enemy
   m_TagString: Enemy
   m_Icon: {fileID: 0}
@@ -57,6 +57,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -81,6 +82,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!135 &6846939960426943441
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -106,3 +108,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96bc9967ef8dd4d438bb54be5a9612d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  health: 1

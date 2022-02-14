@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Enemy : MonoBehaviour
 {
+    public int health = 1;
+
     void Start()
     {
         
@@ -11,11 +13,19 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        transform.Translate(0.01f,0,0);
+        transform.Translate(0.015f,0,0);
 
         if(transform.position.x > 22) {
             Destroy(gameObject);
-            GameObject.Find("Manager").GetComponent<Manager>().enemiesAlive--;
         }
+
+        if(health <= 0) {
+            GameObject.Find("Manager").GetComponent<Manager>().enemiesKilled++;
+            Destroy(gameObject);
+        }
+    }
+
+    void rewardPlayer() {
+        GameObject.Find("Manager").GetComponent<Manager>().reward = Random.Range(1,15);
     }
 }

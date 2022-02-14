@@ -32,14 +32,8 @@ public class Projectile : MonoBehaviour
 
     void OnCollisionEnter(Collision collision) {
         if (collision.gameObject.tag == "Enemy") {
-            rewardPlayer();
-            Destroy(collision.gameObject);
+            collision.gameObject.GetComponent<Enemy>().health--;
             Destroy(gameObject);
-            GameObject.Find("Manager").GetComponent<Manager>().enemiesKilled++;
         }
-    }
-
-    void rewardPlayer() {
-        GameObject.Find("Manager").GetComponent<Manager>().reward = Random.Range(1,15);
     }
 }

@@ -25,14 +25,11 @@ public class Manager : MonoBehaviour {
 
     [HideInInspector]
     public int enemiesKilled = 0;
-    [HideInInspector]
-    public int enemiesAlive = 0;
 
     private float   powerUpTimer = 0f;
     public int      powerUpReq = 5;
 
-    float enemySpawnTimer = 0f;
-    float enemySpawnInterval = 1f;
+    float enemySpawnTimer = 1f;
 
     float pot = 0f;
 
@@ -50,12 +47,21 @@ public class Manager : MonoBehaviour {
 
     bool playGame = false;
 
+    int enemyNumber = 0;
+    int enemiesSpawned = 0;
+
+    public int level = 1;
+
     void Start() {
-        enemySpawnTimer = enemySpawnInterval;
         powerUpSlider.maxValue = powerUpReq;
         powerUpSlider.value = 0;
         currency = 0;
         reward = 0;
+
+        calculateDifficulty(level);
+        Debug.Log("Level: " + level);
+        Debug.Log("EnemyNumber: " + enemyNumber);
+        Debug.Log("enemySpawnTimer: " + enemySpawnTimer);
 
         playButton.onClick.AddListener(Play);
         upgrade1.onClick.AddListener(Upgrade1);
@@ -72,10 +78,10 @@ public class Manager : MonoBehaviour {
         if (playGame) {
             // Spawn Enemies
             enemySpawnTimer -= Time.deltaTime;
-            if (enemySpawnTimer <= 0) {
-                enemySpawnTimer = enemySpawnInterval;
+            if (enemySpawnTimer <= 0 && enemiesSpawned < enemyNumber) {
+                calculateDifficulty(level);
                 Instantiate(enemy, new Vector3(-20+Random.Range(-10,10),2,Random.Range(-7,7)), Quaternion.identity);
-                enemiesAlive++;
+                enemiesSpawned++;
             }
 
             // Reward Player
@@ -157,6 +163,12 @@ public class Manager : MonoBehaviour {
 
     void Upgrade2() {
         ballSpeedLevel++;
+    }
+
+    void calculateDifficulty (int level) {
+        double y = 1 / (1 + 10 * Mathf.Exp(-level/6));
+        enemyNumber = (int)(100 * y);
+        enemySpawnTimer = (float)(1 - (y/1.5));
     }
 }
 

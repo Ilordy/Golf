@@ -3083,11 +3083,11 @@ MonoBehaviour:
   upgrade3: {fileID: 1117250519}
   currencyText: {fileID: 369189146}
   enemiesKilled: 0
-  enemiesAlive: 0
   powerUpReq: 5
-  fireRateLevel: 1
-  ballSpeedLevel: 1
+  fireRateLevel: 20
+  ballSpeedLevel: 20
   reward: 0
+  level: 50
 --- !u!4 &981665294
 Transform:
   m_ObjectHideFlags: 0
