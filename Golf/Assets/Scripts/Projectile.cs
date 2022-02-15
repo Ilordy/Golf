@@ -15,7 +15,6 @@ public class Projectile : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        speed = 25f;
         limit = 300f;
 
         initialPos = transform.position;

@@ -5,27 +5,34 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     public int health = 1;
+    Vector3 playerPos;
+    Manager manager;
 
     void Start()
     {
-        
+        manager = GameObject.Find("Manager").GetComponent<Manager>();
+        playerPos = GameObject.Find("Player").transform.position;
     }
 
     void Update()
     {
-        transform.Translate(0.015f,0,0);
+        transform.LookAt(playerPos);
+        transform.Translate(0,0,0.025f);
 
         if(transform.position.x > 22) {
             Destroy(gameObject);
+            manager.enemiesKilled++;
         }
 
         if(health <= 0) {
-            GameObject.Find("Manager").GetComponent<Manager>().enemiesKilled++;
+            manager.killStreak++;
+            manager.enemiesKilled++;
+            rewardPlayer();
             Destroy(gameObject);
         }
     }
 
     void rewardPlayer() {
-        GameObject.Find("Manager").GetComponent<Manager>().reward = Random.Range(1,15);
+        manager.reward = Random.Range(1,15);
     }
 }

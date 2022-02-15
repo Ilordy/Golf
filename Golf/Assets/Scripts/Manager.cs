@@ -17,12 +17,16 @@ public class Manager : MonoBehaviour {
     public Button upgrade1;
     public Button upgrade2;
     public Button upgrade3;
-    public TextMeshProUGUI currencyText;
+    public TextMeshProUGUI currencyTextMain;
+    public TextMeshProUGUI currencyTextGame;
+    public TextMeshProUGUI levelText;
 
 
     GameObject[] enemies;
     GameObject[] powerUpProjectiles;
 
+    [HideInInspector]
+    public int killStreak = 0;
     [HideInInspector]
     public int enemiesKilled = 0;
 
@@ -42,6 +46,7 @@ public class Manager : MonoBehaviour {
     public int ballSpeedLevel = 1;
     int upgradeMaxLevel = 20;
 
+    [HideInInspector]
     public int reward;
     int currency;
 
@@ -55,17 +60,23 @@ public class Manager : MonoBehaviour {
     void Start() {
         powerUpSlider.maxValue = powerUpReq;
         powerUpSlider.value = 0;
-        currency = 0;
+        currency = PlayerPrefs.GetInt("Money",0);
+        currencyTextMain.text = currency.ToString();
+        currencyTextGame.text = currency.ToString();
+        levelText.text = "Level: " + level;
         reward = 0;
 
         calculateDifficulty(level);
-        Debug.Log("Level: " + level);
-        Debug.Log("EnemyNumber: " + enemyNumber);
-        Debug.Log("enemySpawnTimer: " + enemySpawnTimer);
+
+        //Debug.Log("Level: " + level);
+        //Debug.Log("EnemyNumber: " + enemyNumber);
+        //Debug.Log("enemySpawnTimer: " + enemySpawnTimer);
 
         playButton.onClick.AddListener(Play);
         upgrade1.onClick.AddListener(Upgrade1);
         upgrade2.onClick.AddListener(Upgrade2);
+
+        //PlayerPrefs.DeleteAll();
     }
 
     void Update() {
@@ -74,6 +85,8 @@ public class Manager : MonoBehaviour {
 
         // Handle Ball Speed Upgrade
         ballSpeed = Mathf.Lerp(25f,50f,ballSpeedLevel/upgradeMaxLevel);
+
+        Debug.Log(enemiesKilled);
 
         if (playGame) {
             // Spawn Enemies
@@ -84,14 +97,26 @@ public class Manager : MonoBehaviour {
                 enemiesSpawned++;
             }
 
+            if (enemiesKilled == enemyNumber) {
+                MainMenu();
+                enemiesKilled = 0;
+                enemiesSpawned = 0;
+                level++;
+                //PlayerPrefs.SetInt("Level", level);
+                levelText.text = "Level: " + level;
+                calculateDifficulty(level);
+            }
+
             // Reward Player
             currency += reward;
+            PlayerPrefs.SetInt("Money", currency);
+            currencyTextMain.text = currency.ToString();
+            currencyTextGame.text = currency.ToString();
             reward = 0;
-            //Debug.Log(currency);
 
             // Adjust Power Up Slider
-            if (enemiesKilled <= powerUpReq) {
-                powerUpSlider.value = enemiesKilled;
+            if (killStreak <= powerUpReq) {
+                powerUpSlider.value = killStreak;
             }
 
             // Shooting / Power up
@@ -101,7 +126,7 @@ public class Manager : MonoBehaviour {
 
             if (Input.GetMouseButton(0)) {
                 float holdTime = Time.time - powerUpTimer;
-                if (enemiesKilled >= powerUpReq && holdTime > 0.1f) {
+                if (killStreak >= powerUpReq && holdTime > 0.1f) {
                     pot += Time.deltaTime;
                     powerUpSlider.value = Mathf.Lerp(powerUpReq, 0, pot / 1f);
                 }
@@ -109,7 +134,7 @@ public class Manager : MonoBehaviour {
 
             if (Input.GetMouseButtonUp(0)) {
                 float holdTime = Time.time - powerUpTimer;
-                if (holdTime >= 1f && enemiesKilled >= powerUpReq) {
+                if (holdTime >= 1f && killStreak >= powerUpReq) {
                     enemies = GameObject.FindGameObjectsWithTag("Enemy");
                     powerUpProjectiles = new GameObject[enemies.Length];
                     for (int i = 0; i <= enemies.Length - 1; i++) {
@@ -121,12 +146,12 @@ public class Manager : MonoBehaviour {
                         powerUpProjectiles[i].transform.LookAt(enemies[i].transform.position);
                         powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = powerUpProjectiles[i].transform.forward * 100f;
                     }
-                    enemiesKilled = 0;
+                    killStreak = 0;
                     pot = 0;
                 } else {
                     fireProjectile(ref fireRateCounter, fireRate);
                     pot = 0;
-                    powerUpSlider.value = enemiesKilled;
+                    powerUpSlider.value = killStreak;
                 }
             }
         }
@@ -150,6 +175,13 @@ public class Manager : MonoBehaviour {
         return screenPoint + cursorRay / Mathf.Abs(cursorRay.y) * Mathf.Abs(screenPoint.y - spawner.transform.position.y);
     }
 
+    void MainMenu() {
+        inGameUI.enabled = false;
+        mainMenuUI.enabled = true;
+        mainMenuUI.gameObject.SetActive(true);
+        playGame = false;
+    }
+
     void Play() {
         mainMenuUI.enabled = false;
         inGameUI.enabled = true;
@@ -166,76 +198,7 @@ public class Manager : MonoBehaviour {
     }
 
     void calculateDifficulty (int level) {
-        double y = 1 / (1 + 10 * Mathf.Exp(-level/6));
-        enemyNumber = (int)(100 * y);
-        enemySpawnTimer = (float)(1 - (y/1.5));
+        enemyNumber = (int)Mathf.Ceil((level + 10) * 1.2f);
+        enemySpawnTimer = Mathf.Clamp(1-level/100f, 0.2f,1f);
     }
 }
-
-        // powerUpSlider.value = enemiesKilled;
-        //     if (Input.GetMouseButton(0)) {
-        //         if (powerUpTimer >= 1.5f && powerUpTimer <= 1.6f) {
-        //             enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        //             powerUpProjectiles = new GameObject[enemies.Length];
-        //             for (int i = 0; i <= enemies.Length - 1; i++) {
-        //                 int r = 3;
-        //                 float x = r * Mathf.Cos(i * (Mathf.PI / (enemies.Length - 1)));
-        //                 float y = r * Mathf.Sin(i * (Mathf.PI / (enemies.Length - 1)));
-        //                 powerUpProjectiles[i] = Instantiate(projectile, spawner.transform.position + new Vector3(0, y, x), Quaternion.identity);
-        //                 powerUpProjectiles[i].GetComponent<Rigidbody>().useGravity = false;
-        //                 powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = Vector3.zero;
-        //             }
-        //         }
-        //         powerUpTimer += 0.1f;
-        //     }
-        //     if (Input.GetMouseButtonUp(0)) {
-        //         if (powerUpTimer >= 5f) {
-        //             for (int i = 0; i < enemies.Length; i++) {
-        //                 powerUpProjectiles[i].transform.LookAt(enemies[i].transform.position);
-        //                 powerUpProjectiles[i].GetComponent<Rigidbody>().useGravity = true;
-        //                 powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = powerUpProjectiles[i].transform.forward * 50f;
-        //             }
-        //             powerUpTimer = 0f;
-        //             enemiesKilled = 0;
-        //         }
-        //         else {
-        //             fireProjectile(ref fireRateCounter, fireRate);
-        //             powerUpTimer = 0f;
-        //         }
-        //     }
-
-
-        // SECOND MORE UP TO DATE ITERATION OF SHOOTING LOGIC
-
-
-        // if (Input.GetMouseButton(0)) {
-        //     powerUpTimer += Time.deltaTime;
-        //     if (powerUpEnabled == true && powerUpTimer > 0.2f) {
-        //         pot += Time.deltaTime;
-        //         powerUpSlider.value = Mathf.Lerp(powerUpReq, 0, pot / 1f);
-        //     }
-        // }
-        // if (Input.GetMouseButtonUp(0)) {
-        //     if (enemiesKilled >= powerUpReq && powerUpTimer >= powerUpChargeTime) {
-        //         enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        //         powerUpProjectiles = new GameObject[enemies.Length];
-        //         for (int i = 0; i <= enemies.Length - 1; i++) {
-        //             int r = 3;
-        //             float x = r * Mathf.Cos(i * (Mathf.PI / (enemies.Length - 1)));
-        //             float y = r * Mathf.Sin(i * (Mathf.PI / (enemies.Length - 1)));
-        //             powerUpProjectiles[i] = Instantiate(powerUpProjectile, spawner.transform.position + new Vector3(0, y, x), Quaternion.identity);
-        //             powerUpProjectiles[i].GetComponent<Rigidbody>().useGravity = true;
-        //             powerUpProjectiles[i].transform.LookAt(enemies[i].transform.position);
-        //             powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = powerUpProjectiles[i].transform.forward * 100f;
-        //         }
-        //         enemiesKilled = 0;
-        //         powerUpTimer = 0f;
-        //         powerUpEnabled = false;
-        //         pot = 0;
-        //     } else {
-        //         fireProjectile(ref fireRateCounter, fireRate);
-        //         powerUpTimer = 0f;
-        //         powerUpSlider.value = enemiesKilled;
-        //         pot = 0;
-        //     }
-        // }

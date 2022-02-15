@@ -8,10 +8,13 @@ public class PowerUpProjectile : MonoBehaviour
 
     Vector3 initialPos;
 
+    Manager manager;
+
     float limit;
 
     void Start()
     {
+        manager = GameObject.Find("Manager").GetComponent<Manager>();
         rb = GetComponent<Rigidbody>();
         limit = 300f;
 
@@ -29,9 +32,8 @@ public class PowerUpProjectile : MonoBehaviour
 
     void OnCollisionEnter(Collision collision) {
         if (collision.gameObject.tag == "Enemy") {
-            Destroy(collision.gameObject);
+            collision.gameObject.GetComponent<Enemy>().health--;
             Destroy(gameObject);
-            //GameObject.Find("Manager").GetComponent<Manager>().enemiesKilled++;
         }
     }
 }
