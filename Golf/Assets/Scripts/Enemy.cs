@@ -7,6 +7,7 @@ public class Enemy : MonoBehaviour
     public int health = 1;
     Vector3 playerPos;
     Manager manager;
+    bool increase = false;
 
     void Start()
     {
@@ -25,8 +26,10 @@ public class Enemy : MonoBehaviour
         }
 
         if(health <= 0) {
-            manager.killStreak++;
             manager.enemiesKilled++;
+            if (increase) {
+                manager.killStreak++;
+            }
             rewardPlayer();
             Destroy(gameObject);
         }
@@ -34,5 +37,13 @@ public class Enemy : MonoBehaviour
 
     void rewardPlayer() {
         manager.reward = Random.Range(1,15);
+    }
+
+    void OnCollisionEnter(Collision collision) {
+        if (collision.gameObject.tag == "PowerUpProjectile") {
+            increase = false;
+        } else {
+            increase = true;
+        }
     }
 }

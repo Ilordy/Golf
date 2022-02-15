@@ -86,8 +86,6 @@ public class Manager : MonoBehaviour {
         // Handle Ball Speed Upgrade
         ballSpeed = Mathf.Lerp(25f,50f,ballSpeedLevel/upgradeMaxLevel);
 
-        Debug.Log(enemiesKilled);
-
         if (playGame) {
             // Spawn Enemies
             enemySpawnTimer -= Time.deltaTime;
