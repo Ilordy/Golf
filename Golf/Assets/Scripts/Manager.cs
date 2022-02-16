@@ -43,7 +43,11 @@ public class Manager : MonoBehaviour {
     float ballSpeed = 25f;
 
     public int fireRateLevel = 1;
+    int fireRateCost = 100;
+
     public int ballSpeedLevel = 1;
+    int ballSpeedCost = 100;
+
     int upgradeMaxLevel = 20;
 
     [HideInInspector]
@@ -86,6 +90,7 @@ public class Manager : MonoBehaviour {
         // Handle Ball Speed Upgrade
         ballSpeed = Mathf.Lerp(25f,50f,ballSpeedLevel/upgradeMaxLevel);
 
+        //Gameplay
         if (playGame) {
             // Spawn Enemies
             enemySpawnTimer -= Time.deltaTime;
@@ -189,10 +194,16 @@ public class Manager : MonoBehaviour {
 
     void Upgrade1() {
         fireRateLevel++;
+        fireRateCost = 100 * fireRateLevel;
+        upgrade1.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Fire Rate " + fireRateLevel.ToString();
+        upgrade1.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = fireRateCost.ToString();
     }
 
     void Upgrade2() {
         ballSpeedLevel++;
+        ballSpeedCost = 100 * ballSpeedLevel;
+        upgrade2.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Ball Speed " + ballSpeedLevel.ToString();
+        upgrade2.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = ballSpeedCost.ToString();
     }
 
     void calculateDifficulty (int level) {
