@@ -6,6 +6,7 @@ using TMPro;
 
 public class Manager : MonoBehaviour {
 
+    public GameObject player;
     public GameObject enemy;
     public GameObject projectile;
     public GameObject powerUpProjectile;
@@ -20,7 +21,8 @@ public class Manager : MonoBehaviour {
     public TextMeshProUGUI currencyTextMain;
     public TextMeshProUGUI currencyTextGame;
     public TextMeshProUGUI levelText;
-
+    
+    Animator playerAnimator;
 
     GameObject[] enemies;
     GameObject[] powerUpProjectiles;
@@ -69,7 +71,7 @@ public class Manager : MonoBehaviour {
         powerUpSlider.maxValue = powerUpReq;
         powerUpSlider.value = 0;
         level = PlayerPrefs.GetInt("Level", 1);
-        currency = PlayerPrefs.GetInt("Money",4000);
+        currency = PlayerPrefs.GetInt("Money",4000000);
         fireRateLevel = PlayerPrefs.GetInt("FireRateLevel", 1);
         fireRateCost = PlayerPrefs.GetInt("FireRateCost", 100);
         ballSpeedLevel = PlayerPrefs.GetInt("BallSpeedLevel", 1);
@@ -91,6 +93,8 @@ public class Manager : MonoBehaviour {
         upgrade2.onClick.AddListener(Upgrade2);
         upgrade3.onClick.AddListener(Upgrade3);
 
+        playerAnimator = player.GetComponent<Animator>();
+
         //PlayerPrefs.DeleteAll();
     }
 
@@ -108,7 +112,9 @@ public class Manager : MonoBehaviour {
 
 
         // Handle Fire Rate Upgrade
-        fireRate = Mathf.Lerp(0.5f,0.1f,fireRateLevel/upgradeMaxLevel);
+        //fireRate = Mathf.Lerp(0.5f,0.1f,fireRateLevel/upgradeMaxLevel);
+        fireRate = Mathf.Lerp(1.0f,5.0f,(float)fireRateLevel/upgradeMaxLevel);
+        playerAnimator.SetFloat("Speed", fireRate);
 
         // Handle Ball Speed Upgrade
         ballSpeed = Mathf.Lerp(25f,50f,ballSpeedLevel/upgradeMaxLevel);
@@ -178,11 +184,24 @@ public class Manager : MonoBehaviour {
                     killStreak = 0;
                     pot = 0;
                 } else {
-                    fireProjectile(ref fireRateCounter, fireRate);
+                    //fireProjectile(ref fireRateCounter, fireRate);
+                    playerAnimator.SetBool("Swing",false);
+                    playerAnimator.SetBool("Swing",true);
                     pot = 0;
                     powerUpSlider.value = killStreak;
                 }
             }
+        }
+
+        if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f) {
+            playerAnimator.SetBool("Swing",false);
+        }
+
+        if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.5f) {
+            fireProjectile(ref fireRateCounter, Mathf.Lerp(0.8f,0.4f, (float)fireRateLevel/upgradeMaxLevel));
+            Debug.Log("Fire Rate Level: " + fireRateLevel);
+            Debug.Log("Fire Rate: " + fireRate);
+            Debug.Log("Speed Multiplier: " + playerAnimator.GetFloat("Speed"));
         }
     }
 
