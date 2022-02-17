@@ -29,6 +29,8 @@ public class Manager : MonoBehaviour {
     public int killStreak = 0;
     [HideInInspector]
     public int enemiesKilled = 0;
+    [HideInInspector]
+    public bool reward = false;
 
     private float   powerUpTimer = 0f;
     public int      powerUpReq = 5;
@@ -38,20 +40,22 @@ public class Manager : MonoBehaviour {
     float pot = 0f;
 
     float fireRateCounter = 0f;
+
     float fireRate = 0.5f;
-
     float ballSpeed = 25f;
+    int income = 1;
 
-    public int fireRateLevel = 1;
+    int fireRateLevel = 1;
     int fireRateCost = 100;
 
-    public int ballSpeedLevel = 1;
+    int ballSpeedLevel = 1;
     int ballSpeedCost = 100;
+
+    int incomeLevel = 1;
+    int incomeCost = 100;
 
     int upgradeMaxLevel = 20;
 
-    [HideInInspector]
-    public int reward;
     int currency;
 
     bool playGame = false;
@@ -64,11 +68,17 @@ public class Manager : MonoBehaviour {
     void Start() {
         powerUpSlider.maxValue = powerUpReq;
         powerUpSlider.value = 0;
-        currency = PlayerPrefs.GetInt("Money",0);
+        level = PlayerPrefs.GetInt("Level", 1);
+        currency = PlayerPrefs.GetInt("Money",4000);
+        fireRateLevel = PlayerPrefs.GetInt("FireRateLevel", 1);
+        fireRateCost = PlayerPrefs.GetInt("FireRateCost", 100);
+        ballSpeedLevel = PlayerPrefs.GetInt("BallSpeedLevel", 1);
+        ballSpeedCost = PlayerPrefs.GetInt("BallSpeedCost", 100);
+        incomeLevel = PlayerPrefs.GetInt("IncomeLevel", 1);
+        incomeCost = PlayerPrefs.GetInt("IncomeCost", 100);
         currencyTextMain.text = currency.ToString();
         currencyTextGame.text = currency.ToString();
         levelText.text = "Level: " + level;
-        reward = 0;
 
         calculateDifficulty(level);
 
@@ -79,16 +89,32 @@ public class Manager : MonoBehaviour {
         playButton.onClick.AddListener(Play);
         upgrade1.onClick.AddListener(Upgrade1);
         upgrade2.onClick.AddListener(Upgrade2);
+        upgrade3.onClick.AddListener(Upgrade3);
 
         //PlayerPrefs.DeleteAll();
     }
 
     void Update() {
+        // Update UI
+        currencyTextMain.text = currency.ToString();
+        currencyTextGame.text = currency.ToString();
+
+        upgrade1.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Fire Rate " + fireRateLevel.ToString();
+        upgrade1.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = fireRateCost.ToString();
+        upgrade2.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Ball Speed " + ballSpeedLevel.ToString();
+        upgrade2.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = ballSpeedCost.ToString();
+        upgrade3.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Income " + incomeLevel.ToString();
+        upgrade3.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = incomeCost.ToString();
+
+
         // Handle Fire Rate Upgrade
         fireRate = Mathf.Lerp(0.5f,0.1f,fireRateLevel/upgradeMaxLevel);
 
         // Handle Ball Speed Upgrade
         ballSpeed = Mathf.Lerp(25f,50f,ballSpeedLevel/upgradeMaxLevel);
+
+        // Handle Income Upgrade
+        income = incomeLevel;
 
         //Gameplay
         if (playGame) {
@@ -96,7 +122,7 @@ public class Manager : MonoBehaviour {
             enemySpawnTimer -= Time.deltaTime;
             if (enemySpawnTimer <= 0 && enemiesSpawned < enemyNumber) {
                 calculateDifficulty(level);
-                Instantiate(enemy, new Vector3(-20+Random.Range(-10,10),2,Random.Range(-7,7)), Quaternion.identity);
+                Instantiate(enemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
                 enemiesSpawned++;
             }
 
@@ -105,17 +131,17 @@ public class Manager : MonoBehaviour {
                 enemiesKilled = 0;
                 enemiesSpawned = 0;
                 level++;
-                //PlayerPrefs.SetInt("Level", level);
+                PlayerPrefs.SetInt("Level", level);
                 levelText.text = "Level: " + level;
                 calculateDifficulty(level);
             }
 
             // Reward Player
-            currency += reward;
-            PlayerPrefs.SetInt("Money", currency);
-            currencyTextMain.text = currency.ToString();
-            currencyTextGame.text = currency.ToString();
-            reward = 0;
+            if (reward) {
+                currency += Random.Range(1, income);
+                PlayerPrefs.SetInt("Money", currency);
+                reward = false;
+            }
 
             // Adjust Power Up Slider
             if (killStreak <= powerUpReq) {
@@ -193,17 +219,49 @@ public class Manager : MonoBehaviour {
     }
 
     void Upgrade1() {
-        fireRateLevel++;
-        fireRateCost = 100 * fireRateLevel;
-        upgrade1.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Fire Rate " + fireRateLevel.ToString();
-        upgrade1.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = fireRateCost.ToString();
+        if (currency >= fireRateCost && fireRateLevel < upgradeMaxLevel) {
+            currency -= fireRateCost;
+            fireRateLevel++;
+            fireRateCost = 100 * fireRateLevel;
+            //upgrade1.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Fire Rate " + fireRateLevel.ToString();
+            //upgrade1.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = fireRateCost.ToString();
+            PlayerPrefs.SetInt("FireRateLevel", fireRateLevel);
+            PlayerPrefs.SetInt("FireRateCost", fireRateCost);
+            
+        }
+        else {
+            //upgrade1.interactable = false;
+        }
     }
 
     void Upgrade2() {
-        ballSpeedLevel++;
-        ballSpeedCost = 100 * ballSpeedLevel;
-        upgrade2.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Ball Speed " + ballSpeedLevel.ToString();
-        upgrade2.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = ballSpeedCost.ToString();
+        if (currency >= ballSpeedCost && ballSpeedLevel < upgradeMaxLevel) {
+            currency -= ballSpeedCost;
+            ballSpeedLevel++;
+            ballSpeedCost = 100 * ballSpeedLevel;
+            //upgrade2.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Ball Speed " + ballSpeedLevel.ToString();
+            //upgrade2.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = ballSpeedCost.ToString();
+            PlayerPrefs.SetInt("BallSpeedLevel", ballSpeedLevel);
+            PlayerPrefs.SetInt("BallSpeedCost", ballSpeedCost);
+            
+        } else {
+            //upgrade2.interactable = false;
+        }
+    }
+
+    void Upgrade3() {
+        if (currency >= incomeCost && incomeLevel < upgradeMaxLevel) {
+            currency -= incomeCost;
+            incomeLevel++;
+            incomeCost = 100 * incomeLevel;
+            //upgrade3.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Income " + ballSpeedLevel.ToString();
+            //upgrade3.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = incomeCost.ToString();
+            PlayerPrefs.SetInt("IncomeLevel", ballSpeedLevel);
+            PlayerPrefs.SetInt("IncomeCost", ballSpeedCost);
+            
+        } else {
+            //upgrade2.interactable = false;
+        }
     }
 
     void calculateDifficulty (int level) {

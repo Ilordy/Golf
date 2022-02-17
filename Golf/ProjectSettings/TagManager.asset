@@ -7,6 +7,7 @@ TagManager:
   - Enemy
   - Projectile
   - PowerUpProjectile
+  - Dead
   layers:
   - Default
   - TransparentFX
@@ -17,8 +18,8 @@ TagManager:
   - 
   - 
   - Projectile
-  - 
-  - 
+  - Ragdoll
+  - Enemy
   - 
   - 
   - 

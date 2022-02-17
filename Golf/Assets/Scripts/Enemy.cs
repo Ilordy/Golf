@@ -8,17 +8,24 @@ public class Enemy : MonoBehaviour
     Vector3 playerPos;
     Manager manager;
     bool increase = false;
+    bool death = false;
+
+    Collider[] colliders;
+    Rigidbody[] bodyParts;
+
+    float timer;
 
     void Start()
     {
         manager = GameObject.Find("Manager").GetComponent<Manager>();
         playerPos = GameObject.Find("Player").transform.position;
+
+        colliders = gameObject.GetComponentsInChildren<Collider>();
+        bodyParts = gameObject.GetComponentsInChildren<Rigidbody>();
     }
 
     void Update()
     {
-        transform.LookAt(playerPos);
-        transform.Translate(0,0,0.025f);
 
         if(transform.position.x > 22) {
             Destroy(gameObject);
@@ -26,17 +33,28 @@ public class Enemy : MonoBehaviour
         }
 
         if(health <= 0) {
+            health = 10000;
+            death = true;
+            timer = Time.time;
+            gameObject.tag = "Dead";
+
             manager.enemiesKilled++;
             if (increase) {
                 manager.killStreak++;
             }
-            rewardPlayer();
-            Destroy(gameObject);
+            manager.reward = true;
+            gameObject.GetComponent<CapsuleCollider>().enabled = false;
+            gameObject.GetComponent<Animator>().enabled = false;
         }
-    }
 
-    void rewardPlayer() {
-        manager.reward = Random.Range(1,15);
+        if (death) {
+            if (Time.time - timer >= 5) {
+                Destroy(gameObject);
+            }
+        } else {
+            transform.LookAt(playerPos);
+            transform.Translate(0,0,0.025f);
+        }
     }
 
     void OnCollisionEnter(Collision collision) {
