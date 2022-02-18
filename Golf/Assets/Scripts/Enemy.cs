@@ -45,6 +45,7 @@ public class Enemy : MonoBehaviour
             manager.reward = true;
             gameObject.GetComponent<CapsuleCollider>().enabled = false;
             gameObject.GetComponent<Animator>().enabled = false;
+            gameObject.GetComponent<ParticleSystem>().Stop(true,UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
         }
 
         if (death) {

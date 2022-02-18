@@ -13,16 +13,18 @@ public class Manager : MonoBehaviour {
     public GameObject spawner;
     public Canvas inGameUI;
     public Canvas mainMenuUI;
-    public Slider powerUpSlider;
-    public Button playButton;
-    public Button upgrade1;
-    public Button upgrade2;
-    public Button upgrade3;
-    public TextMeshProUGUI currencyTextMain;
-    public TextMeshProUGUI currencyTextGame;
-    public TextMeshProUGUI levelText;
-    
+    public Canvas settingsUI;
+    public Canvas shopUI;
+    Slider powerUpSlider;
+    Button playButton, upgrade1, upgrade2, upgrade3, settings, sounds, haptics, settingsBack, shop, shopBack;
+    TextMeshProUGUI currencyTextMain, levelText, currencyTextGame;
     Animator playerAnimator;
+
+    Color colorEnabled = new Color32(117,255,131,255);
+    Color colorDisabled = new Color32(255,117,131,255);
+
+    int soundEnabled = 1;
+    int hapticsEnabled = 1;
 
     GameObject[] enemies;
     GameObject[] powerUpProjectiles;
@@ -34,8 +36,8 @@ public class Manager : MonoBehaviour {
     [HideInInspector]
     public bool reward = false;
 
-    private float   powerUpTimer = 0f;
-    public int      powerUpReq = 5;
+    float   powerUpTimer = 0f;
+    int      powerUpReq = 5;
 
     float enemySpawnTimer = 1f;
 
@@ -65,9 +67,43 @@ public class Manager : MonoBehaviour {
     int enemyNumber = 0;
     int enemiesSpawned = 0;
 
-    public int level = 1;
+    int level = 1;
 
     void Start() {
+
+        playerAnimator = player.GetComponent<Animator>();
+        powerUpSlider = inGameUI.transform.GetChild(0).GetComponent<Slider>();
+        playButton = mainMenuUI.transform.GetChild(3).GetComponent<Button>();
+        upgrade1 = mainMenuUI.transform.GetChild(4).gameObject.transform.GetChild(0).GetComponent<Button>();
+        upgrade2 = mainMenuUI.transform.GetChild(4).transform.GetChild(1).GetComponent<Button>();
+        upgrade3 = mainMenuUI.transform.GetChild(4).transform.GetChild(2).GetComponent<Button>();
+        settings = mainMenuUI.transform.GetChild(5).GetComponent<Button>();
+        currencyTextMain = mainMenuUI.transform.GetChild(7).transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        levelText = mainMenuUI.transform.GetChild(3).transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        currencyTextGame = inGameUI.transform.GetChild(1).transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+        shop = mainMenuUI.transform.GetChild(6).GetComponent<Button>();
+        sounds = settingsUI.transform.GetChild(0).transform.GetChild(1).GetComponent<Button>();
+        haptics = settingsUI.transform.GetChild(0).transform.GetChild(2).GetComponent<Button>();
+        settingsBack = settingsUI.transform.GetChild(0).transform.GetChild(4).GetComponent<Button>();
+        shopBack = shopUI.transform.GetChild(1).transform.GetChild(5).GetComponent<Button>();
+
+        mainMenuUI.gameObject.SetActive(true);
+        inGameUI.gameObject.SetActive(false);
+        settingsUI.gameObject.SetActive(false);
+        shopUI.gameObject.SetActive(false);
+
+        playButton.onClick.AddListener(Play);
+        upgrade1.onClick.AddListener(Upgrade1);
+        upgrade2.onClick.AddListener(Upgrade2);
+        upgrade3.onClick.AddListener(Upgrade3);
+        settings.onClick.AddListener(Settings);
+        sounds.onClick.AddListener(Sounds);
+        haptics.onClick.AddListener(Haptics);
+        shop.onClick.AddListener(Shop);
+        settingsBack.onClick.AddListener(Back);
+        shopBack.onClick.AddListener(Back);
+
+
         powerUpSlider.maxValue = powerUpReq;
         powerUpSlider.value = 0;
         level = PlayerPrefs.GetInt("Level", 1);
@@ -78,9 +114,14 @@ public class Manager : MonoBehaviour {
         ballSpeedCost = PlayerPrefs.GetInt("BallSpeedCost", 100);
         incomeLevel = PlayerPrefs.GetInt("IncomeLevel", 1);
         incomeCost = PlayerPrefs.GetInt("IncomeCost", 100);
+        soundEnabled = PlayerPrefs.GetInt("SoundEnabled", 1);
+        hapticsEnabled = PlayerPrefs.GetInt("HapticsEnabled", 1);
+
         currencyTextMain.text = currency.ToString();
         currencyTextGame.text = currency.ToString();
         levelText.text = "Level: " + level;
+        //sounds.GetComponent<Image>().color = colorEnabled;
+        //haptics.GetComponent<Image>().color = colorDisabled;
 
         calculateDifficulty(level);
 
@@ -88,12 +129,7 @@ public class Manager : MonoBehaviour {
         //Debug.Log("EnemyNumber: " + enemyNumber);
         //Debug.Log("enemySpawnTimer: " + enemySpawnTimer);
 
-        playButton.onClick.AddListener(Play);
-        upgrade1.onClick.AddListener(Upgrade1);
-        upgrade2.onClick.AddListener(Upgrade2);
-        upgrade3.onClick.AddListener(Upgrade3);
-
-        playerAnimator = player.GetComponent<Animator>();
+        
 
         //PlayerPrefs.DeleteAll();
     }
@@ -109,6 +145,18 @@ public class Manager : MonoBehaviour {
         upgrade2.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = ballSpeedCost.ToString();
         upgrade3.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Income " + incomeLevel.ToString();
         upgrade3.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = incomeCost.ToString();
+
+        if (hapticsEnabled > 0) {
+            haptics.GetComponent<Image>().color = colorEnabled;
+        } else {
+            haptics.GetComponent<Image>().color = colorDisabled;
+        }
+
+        if (soundEnabled > 0) {
+            sounds.GetComponent<Image>().color = colorEnabled;
+        } else {
+            sounds.GetComponent<Image>().color = colorDisabled;
+        }
 
 
         // Handle Fire Rate Upgrade
@@ -199,9 +247,9 @@ public class Manager : MonoBehaviour {
 
         if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.5f) {
             fireProjectile(ref fireRateCounter, Mathf.Lerp(0.8f,0.4f, (float)fireRateLevel/upgradeMaxLevel));
-            Debug.Log("Fire Rate Level: " + fireRateLevel);
-            Debug.Log("Fire Rate: " + fireRate);
-            Debug.Log("Speed Multiplier: " + playerAnimator.GetFloat("Speed"));
+            //Debug.Log("Fire Rate Level: " + fireRateLevel);
+            //Debug.Log("Fire Rate: " + fireRate);
+            //Debug.Log("Speed Multiplier: " + playerAnimator.GetFloat("Speed"));
         }
     }
 
@@ -224,17 +272,42 @@ public class Manager : MonoBehaviour {
     }
 
     void MainMenu() {
-        inGameUI.enabled = false;
-        mainMenuUI.enabled = true;
+        inGameUI.gameObject.SetActive(false);
+        shopUI.gameObject.SetActive(false);
+        settingsUI.gameObject.SetActive(false);
         mainMenuUI.gameObject.SetActive(true);
         playGame = false;
     }
 
     void Play() {
-        mainMenuUI.enabled = false;
-        inGameUI.enabled = true;
+        mainMenuUI.gameObject.SetActive(false);
         inGameUI.gameObject.SetActive(true);
         playGame = true;
+    }
+
+    void Settings() {
+        //mainMenuUI.gameObject.SetActive(false);
+        settingsUI.gameObject.SetActive(true);
+    }
+
+    void Sounds() {
+        soundEnabled = -soundEnabled;
+        PlayerPrefs.SetInt("SoundEnabled", soundEnabled);
+    }
+
+    void Haptics() {
+        hapticsEnabled = -hapticsEnabled;
+        PlayerPrefs.SetInt("HapticsEnabled", hapticsEnabled);
+    }
+
+    void Shop() {
+        //mainMenuUI.gameObject.SetActive(false);
+        shopUI.gameObject.SetActive(true);
+    }
+
+    void Back() {
+        shopUI.gameObject.SetActive(false);
+        settingsUI.gameObject.SetActive(false);
     }
 
     void Upgrade1() {
