@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.Collections.Generic;
 using TMPro;
 
 
@@ -15,8 +16,13 @@ public class Manager : MonoBehaviour {
     public Canvas mainMenuUI;
     public Canvas settingsUI;
     public Canvas shopUI;
+    Transform shopMainUI, hatsUI, skinsUI, trailsUI, ballSkinsUI;
+
+    Stack<Transform> menuStack = new Stack<Transform>();
+
     Slider powerUpSlider;
-    Button playButton, upgrade1, upgrade2, upgrade3, settings, sounds, haptics, settingsBack, shop, shopBack;
+    Button playButton, upgrade1, upgrade2, upgrade3, settings, sounds, haptics, settingsBack, shop, shopBack,
+    shopHats, shopSkins, shopTrails, shopBallSkins, hatsUIBack, skinsUIBack, trailsUIBack, ballSkinsUIBack;
     TextMeshProUGUI currencyTextMain, levelText, currencyTextGame;
     Animator playerAnimator;
 
@@ -70,6 +76,12 @@ public class Manager : MonoBehaviour {
     int level = 1;
 
     void Start() {
+        mainMenuUI.gameObject.SetActive(true);
+        inGameUI.gameObject.SetActive(false);
+        settingsUI.gameObject.SetActive(false);
+        shopUI.gameObject.SetActive(false);
+
+        menuStack.Push(mainMenuUI.transform);
 
         playerAnimator = player.GetComponent<Animator>();
         powerUpSlider = inGameUI.transform.GetChild(0).GetComponent<Slider>();
@@ -86,11 +98,19 @@ public class Manager : MonoBehaviour {
         haptics = settingsUI.transform.GetChild(0).transform.GetChild(2).GetComponent<Button>();
         settingsBack = settingsUI.transform.GetChild(0).transform.GetChild(4).GetComponent<Button>();
         shopBack = shopUI.transform.GetChild(1).transform.GetChild(5).GetComponent<Button>();
-
-        mainMenuUI.gameObject.SetActive(true);
-        inGameUI.gameObject.SetActive(false);
-        settingsUI.gameObject.SetActive(false);
-        shopUI.gameObject.SetActive(false);
+        shopHats = shopUI.transform.GetChild(1).transform.GetChild(1).GetComponent<Button>();
+        shopSkins = shopUI.transform.GetChild(1).transform.GetChild(2).GetComponent<Button>();
+        shopTrails = shopUI.transform.GetChild(1).transform.GetChild(3).GetComponent<Button>();
+        shopBallSkins = shopUI.transform.GetChild(1).transform.GetChild(4).GetComponent<Button>();
+        shopMainUI = shopUI.transform.GetChild(1).transform;
+        hatsUI = shopUI.transform.GetChild(2).transform;
+        hatsUIBack = hatsUI.GetChild(hatsUI.childCount-1).GetComponent<Button>();
+        skinsUI = shopUI.transform.GetChild(3).transform;
+        skinsUIBack = skinsUI.GetChild(skinsUI.childCount-1).GetComponent<Button>();
+        trailsUI = shopUI.transform.GetChild(4).transform;
+        trailsUIBack = trailsUI.GetChild(trailsUI.childCount-1).GetComponent<Button>();
+        ballSkinsUI = shopUI.transform.GetChild(5).transform;
+        ballSkinsUIBack = ballSkinsUI.GetChild(ballSkinsUI.childCount-1).GetComponent<Button>();
 
         playButton.onClick.AddListener(Play);
         upgrade1.onClick.AddListener(Upgrade1);
@@ -102,6 +122,14 @@ public class Manager : MonoBehaviour {
         shop.onClick.AddListener(Shop);
         settingsBack.onClick.AddListener(Back);
         shopBack.onClick.AddListener(Back);
+        hatsUIBack.onClick.AddListener(Back);
+        skinsUIBack.onClick.AddListener(Back);
+        trailsUIBack.onClick.AddListener(Back);
+        ballSkinsUIBack.onClick.AddListener(Back);
+        shopHats.onClick.AddListener(ShopHats);
+        shopSkins.onClick.AddListener(ShopSkins);
+        shopTrails.onClick.AddListener(ShopTrails);
+        shopBallSkins.onClick.AddListener(ShopBallSkins);
 
 
         powerUpSlider.maxValue = powerUpReq;
@@ -288,6 +316,7 @@ public class Manager : MonoBehaviour {
     void Settings() {
         //mainMenuUI.gameObject.SetActive(false);
         settingsUI.gameObject.SetActive(true);
+        menuStack.Push(settingsUI.transform);
     }
 
     void Sounds() {
@@ -303,11 +332,41 @@ public class Manager : MonoBehaviour {
     void Shop() {
         //mainMenuUI.gameObject.SetActive(false);
         shopUI.gameObject.SetActive(true);
+        shopMainUI.gameObject.SetActive(true);
+        menuStack.Push(shopUI.transform);
+    }
+
+    void ShopHats() {
+        shopMainUI.gameObject.SetActive(false);
+        hatsUI.gameObject.SetActive(true);
+        menuStack.Push(hatsUI);
+    }
+
+    void ShopSkins() {
+        shopMainUI.gameObject.SetActive(false);
+        skinsUI.gameObject.SetActive(true);
+        menuStack.Push(skinsUI);
+    }
+
+    void ShopTrails() {
+        shopMainUI.gameObject.SetActive(false);
+        trailsUI.gameObject.SetActive(true);
+        menuStack.Push(trailsUI);
+    }
+
+    void ShopBallSkins() {
+        shopMainUI.gameObject.SetActive(false);
+        ballSkinsUI.gameObject.SetActive(true);
+        menuStack.Push(ballSkinsUI);
     }
 
     void Back() {
-        shopUI.gameObject.SetActive(false);
-        settingsUI.gameObject.SetActive(false);
+        menuStack.Peek().gameObject.SetActive(false);
+        menuStack.Pop();
+        menuStack.Peek().gameObject.SetActive(true);
+        shopMainUI.gameObject.SetActive(true);
+        //shopUI.gameObject.SetActive(false);
+        //settingsUI.gameObject.SetActive(false);
     }
 
     void Upgrade1() {
