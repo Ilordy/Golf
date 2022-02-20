@@ -7,27 +7,16 @@ using TMPro;
 
 public class Manager : MonoBehaviour {
 
+    public UIManager UIManager;
+    public Enemy EnemyClass;
+
     public GameObject player;
     public GameObject enemy;
     public GameObject projectile;
     public GameObject powerUpProjectile;
     public GameObject spawner;
-    public Canvas inGameUI;
-    public Canvas mainMenuUI;
-    public Canvas settingsUI;
-    public Canvas shopUI;
-    Transform shopMainUI, hatsUI, skinsUI, trailsUI, ballSkinsUI;
 
-    Stack<Transform> menuStack = new Stack<Transform>();
-
-    Slider powerUpSlider;
-    Button playButton, upgrade1, upgrade2, upgrade3, settings, sounds, haptics, settingsBack, shop, shopBack,
-    shopHats, shopSkins, shopTrails, shopBallSkins, hatsUIBack, skinsUIBack, trailsUIBack, ballSkinsUIBack;
-    TextMeshProUGUI currencyTextMain, levelText, currencyTextGame;
     Animator playerAnimator;
-
-    Color colorEnabled = new Color32(117,255,131,255);
-    Color colorDisabled = new Color32(255,117,131,255);
 
     int soundEnabled = 1;
     int hapticsEnabled = 1;
@@ -35,17 +24,12 @@ public class Manager : MonoBehaviour {
     GameObject[] enemies;
     GameObject[] powerUpProjectiles;
 
-    [HideInInspector]
-    public int killStreak = 0;
-    [HideInInspector]
-    public int enemiesKilled = 0;
-    [HideInInspector]
-    public bool reward = false;
+    float   beganHolding = 0f;
+    int     powerUpReq = 5;
 
-    float   powerUpTimer = 0f;
-    int      powerUpReq = 5;
-
-    float enemySpawnTimer = 1f;
+    int enemiesToSpawn = 0;
+    float enemySpawnInterval = 1f;
+    float currentTime = 0f;
 
     float pot = 0f;
 
@@ -66,76 +50,21 @@ public class Manager : MonoBehaviour {
 
     int upgradeMaxLevel = 20;
 
-    int currency;
+    int money = 0;
 
-    bool playGame = false;
+    public bool playGame = false;
 
-    int enemyNumber = 0;
-    int enemiesSpawned = 0;
+    public bool willDeleteSaves = false;
 
     int level = 1;
 
     void Start() {
-        mainMenuUI.gameObject.SetActive(true);
-        inGameUI.gameObject.SetActive(false);
-        settingsUI.gameObject.SetActive(false);
-        shopUI.gameObject.SetActive(false);
-
-        menuStack.Push(mainMenuUI.transform);
-
+        //Set Player Animator
         playerAnimator = player.GetComponent<Animator>();
-        powerUpSlider = inGameUI.transform.GetChild(0).GetComponent<Slider>();
-        playButton = mainMenuUI.transform.GetChild(3).GetComponent<Button>();
-        upgrade1 = mainMenuUI.transform.GetChild(4).gameObject.transform.GetChild(0).GetComponent<Button>();
-        upgrade2 = mainMenuUI.transform.GetChild(4).transform.GetChild(1).GetComponent<Button>();
-        upgrade3 = mainMenuUI.transform.GetChild(4).transform.GetChild(2).GetComponent<Button>();
-        settings = mainMenuUI.transform.GetChild(5).GetComponent<Button>();
-        currencyTextMain = mainMenuUI.transform.GetChild(7).transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-        levelText = mainMenuUI.transform.GetChild(3).transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-        currencyTextGame = inGameUI.transform.GetChild(1).transform.GetChild(2).GetComponent<TextMeshProUGUI>();
-        shop = mainMenuUI.transform.GetChild(6).GetComponent<Button>();
-        sounds = settingsUI.transform.GetChild(0).transform.GetChild(1).GetComponent<Button>();
-        haptics = settingsUI.transform.GetChild(0).transform.GetChild(2).GetComponent<Button>();
-        settingsBack = settingsUI.transform.GetChild(0).transform.GetChild(4).GetComponent<Button>();
-        shopBack = shopUI.transform.GetChild(1).transform.GetChild(5).GetComponent<Button>();
-        shopHats = shopUI.transform.GetChild(1).transform.GetChild(1).GetComponent<Button>();
-        shopSkins = shopUI.transform.GetChild(1).transform.GetChild(2).GetComponent<Button>();
-        shopTrails = shopUI.transform.GetChild(1).transform.GetChild(3).GetComponent<Button>();
-        shopBallSkins = shopUI.transform.GetChild(1).transform.GetChild(4).GetComponent<Button>();
-        shopMainUI = shopUI.transform.GetChild(1).transform;
-        hatsUI = shopUI.transform.GetChild(2).transform;
-        hatsUIBack = hatsUI.GetChild(hatsUI.childCount-1).GetComponent<Button>();
-        skinsUI = shopUI.transform.GetChild(3).transform;
-        skinsUIBack = skinsUI.GetChild(skinsUI.childCount-1).GetComponent<Button>();
-        trailsUI = shopUI.transform.GetChild(4).transform;
-        trailsUIBack = trailsUI.GetChild(trailsUI.childCount-1).GetComponent<Button>();
-        ballSkinsUI = shopUI.transform.GetChild(5).transform;
-        ballSkinsUIBack = ballSkinsUI.GetChild(ballSkinsUI.childCount-1).GetComponent<Button>();
 
-        playButton.onClick.AddListener(Play);
-        upgrade1.onClick.AddListener(Upgrade1);
-        upgrade2.onClick.AddListener(Upgrade2);
-        upgrade3.onClick.AddListener(Upgrade3);
-        settings.onClick.AddListener(Settings);
-        sounds.onClick.AddListener(Sounds);
-        haptics.onClick.AddListener(Haptics);
-        shop.onClick.AddListener(Shop);
-        settingsBack.onClick.AddListener(Back);
-        shopBack.onClick.AddListener(Back);
-        hatsUIBack.onClick.AddListener(Back);
-        skinsUIBack.onClick.AddListener(Back);
-        trailsUIBack.onClick.AddListener(Back);
-        ballSkinsUIBack.onClick.AddListener(Back);
-        shopHats.onClick.AddListener(ShopHats);
-        shopSkins.onClick.AddListener(ShopSkins);
-        shopTrails.onClick.AddListener(ShopTrails);
-        shopBallSkins.onClick.AddListener(ShopBallSkins);
-
-
-        powerUpSlider.maxValue = powerUpReq;
-        powerUpSlider.value = 0;
+        //Get all persistent values
         level = PlayerPrefs.GetInt("Level", 1);
-        currency = PlayerPrefs.GetInt("Money",4000000);
+        money = PlayerPrefs.GetInt("Money",4000000);
         fireRateLevel = PlayerPrefs.GetInt("FireRateLevel", 1);
         fireRateCost = PlayerPrefs.GetInt("FireRateCost", 100);
         ballSpeedLevel = PlayerPrefs.GetInt("BallSpeedLevel", 1);
@@ -145,127 +74,85 @@ public class Manager : MonoBehaviour {
         soundEnabled = PlayerPrefs.GetInt("SoundEnabled", 1);
         hapticsEnabled = PlayerPrefs.GetInt("HapticsEnabled", 1);
 
-        currencyTextMain.text = currency.ToString();
-        currencyTextGame.text = currency.ToString();
-        levelText.text = "Level: " + level;
-        //sounds.GetComponent<Image>().color = colorEnabled;
-        //haptics.GetComponent<Image>().color = colorDisabled;
-
+        //Calculate difficulty for current level
         calculateDifficulty(level);
-
-        //Debug.Log("Level: " + level);
-        //Debug.Log("EnemyNumber: " + enemyNumber);
-        //Debug.Log("enemySpawnTimer: " + enemySpawnTimer);
-
         
+        //Update Upgrade Values
+        UpdateUpgradeValues();
 
-        //PlayerPrefs.DeleteAll();
+        //Update UI
+        UIManager.UpdateMoney(money);
+        UIManager.UpdateUpgradeInfo(1, fireRateLevel, fireRateCost);
+        UIManager.UpdateUpgradeInfo(2, ballSpeedLevel, ballSpeedCost);
+        UIManager.UpdateUpgradeInfo(3, incomeLevel, incomeCost);
+
+        //Debug delete
+        if(willDeleteSaves) {
+            PlayerPrefs.DeleteAll();
+        }
     }
 
     void Update() {
-        // Update UI
-        currencyTextMain.text = currency.ToString();
-        currencyTextGame.text = currency.ToString();
-
-        upgrade1.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Fire Rate " + fireRateLevel.ToString();
-        upgrade1.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = fireRateCost.ToString();
-        upgrade2.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Ball Speed " + ballSpeedLevel.ToString();
-        upgrade2.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = ballSpeedCost.ToString();
-        upgrade3.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Income " + incomeLevel.ToString();
-        upgrade3.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = incomeCost.ToString();
-
-        if (hapticsEnabled > 0) {
-            haptics.GetComponent<Image>().color = colorEnabled;
-        } else {
-            haptics.GetComponent<Image>().color = colorDisabled;
-        }
-
-        if (soundEnabled > 0) {
-            sounds.GetComponent<Image>().color = colorEnabled;
-        } else {
-            sounds.GetComponent<Image>().color = colorDisabled;
-        }
-
-
-        // Handle Fire Rate Upgrade
-        //fireRate = Mathf.Lerp(0.5f,0.1f,fireRateLevel/upgradeMaxLevel);
-        fireRate = Mathf.Lerp(1.0f,5.0f,(float)fireRateLevel/upgradeMaxLevel);
-        playerAnimator.SetFloat("Speed", fireRate);
-
-        // Handle Ball Speed Upgrade
-        ballSpeed = Mathf.Lerp(25f,50f,ballSpeedLevel/upgradeMaxLevel);
-
-        // Handle Income Upgrade
-        income = incomeLevel;
-
         //Gameplay
-        if (playGame) {
-            // Spawn Enemies
-            enemySpawnTimer -= Time.deltaTime;
-            if (enemySpawnTimer <= 0 && enemiesSpawned < enemyNumber) {
-                calculateDifficulty(level);
-                Instantiate(enemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
-                enemiesSpawned++;
-            }
+        if (!playGame) return;
 
-            if (enemiesKilled == enemyNumber) {
-                MainMenu();
-                enemiesKilled = 0;
-                enemiesSpawned = 0;
-                level++;
-                PlayerPrefs.SetInt("Level", level);
-                levelText.text = "Level: " + level;
-                calculateDifficulty(level);
-            }
+        //Spawn Enemies
+        if (currentTime < enemySpawnInterval) {
+            currentTime+=Time.deltaTime;
+        } else if (Enemy.AliveCount < enemiesToSpawn) {
+            currentTime = 0f;
+            Instantiate(enemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
+        }
 
-            // Reward Player
-            if (reward) {
-                currency += Random.Range(1, income);
-                PlayerPrefs.SetInt("Money", currency);
-                reward = false;
-            }
+        //Handle Win/Loss
+        if (Enemy.DeadCount + Enemy.TotalKilledCount == enemiesToSpawn) {
+            playGame = false;
+            Enemy.ResetStatics();
+            level++;
+            PlayerPrefs.SetInt("Level", level);
+            calculateDifficulty(level);
+            UIManager.OpenMainMenu();
+        }
 
-            // Adjust Power Up Slider
-            if (killStreak <= powerUpReq) {
-                powerUpSlider.value = killStreak;
-            }
+        // Adjust Power Up Slider
+        if (Enemy.KilledCount <= powerUpReq) {
+            UIManager.UpdatePowerUpSlider(Enemy.KilledCount);
+        }
 
-            // Shooting / Power up
-            if (Input.GetMouseButtonDown(0)) {
-                powerUpTimer = Time.time;
-            }
+        // Shooting / Power up
+        if (Input.GetMouseButtonDown(0)) {
+            beganHolding = Time.time;
+        }
 
-            if (Input.GetMouseButton(0)) {
-                float holdTime = Time.time - powerUpTimer;
-                if (killStreak >= powerUpReq && holdTime > 0.1f) {
-                    pot += Time.deltaTime;
-                    powerUpSlider.value = Mathf.Lerp(powerUpReq, 0, pot / 1f);
+        if (Input.GetMouseButton(0)) {
+            float holdTime = Time.time - beganHolding;
+            if (Enemy.KilledCount >= powerUpReq && holdTime > 0.1f) {
+                pot += Time.deltaTime;
+                UIManager.UpdatePowerUpSlider(Mathf.Lerp(powerUpReq, 0, pot / 1f));
+            }
+        }
+
+        if (Input.GetMouseButtonUp(0)) {
+            float holdTime = Time.time - beganHolding;
+            if (holdTime >= 1f && Enemy.KilledCount >= powerUpReq) {
+                enemies = GameObject.FindGameObjectsWithTag("Enemy");
+                powerUpProjectiles = new GameObject[enemies.Length];
+                for (int i = 0; i <= enemies.Length - 1; i++) {
+                    int r = 3;
+                    float x = r * Mathf.Cos(i * (Mathf.PI / (enemies.Length - 1)));
+                    float y = r * Mathf.Sin(i * (Mathf.PI / (enemies.Length - 1)));
+                    powerUpProjectiles[i] = Instantiate(powerUpProjectile, spawner.transform.position + new Vector3(0, y, x), Quaternion.identity);
+                    powerUpProjectiles[i].GetComponent<Rigidbody>().useGravity = true;
+                    powerUpProjectiles[i].transform.LookAt(enemies[i].transform.position);
+                    powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = powerUpProjectiles[i].transform.forward * 100f;
                 }
-            }
-
-            if (Input.GetMouseButtonUp(0)) {
-                float holdTime = Time.time - powerUpTimer;
-                if (holdTime >= 1f && killStreak >= powerUpReq) {
-                    enemies = GameObject.FindGameObjectsWithTag("Enemy");
-                    powerUpProjectiles = new GameObject[enemies.Length];
-                    for (int i = 0; i <= enemies.Length - 1; i++) {
-                        int r = 3;
-                        float x = r * Mathf.Cos(i * (Mathf.PI / (enemies.Length - 1)));
-                        float y = r * Mathf.Sin(i * (Mathf.PI / (enemies.Length - 1)));
-                        powerUpProjectiles[i] = Instantiate(powerUpProjectile, spawner.transform.position + new Vector3(0, y, x), Quaternion.identity);
-                        powerUpProjectiles[i].GetComponent<Rigidbody>().useGravity = true;
-                        powerUpProjectiles[i].transform.LookAt(enemies[i].transform.position);
-                        powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = powerUpProjectiles[i].transform.forward * 100f;
-                    }
-                    killStreak = 0;
-                    pot = 0;
-                } else {
-                    //fireProjectile(ref fireRateCounter, fireRate);
-                    playerAnimator.SetBool("Swing",false);
-                    playerAnimator.SetBool("Swing",true);
-                    pot = 0;
-                    powerUpSlider.value = killStreak;
-                }
+                Enemy.KilledCount = 0;
+                pot = 0;
+            } else {
+                playerAnimator.SetBool("Swing",false);
+                playerAnimator.SetBool("Swing",true);
+                pot = 0;
+                UIManager.UpdatePowerUpSlider(Enemy.KilledCount);
             }
         }
 
@@ -275,9 +162,6 @@ public class Manager : MonoBehaviour {
 
         if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.5f) {
             fireProjectile(ref fireRateCounter, Mathf.Lerp(0.8f,0.4f, (float)fireRateLevel/upgradeMaxLevel));
-            //Debug.Log("Fire Rate Level: " + fireRateLevel);
-            //Debug.Log("Fire Rate: " + fireRate);
-            //Debug.Log("Speed Multiplier: " + playerAnimator.GetFloat("Speed"));
         }
     }
 
@@ -299,124 +183,71 @@ public class Manager : MonoBehaviour {
         return screenPoint + cursorRay / Mathf.Abs(cursorRay.y) * Mathf.Abs(screenPoint.y - spawner.transform.position.y);
     }
 
-    void MainMenu() {
-        inGameUI.gameObject.SetActive(false);
-        shopUI.gameObject.SetActive(false);
-        settingsUI.gameObject.SetActive(false);
-        mainMenuUI.gameObject.SetActive(true);
-        playGame = false;
+    void calculateDifficulty (int level) {
+        enemiesToSpawn = (int)Mathf.Ceil((level + 10) * 1.2f);
+        enemySpawnInterval = Mathf.Clamp(1-level/100f, 0.2f,1f);
     }
 
-    void Play() {
-        mainMenuUI.gameObject.SetActive(false);
-        inGameUI.gameObject.SetActive(true);
-        playGame = true;
+    void UpdateUpgradeValues() {
+        fireRate = Mathf.Lerp(1.0f,5.0f,(float)fireRateLevel/upgradeMaxLevel);
+        ballSpeed = Mathf.Lerp(25f,50f,ballSpeedLevel/upgradeMaxLevel);
+        playerAnimator.SetFloat("Speed", fireRate);
+        income = incomeLevel;
     }
 
-    void Settings() {
-        //mainMenuUI.gameObject.SetActive(false);
-        settingsUI.gameObject.SetActive(true);
-        menuStack.Push(settingsUI.transform);
+    public int GetSound() {
+        return soundEnabled;
     }
 
-    void Sounds() {
-        soundEnabled = -soundEnabled;
+    public void SetSound(int value) {
+        soundEnabled = value;
         PlayerPrefs.SetInt("SoundEnabled", soundEnabled);
     }
 
-    void Haptics() {
-        hapticsEnabled = -hapticsEnabled;
+    public int GetHaptics() {
+        return hapticsEnabled;
+    }
+
+    public void SetHaptics(int value) {
+        hapticsEnabled = value;
         PlayerPrefs.SetInt("HapticsEnabled", hapticsEnabled);
     }
 
-    void Shop() {
-        //mainMenuUI.gameObject.SetActive(false);
-        shopUI.gameObject.SetActive(true);
-        shopMainUI.gameObject.SetActive(true);
-        menuStack.Push(shopUI.transform);
+    public int GetMoney() {
+        return money;
     }
 
-    void ShopHats() {
-        shopMainUI.gameObject.SetActive(false);
-        hatsUI.gameObject.SetActive(true);
-        menuStack.Push(hatsUI);
-    }
-
-    void ShopSkins() {
-        shopMainUI.gameObject.SetActive(false);
-        skinsUI.gameObject.SetActive(true);
-        menuStack.Push(skinsUI);
-    }
-
-    void ShopTrails() {
-        shopMainUI.gameObject.SetActive(false);
-        trailsUI.gameObject.SetActive(true);
-        menuStack.Push(trailsUI);
-    }
-
-    void ShopBallSkins() {
-        shopMainUI.gameObject.SetActive(false);
-        ballSkinsUI.gameObject.SetActive(true);
-        menuStack.Push(ballSkinsUI);
-    }
-
-    void Back() {
-        menuStack.Peek().gameObject.SetActive(false);
-        menuStack.Pop();
-        menuStack.Peek().gameObject.SetActive(true);
-        shopMainUI.gameObject.SetActive(true);
-        //shopUI.gameObject.SetActive(false);
-        //settingsUI.gameObject.SetActive(false);
-    }
-
-    void Upgrade1() {
-        if (currency >= fireRateCost && fireRateLevel < upgradeMaxLevel) {
-            currency -= fireRateCost;
+    public void HandleUpgrade1() {
+        if (money > fireRateCost && fireRateLevel < upgradeMaxLevel) {
+            money -= fireRateCost;
             fireRateLevel++;
-            fireRateCost = 100 * fireRateLevel;
-            //upgrade1.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Fire Rate " + fireRateLevel.ToString();
-            //upgrade1.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = fireRateCost.ToString();
-            PlayerPrefs.SetInt("FireRateLevel", fireRateLevel);
-            PlayerPrefs.SetInt("FireRateCost", fireRateCost);
-            
+            fireRateCost += 100;
         }
-        else {
-            //upgrade1.interactable = false;
-        }
+        UpdateUpgradeValues();
+        UIManager.UpdateUpgradeInfo(1, fireRateLevel, fireRateCost);
     }
 
-    void Upgrade2() {
-        if (currency >= ballSpeedCost && ballSpeedLevel < upgradeMaxLevel) {
-            currency -= ballSpeedCost;
+    public void HandleUpgrade2() {
+        if (money > ballSpeedCost && ballSpeedLevel < upgradeMaxLevel) {
+            money -= ballSpeedCost;
             ballSpeedLevel++;
-            ballSpeedCost = 100 * ballSpeedLevel;
-            //upgrade2.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Ball Speed " + ballSpeedLevel.ToString();
-            //upgrade2.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = ballSpeedCost.ToString();
-            PlayerPrefs.SetInt("BallSpeedLevel", ballSpeedLevel);
-            PlayerPrefs.SetInt("BallSpeedCost", ballSpeedCost);
-            
-        } else {
-            //upgrade2.interactable = false;
+            ballSpeedCost += 100;
         }
+        UpdateUpgradeValues();
+        UIManager.UpdateUpgradeInfo(2, ballSpeedLevel, ballSpeedCost);
     }
 
-    void Upgrade3() {
-        if (currency >= incomeCost && incomeLevel < upgradeMaxLevel) {
-            currency -= incomeCost;
+    public void HandleUpgrade3() {
+        if (money > incomeCost && incomeLevel < upgradeMaxLevel) {
+            money -= incomeCost;
             incomeLevel++;
-            incomeCost = 100 * incomeLevel;
-            //upgrade3.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Income " + ballSpeedLevel.ToString();
-            //upgrade3.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = incomeCost.ToString();
-            PlayerPrefs.SetInt("IncomeLevel", ballSpeedLevel);
-            PlayerPrefs.SetInt("IncomeCost", ballSpeedCost);
-            
-        } else {
-            //upgrade2.interactable = false;
+            incomeCost += 100;
         }
+        UpdateUpgradeValues();
+        UIManager.UpdateUpgradeInfo(3, incomeLevel, incomeCost);
     }
 
-    void calculateDifficulty (int level) {
-        enemyNumber = (int)Mathf.Ceil((level + 10) * 1.2f);
-        enemySpawnTimer = Mathf.Clamp(1-level/100f, 0.2f,1f);
+    public void HandleReward() {
+        money += Random.Range(1, income);
     }
 }

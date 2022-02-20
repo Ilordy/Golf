@@ -6,22 +6,23 @@ public class Enemy : MonoBehaviour
 {
     public int health = 1;
     Vector3 playerPos;
-    Manager manager;
+    Manager GameManager;
     bool increase = false;
     bool death = false;
 
-    Collider[] colliders;
-    Rigidbody[] bodyParts;
+    public static int AliveCount = 0;
+    public static int TotalKilledCount = 0;
+    public static int KilledCount = 0;
+    public static int DeadCount = 0;
 
     float timer;
 
     void Start()
     {
-        manager = GameObject.Find("Manager").GetComponent<Manager>();
-        playerPos = GameObject.Find("Player").transform.position;
+        AliveCount++;
 
-        colliders = gameObject.GetComponentsInChildren<Collider>();
-        bodyParts = gameObject.GetComponentsInChildren<Rigidbody>();
+        GameManager = GameObject.Find("Manager").GetComponent<Manager>();
+        playerPos = GameObject.Find("Player").transform.position;
     }
 
     void Update()
@@ -29,20 +30,19 @@ public class Enemy : MonoBehaviour
 
         if(transform.position.x > 22) {
             Destroy(gameObject);
-            manager.enemiesKilled++;
+            DeadCount++;
         }
 
         if(health <= 0) {
+            TotalKilledCount++;
+            if (increase) {
+                KilledCount++;
+            }
             health = 10000;
             death = true;
             timer = Time.time;
             gameObject.tag = "Dead";
-
-            manager.enemiesKilled++;
-            if (increase) {
-                manager.killStreak++;
-            }
-            manager.reward = true;
+            GameManager.HandleReward();
             gameObject.GetComponent<CapsuleCollider>().enabled = false;
             gameObject.GetComponent<Animator>().enabled = false;
             gameObject.GetComponent<ParticleSystem>().Stop(true,UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
@@ -64,5 +64,12 @@ public class Enemy : MonoBehaviour
         } else {
             increase = true;
         }
+    }
+
+    public static void ResetStatics() {
+        AliveCount = 0;
+        KilledCount = 0;
+        TotalKilledCount = 0;
+        DeadCount = 0;
     }
 }
