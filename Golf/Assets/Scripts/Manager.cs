@@ -8,10 +8,11 @@ using TMPro;
 public class Manager : MonoBehaviour {
 
     public UIManager UIManager;
-    public Enemy EnemyClass;
+    public EnemyClass EnemyClass;
 
     public GameObject player;
     public GameObject enemy;
+    public GameObject cartEnemy;
     public GameObject projectile;
     public GameObject powerUpProjectile;
     public GameObject spawner;
@@ -59,6 +60,8 @@ public class Manager : MonoBehaviour {
     int level = 1;
 
     void Start() {
+        //Get EnemyClass
+        EnemyClass = GetComponent<EnemyClass>();
         //Set Player Animator
         playerAnimator = player.GetComponent<Animator>();
 
@@ -99,13 +102,18 @@ public class Manager : MonoBehaviour {
         //Spawn Enemies
         if (currentTime < enemySpawnInterval) {
             currentTime+=Time.deltaTime;
-        } else if (Enemy.AliveCount < enemiesToSpawn) {
+        } else if (EnemyClass.GetData("AliveCount") < enemiesToSpawn) {
             currentTime = 0f;
-            Instantiate(enemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
+            float chance = Random.Range(0f,1f);
+            if (chance < 0.1f) {
+                Instantiate(cartEnemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
+            } else {
+                //Instantiate(enemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
+            }
         }
 
         //Handle Win/Loss
-        if (Enemy.DeadCount + Enemy.TotalKilledCount == enemiesToSpawn) {
+        if (EnemyClass.GetData("TotalKilledCount") == enemiesToSpawn) {
             playGame = false;
             Enemy.ResetStatics();
             level++;
@@ -115,8 +123,8 @@ public class Manager : MonoBehaviour {
         }
 
         // Adjust Power Up Slider
-        if (Enemy.KilledCount <= powerUpReq) {
-            UIManager.UpdatePowerUpSlider(Enemy.KilledCount);
+        if (EnemyClass.GetData("KilledCount") <= powerUpReq) {
+            UIManager.UpdatePowerUpSlider(EnemyClass.GetData("KilledCount"));
         }
 
         // Shooting / Power up
@@ -126,7 +134,7 @@ public class Manager : MonoBehaviour {
 
         if (Input.GetMouseButton(0)) {
             float holdTime = Time.time - beganHolding;
-            if (Enemy.KilledCount >= powerUpReq && holdTime > 0.1f) {
+            if (EnemyClass.GetData("KilledCount") >= powerUpReq && holdTime > 0.1f) {
                 pot += Time.deltaTime;
                 UIManager.UpdatePowerUpSlider(Mathf.Lerp(powerUpReq, 0, pot / 1f));
             }
@@ -134,7 +142,7 @@ public class Manager : MonoBehaviour {
 
         if (Input.GetMouseButtonUp(0)) {
             float holdTime = Time.time - beganHolding;
-            if (holdTime >= 1f && Enemy.KilledCount >= powerUpReq) {
+            if (holdTime >= 1f && EnemyClass.GetData("KilledCount") >= powerUpReq) {
                 enemies = GameObject.FindGameObjectsWithTag("Enemy");
                 powerUpProjectiles = new GameObject[enemies.Length];
                 for (int i = 0; i <= enemies.Length - 1; i++) {
@@ -146,13 +154,13 @@ public class Manager : MonoBehaviour {
                     powerUpProjectiles[i].transform.LookAt(enemies[i].transform.position);
                     powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = powerUpProjectiles[i].transform.forward * 100f;
                 }
-                Enemy.KilledCount = 0;
+                EnemyClass.SetKilledCount(0);
                 pot = 0;
             } else {
                 playerAnimator.SetBool("Swing",false);
                 playerAnimator.SetBool("Swing",true);
                 pot = 0;
-                UIManager.UpdatePowerUpSlider(Enemy.KilledCount);
+                UIManager.UpdatePowerUpSlider(EnemyClass.GetData("KilledCount"));
             }
         }
 
@@ -225,6 +233,8 @@ public class Manager : MonoBehaviour {
         }
         UpdateUpgradeValues();
         UIManager.UpdateUpgradeInfo(1, fireRateLevel, fireRateCost);
+        PlayerPrefs.SetInt("FireRateLevel", fireRateLevel);
+        PlayerPrefs.SetInt("FireRateCost", fireRateCost);
     }
 
     public void HandleUpgrade2() {
@@ -235,6 +245,8 @@ public class Manager : MonoBehaviour {
         }
         UpdateUpgradeValues();
         UIManager.UpdateUpgradeInfo(2, ballSpeedLevel, ballSpeedCost);
+        PlayerPrefs.SetInt("BallSpeedLevel", ballSpeedLevel);
+        PlayerPrefs.SetInt("BallSpeedCost", ballSpeedCost);
     }
 
     public void HandleUpgrade3() {
@@ -245,6 +257,8 @@ public class Manager : MonoBehaviour {
         }
         UpdateUpgradeValues();
         UIManager.UpdateUpgradeInfo(3, incomeLevel, incomeCost);
+        PlayerPrefs.SetInt("IncomeLevel", incomeLevel);
+        PlayerPrefs.SetInt("IncomeCost", incomeCost);
     }
 
     public void HandleReward() {

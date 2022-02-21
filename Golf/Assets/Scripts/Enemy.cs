@@ -2,24 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : EnemyClass
 {
-    public int health = 1;
-    Vector3 playerPos;
-    Manager GameManager;
-    bool increase = false;
-    bool death = false;
-
-    public static int AliveCount = 0;
-    public static int TotalKilledCount = 0;
-    public static int KilledCount = 0;
-    public static int DeadCount = 0;
-
-    float timer;
-
+    bool isDead = false;
     void Start()
     {
         AliveCount++;
+
+        health = 1;
+        
+        speed = 0.025f;
 
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
         playerPos = GameObject.Find("Player").transform.position;
@@ -27,34 +19,25 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-
-        if(transform.position.x > 22) {
-            Destroy(gameObject);
-            DeadCount++;
-        }
-
         if(health <= 0) {
             TotalKilledCount++;
             if (increase) {
                 KilledCount++;
             }
             health = 10000;
-            death = true;
+            isDead = true;
             timer = Time.time;
             gameObject.tag = "Dead";
             GameManager.HandleReward();
             gameObject.GetComponent<CapsuleCollider>().enabled = false;
             gameObject.GetComponent<Animator>().enabled = false;
             gameObject.GetComponent<ParticleSystem>().Stop(true,UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
+            Destroy(gameObject,5);
         }
 
-        if (death) {
-            if (Time.time - timer >= 5) {
-                Destroy(gameObject);
-            }
-        } else {
+        if(!isDead) {
             transform.LookAt(playerPos);
-            transform.Translate(0,0,0.025f);
+            transform.Translate(0,0,speed);
         }
     }
 
@@ -64,12 +47,5 @@ public class Enemy : MonoBehaviour
         } else {
             increase = true;
         }
-    }
-
-    public static void ResetStatics() {
-        AliveCount = 0;
-        KilledCount = 0;
-        TotalKilledCount = 0;
-        DeadCount = 0;
     }
 }

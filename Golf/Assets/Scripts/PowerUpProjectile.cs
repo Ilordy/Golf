@@ -32,7 +32,7 @@ public class PowerUpProjectile : MonoBehaviour
 
     void OnCollisionEnter(Collision collision) {
         if (collision.gameObject.tag == "Enemy") {
-            collision.gameObject.GetComponent<Enemy>().health--;
+            collision.gameObject.GetComponent<EnemyClass>().health--;
             Destroy(gameObject);
         }
     }
