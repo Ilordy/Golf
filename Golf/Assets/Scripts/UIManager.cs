@@ -7,9 +7,11 @@ public class UIManager : MonoBehaviour
 {
 
     Manager GameManager;
-    GameObject mainMenu, settingsMenu, shopMenu, ingameUI;
+    GameObject mainMenu, settingsMenu, shopMenu, ingameUI, victoryUI, defeatUI;
     Button playButton, upgradeButton1, upgradeButton2, upgradeButton3, settingsButton, shopButton, soundsButton, hapticsButton, restoreButton, settingsBackButton;
+    Button victoryDoubleButton, victorySkipButton, defeatSkipLevelButton, defeatTryAgainButton;
     TextMeshProUGUI levelText, moneyCounterText, upgradeLevelText1, upgradeLevelText2, upgradeLevelText3, upgradeCostText1, upgradeCostText2, upgradeCostText3;
+    TextMeshProUGUI victoryText, victoryEarnedText, defeatText;
     Slider powerUpSlider;
 
     Image soundsButtonImage;
@@ -28,12 +30,16 @@ public class UIManager : MonoBehaviour
         settingsMenu = gameObject.transform.GetChild(1).gameObject;
         shopMenu = gameObject.transform.GetChild(2).gameObject;
         ingameUI = gameObject.transform.GetChild(3).gameObject;
+        victoryUI = gameObject.transform.GetChild(4).gameObject;
+        defeatUI = gameObject.transform.GetChild(5).gameObject;
 
         //Set default active UI elements
         mainMenu.SetActive(true);
         settingsMenu.SetActive(false);
         shopMenu.SetActive(false);
         ingameUI.SetActive(false);
+        victoryUI.SetActive(false);
+        defeatUI.SetActive(false);
 
         //Chache Main Menu UI Components
         playButton = mainMenu.transform.GetChild(1).GetComponent<Button>();
@@ -64,11 +70,20 @@ public class UIManager : MonoBehaviour
         //Cache ingame UI Components
         powerUpSlider = ingameUI.transform.GetChild(0).GetComponent<Slider>();
 
+        //Cache Victory/Defeat UI Components
+        victoryDoubleButton = victoryUI.transform.GetChild(3).GetComponent<Button>();
+        victorySkipButton = victoryUI.transform.GetChild(4).GetComponent<Button>();
+        victoryText = victoryUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        victoryEarnedText = victoryUI.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+        defeatSkipLevelButton = defeatUI.transform.GetChild(2).GetComponent<Button>();
+        defeatTryAgainButton = defeatUI.transform.GetChild(3).GetComponent<Button>();
+        defeatText = defeatUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+
         //Add Listeners for Main Menu Buttons
         playButton.onClick.AddListener(Play);
-        upgradeButton1.onClick.AddListener(Upgrade1);
-        upgradeButton2.onClick.AddListener(Upgrade2);
-        upgradeButton3.onClick.AddListener(Upgrade3);
+        upgradeButton1.onClick.AddListener(() => GameManager.HandleUpgrade1());
+        upgradeButton2.onClick.AddListener(() => GameManager.HandleUpgrade2());
+        upgradeButton3.onClick.AddListener(() => GameManager.HandleUpgrade3());
         settingsButton.onClick.AddListener(OpenSettings);
         //shopButton.onClick.AddListener(OpenShop);
 
@@ -78,6 +93,12 @@ public class UIManager : MonoBehaviour
         restoreButton.onClick.AddListener(RestorePurchase);
         settingsBackButton.onClick.AddListener(Back);
 
+        //Add Listeners for Victory/Defeat UI Button
+        victoryDoubleButton.onClick.AddListener(AwardDouble);
+        victorySkipButton.onClick.AddListener(AwardRegular);
+        defeatSkipLevelButton.onClick.AddListener(SkipLevel);
+        defeatTryAgainButton.onClick.AddListener(() => OpenMainMenu());
+
         //Add Main Menu as first item in menu stack
         menuStack.Push(mainMenu.transform);
 
@@ -85,23 +106,18 @@ public class UIManager : MonoBehaviour
         UpdateSettings();
     }
 
+    public void OpenMainMenu() {
+        mainMenu.SetActive(true);
+        ingameUI.SetActive(false);
+        victoryUI.SetActive(false);
+        defeatUI.SetActive(false);
+    }
+
     void Play() {
         mainMenu.SetActive(false);
         ingameUI.SetActive(true);
         GameManager.playGame = true;
         menuStack.Push(ingameUI.transform);
-    }
-
-    void Upgrade1() {
-        GameManager.HandleUpgrade1();
-    }
-
-    void Upgrade2() {
-        GameManager.HandleUpgrade2();
-    }
-
-    void Upgrade3() {
-        GameManager.HandleUpgrade3();
     }
 
     void OpenSettings() {
@@ -143,38 +159,64 @@ public class UIManager : MonoBehaviour
 
     public void UpdateUpgradeInfo(int upgradeNumber, int upgradeLevel, int upgradeCost) {
         if (upgradeNumber == 1) {
-            upgradeLevelText1.text = upgradeLevel.ToString();
+            upgradeLevelText1.text = "Fire Rate " + upgradeLevel.ToString();
             upgradeCostText1.text = upgradeCost.ToString();
         }
         if (upgradeNumber == 2) {
-            upgradeLevelText2.text = upgradeLevel.ToString();
+            upgradeLevelText2.text = "Ball Speed " + upgradeLevel.ToString();
             upgradeCostText2.text = upgradeCost.ToString();
         }
         if (upgradeNumber == 3) {
-            upgradeLevelText3.text = upgradeLevel.ToString();
+            upgradeLevelText3.text = "Income " + upgradeLevel.ToString();
             upgradeCostText3.text = upgradeCost.ToString();
         }
     }
 
     public void UpdateMoney(int money) {
-        moneyCounterText.text = money.ToString();
+        if (money > 99999) {
+            moneyCounterText.text = "99999";
+        } else {
+            moneyCounterText.text = money.ToString();
+        }
+    }
+
+    public void UpdateLevel(int level) {
+        levelText.text = "Level: " + level.ToString();
     }
 
     public void UpdatePowerUpSlider(float value) {
         powerUpSlider.value = value;
     }
 
-    public void OpenMainMenu() {
-        mainMenu.SetActive(true);
+    public void HandleVictory(int level, int earned) {
+        UpdateLevel(level);
+        victoryEarnedText.text = "You earned " + earned.ToString() + " coins";
+        victoryDoubleButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Claim 2x\n" + (earned*2).ToString();
+        victorySkipButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Get " + earned.ToString();
         ingameUI.SetActive(false);
+        victoryUI.SetActive(true);
     }
 
-    public void HandleVictory() {
+    void AwardRegular() {
+        GameManager.AwardRegular();
+        UpdateMoney(GameManager.GetMoney());
+        OpenMainMenu();
+    }
 
+    void AwardDouble() {
+        GameManager.AwardDouble();
+        UpdateMoney(GameManager.GetMoney());
+        OpenMainMenu();
     }
 
     public void HandleDefeat() {
+        ingameUI.SetActive(false);
+        defeatUI.SetActive(true);
+    }
 
+    void SkipLevel() {
+        GameManager.SkipLevel();
+        OpenMainMenu();
     }
 
     void Back() {

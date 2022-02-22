@@ -54,5 +54,8 @@ public class CartEnemy : EnemyClass {
         } else {
             increase = true;
         }
+        if (collision.gameObject.tag == "Player") {
+            GameManager.HandleDefeat();
+        }
     }
 }

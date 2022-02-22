@@ -5,6 +5,7 @@ using UnityEngine;
 public class Enemy : EnemyClass
 {
     bool isDead = false;
+
     void Start()
     {
         AliveCount++;
@@ -26,7 +27,6 @@ public class Enemy : EnemyClass
             }
             health = 10000;
             isDead = true;
-            timer = Time.time;
             gameObject.tag = "Dead";
             GameManager.HandleReward();
             gameObject.GetComponent<CapsuleCollider>().enabled = false;
@@ -46,6 +46,9 @@ public class Enemy : EnemyClass
             increase = false;
         } else {
             increase = true;
+        }
+        if (collision.gameObject.tag == "Player") {
+            GameManager.HandleDefeat();
         }
     }
 }

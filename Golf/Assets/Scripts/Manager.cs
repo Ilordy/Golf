@@ -19,47 +19,50 @@ public class Manager : MonoBehaviour {
 
     Animator playerAnimator;
 
+    //Settings
     int soundEnabled = 1;
     int hapticsEnabled = 1;
 
+    //Power Up
     GameObject[] enemies;
     GameObject[] powerUpProjectiles;
 
+    //Shooting
     float   beganHolding = 0f;
+    float   pot = 0f;
+    float   fireRateCounter = 0f;
     int     powerUpReq = 5;
 
-    int enemiesToSpawn = 0;
-    float enemySpawnInterval = 1f;
-    float currentTime = 0f;
+    //Enemy Spawning
+    int     enemiesToSpawn = 0;
+    float   enemySpawnInterval = 1f;
+    float   currentTime = 0f;
 
-    float pot = 0f;
-
-    float fireRateCounter = 0f;
-
+    //Upgrades
     float fireRate = 0.5f;
     float ballSpeed = 25f;
     int income = 1;
-
     int fireRateLevel = 1;
     int fireRateCost = 100;
-
     int ballSpeedLevel = 1;
     int ballSpeedCost = 100;
-
     int incomeLevel = 1;
     int incomeCost = 100;
-
     int upgradeMaxLevel = 20;
+    [SerializeField] int money = 0;
+    [SerializeField] int earned = 0;
 
-    int money = 0;
-
+    //Game loop
     public bool playGame = false;
-
     public bool willDeleteSaves = false;
-
     int level = 1;
 
     void Start() {
+        //Debug delete
+        if(willDeleteSaves) {
+            PlayerPrefs.DeleteAll();
+        }
+
         //Get EnemyClass
         EnemyClass = GetComponent<EnemyClass>();
         //Set Player Animator
@@ -67,7 +70,7 @@ public class Manager : MonoBehaviour {
 
         //Get all persistent values
         level = PlayerPrefs.GetInt("Level", 1);
-        money = PlayerPrefs.GetInt("Money",4000000);
+        money = PlayerPrefs.GetInt("Money", 0);
         fireRateLevel = PlayerPrefs.GetInt("FireRateLevel", 1);
         fireRateCost = PlayerPrefs.GetInt("FireRateCost", 100);
         ballSpeedLevel = PlayerPrefs.GetInt("BallSpeedLevel", 1);
@@ -84,15 +87,11 @@ public class Manager : MonoBehaviour {
         UpdateUpgradeValues();
 
         //Update UI
+        UIManager.UpdateLevel(level);
         UIManager.UpdateMoney(money);
         UIManager.UpdateUpgradeInfo(1, fireRateLevel, fireRateCost);
         UIManager.UpdateUpgradeInfo(2, ballSpeedLevel, ballSpeedCost);
         UIManager.UpdateUpgradeInfo(3, incomeLevel, incomeCost);
-
-        //Debug delete
-        if(willDeleteSaves) {
-            PlayerPrefs.DeleteAll();
-        }
     }
 
     void Update() {
@@ -100,26 +99,22 @@ public class Manager : MonoBehaviour {
         if (!playGame) return;
 
         //Spawn Enemies
-        if (currentTime < enemySpawnInterval) {
-            currentTime+=Time.deltaTime;
-        } else if (EnemyClass.GetData("AliveCount") < enemiesToSpawn) {
-            currentTime = 0f;
-            float chance = Random.Range(0f,1f);
-            if (chance < 0.1f) {
-                Instantiate(cartEnemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
+        if (EnemyClass.GetData("AliveCount") < enemiesToSpawn) {
+            if (currentTime < enemySpawnInterval) {
+                currentTime += Time.deltaTime;
             } else {
-                Instantiate(enemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
+                currentTime = 0;
+                float chance = Random.Range(0f,1f);
+                if (chance < 0.1f) {
+                    Instantiate(cartEnemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
+                } else {
+                    Instantiate(enemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
+                }
             }
-        }
-
-        //Handle Win/Loss
-        if (EnemyClass.GetData("TotalKilledCount") == enemiesToSpawn) {
-            playGame = false;
-            Enemy.ResetStatics();
-            level++;
-            PlayerPrefs.SetInt("Level", level);
-            calculateDifficulty(level);
-            UIManager.OpenMainMenu();
+        } else { //HANDLE VICTORY
+            if (EnemyClass.GetData("TotalKilledCount") == EnemyClass.GetData("AliveCount")) {
+                HandleVictory();
+            }
         }
 
         // Adjust Power Up Slider
@@ -174,6 +169,8 @@ public class Manager : MonoBehaviour {
     }
 
     // Functions
+
+    //FIRE PROJECTILES
     void fireProjectile(ref float fireRateCounter, float nextFire) {
         if (Time.time > fireRateCounter) {
             fireRateCounter = Time.time + nextFire;
@@ -203,6 +200,32 @@ public class Manager : MonoBehaviour {
         income = incomeLevel;
     }
 
+    void HandleVictory() {
+        playGame = false;
+        level++;
+        PlayerPrefs.SetInt("Level", level);
+        calculateDifficulty(level);
+        UIManager.HandleVictory(level, earned);
+        Enemy.ResetStatics();
+    }
+
+    public void HandleDefeat() {
+        playGame = false;
+        UIManager.HandleDefeat();
+        Enemy.ResetStatics();
+        GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (GameObject i in e) {
+            Destroy(i);
+        }
+    }
+
+    public void SkipLevel() {
+        level++;
+        PlayerPrefs.SetInt("Level", level);
+        UIManager.UpdateLevel(level);
+        calculateDifficulty(level);
+    }
+
     public int GetSound() {
         return soundEnabled;
     }
@@ -223,6 +246,10 @@ public class Manager : MonoBehaviour {
 
     public int GetMoney() {
         return money;
+    }
+
+    public int GetLevel() {
+        return level;
     }
 
     public void HandleUpgrade1() {
@@ -262,6 +289,16 @@ public class Manager : MonoBehaviour {
     }
 
     public void HandleReward() {
-        money += Random.Range(1, income);
+        earned += Random.Range(1, income);
+    }
+
+    public void AwardRegular() {
+        money += earned;
+        earned = 0;
+    }
+
+    public void AwardDouble() {
+        money += earned*2;
+        earned = 0;
     }
 }

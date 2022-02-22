@@ -8,13 +8,11 @@ public class EnemyClass : MonoBehaviour
     protected Manager GameManager;
     public int health = 1;
     protected float speed = 1;
-    protected float timer = 0;
     protected bool increase = false;
 
     protected static int AliveCount = 0;
     protected static int TotalKilledCount = 0;
     protected static int KilledCount = 0;
-    protected static int DeadCount = 0;
 
     public int GetData(string name) {
         switch (name) {
@@ -24,8 +22,6 @@ public class EnemyClass : MonoBehaviour
                 return TotalKilledCount;
             case "KilledCount":
                 return KilledCount;
-            case "DeadCount":
-                return DeadCount;
             default:
                 return 0;
         }
@@ -39,7 +35,8 @@ public class EnemyClass : MonoBehaviour
         AliveCount = 0;
         KilledCount = 0;
         TotalKilledCount = 0;
-        DeadCount = 0;
     }
+
+    
 
 }
