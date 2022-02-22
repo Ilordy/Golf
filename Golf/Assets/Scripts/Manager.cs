@@ -301,4 +301,9 @@ public class Manager : MonoBehaviour {
         money += earned*2;
         earned = 0;
     }
+
+    public void PlaySmack() {
+        GetComponent<AudioSource>().pitch = Random.Range(1f,1.5f);
+        GetComponent<AudioSource>().PlayOneShot(GetComponent<AudioSource>().clip);
+    }
 }

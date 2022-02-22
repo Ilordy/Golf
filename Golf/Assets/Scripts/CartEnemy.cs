@@ -36,7 +36,9 @@ public class CartEnemy : EnemyClass {
     void FixedUpdate() {
     }
 
-    void OnCollisionEnter(Collision collision) {
+    protected override void OnCollisionEnter(Collision collision) {
+        base.OnCollisionEnter(collision);
+
         if (health == 2) {
             frags[0].transform.SetParent(null);
             frags[0].GetComponent<Rigidbody>().useGravity = true;
@@ -48,14 +50,6 @@ public class CartEnemy : EnemyClass {
                 frags[i].GetComponent<Rigidbody>().useGravity = true;
                 frags[i].GetComponent<Rigidbody>().AddForce(new Vector3(Random.Range(-5,-1),5,0), ForceMode.Impulse);
             }
-        }
-        if (collision.gameObject.tag == "PowerUpProjectile") {
-            increase = false;
-        } else {
-            increase = true;
-        }
-        if (collision.gameObject.tag == "Player") {
-            GameManager.HandleDefeat();
         }
     }
 }

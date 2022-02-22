@@ -40,15 +40,4 @@ public class Enemy : EnemyClass
             transform.Translate(0,0,speed);
         }
     }
-
-    void OnCollisionEnter(Collision collision) {
-        if (collision.gameObject.tag == "PowerUpProjectile") {
-            increase = false;
-        } else {
-            increase = true;
-        }
-        if (collision.gameObject.tag == "Player") {
-            GameManager.HandleDefeat();
-        }
-    }
 }
