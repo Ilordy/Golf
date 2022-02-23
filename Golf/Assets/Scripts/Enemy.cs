@@ -12,7 +12,7 @@ public class Enemy : EnemyClass
 
         health = 1;
         
-        speed = 0.025f;
+        speed = 3f;
 
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
         playerPos = GameObject.Find("Player").transform.position;
@@ -37,7 +37,7 @@ public class Enemy : EnemyClass
 
         if(!isDead) {
             transform.LookAt(playerPos);
-            transform.Translate(0,0,speed);
+            transform.Translate(0,0,speed * Time.deltaTime);
         }
     }
 }

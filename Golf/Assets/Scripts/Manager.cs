@@ -8,7 +8,9 @@ using TMPro;
 public class Manager : MonoBehaviour {
 
     public UIManager UIManager;
-    public EnemyClass EnemyClass;
+    private EnemyClass EnemyClass;
+    public PowerUpAnimation PowerUpAnimation;
+    public GameObject animProjectile;
 
     public GameObject player;
     public GameObject enemy;
@@ -63,6 +65,9 @@ public class Manager : MonoBehaviour {
             PlayerPrefs.DeleteAll();
         }
 
+        //Debug set power up
+        //EnemyClass.SetKilledCount(5);
+
         //Get EnemyClass
         EnemyClass = GetComponent<EnemyClass>();
         //Set Player Animator
@@ -92,6 +97,18 @@ public class Manager : MonoBehaviour {
         UIManager.UpdateUpgradeInfo(1, fireRateLevel, fireRateCost);
         UIManager.UpdateUpgradeInfo(2, ballSpeedLevel, ballSpeedCost);
         UIManager.UpdateUpgradeInfo(3, incomeLevel, incomeCost);
+
+        // int count = 5;
+        // for (int i = 0; i < count; i++) {
+        //     int r = 3;
+        //     float x = r * Mathf.Cos(Mathf.PI/2.5f + ((Mathf.PI/2 * i) / count/(Mathf.PI/2)));
+        //     float y = r * Mathf.Sin(Mathf.PI/2.5f + ((Mathf.PI/2 * i) / count/(Mathf.PI/2)));
+        //     //Mathf.PI/2.5f + ((Mathf.PI/2 * i) / count/(Mathf.PI/2))
+        //     // x = mathf.pi
+        //     // i = y
+        //     // j = count
+        //     Instantiate(animProjectile, player.transform.position + new Vector3(0,y,x),Quaternion.identity);
+        // }
     }
 
     void Update() {
@@ -130,7 +147,9 @@ public class Manager : MonoBehaviour {
         if (Input.GetMouseButton(0)) {
             float holdTime = Time.time - beganHolding;
             if (EnemyClass.GetData("KilledCount") >= powerUpReq && holdTime > 0.1f) {
+                enemies = GameObject.FindGameObjectsWithTag("Enemy");
                 pot += Time.deltaTime;
+                PowerUpAnimation.AnimatePowerUp(enemies.Length, pot);
                 UIManager.UpdatePowerUpSlider(Mathf.Lerp(powerUpReq, 0, pot / 1f));
             }
         }
@@ -138,7 +157,7 @@ public class Manager : MonoBehaviour {
         if (Input.GetMouseButtonUp(0)) {
             float holdTime = Time.time - beganHolding;
             if (holdTime >= 1f && EnemyClass.GetData("KilledCount") >= powerUpReq) {
-                enemies = GameObject.FindGameObjectsWithTag("Enemy");
+                //enemies = GameObject.FindGameObjectsWithTag("Enemy");
                 powerUpProjectiles = new GameObject[enemies.Length];
                 for (int i = 0; i <= enemies.Length - 1; i++) {
                     int r = 3;
@@ -151,10 +170,12 @@ public class Manager : MonoBehaviour {
                 }
                 EnemyClass.SetKilledCount(0);
                 pot = 0;
+                PowerUpAnimation.DeleteAnimation();
             } else {
                 playerAnimator.SetBool("Swing",false);
                 playerAnimator.SetBool("Swing",true);
                 pot = 0;
+                //cancel animation
                 UIManager.UpdatePowerUpSlider(EnemyClass.GetData("KilledCount"));
             }
         }
