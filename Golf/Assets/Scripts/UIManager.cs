@@ -132,6 +132,7 @@ public class UIManager : MonoBehaviour
 
     void ToggleSound() {
         GameManager.SetSound(-GameManager.GetSound());
+        Debug.Log(GameManager.GetSound());
         UpdateSettings();
     }
 
@@ -140,7 +141,7 @@ public class UIManager : MonoBehaviour
         UpdateSettings();
     }
 
-    void UpdateSettings() {
+    public void UpdateSettings() {
         if (GameManager.GetSound() > 0) {
             soundsButtonImage.color = colorEnabled;
         } else {

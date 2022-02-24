@@ -91,6 +91,7 @@ public class Manager : MonoBehaviour {
         UpdateUpgradeValues();
 
         //Update UI
+        UIManager.UpdateSettings();
         UIManager.UpdateLevel(level);
         UIManager.UpdateMoney(money);
         UIManager.UpdateUpgradeInfo(1, fireRateLevel, fireRateCost);
@@ -282,8 +283,10 @@ public class Manager : MonoBehaviour {
         }
         UpdateUpgradeValues();
         UIManager.UpdateUpgradeInfo(1, fireRateLevel, fireRateCost);
+        UIManager.UpdateMoney(money);
         PlayerPrefs.SetInt("FireRateLevel", fireRateLevel);
         PlayerPrefs.SetInt("FireRateCost", fireRateCost);
+        PlayerPrefs.SetInt("Money", money);
     }
 
     public void HandleUpgrade2() {
@@ -294,8 +297,10 @@ public class Manager : MonoBehaviour {
         }
         UpdateUpgradeValues();
         UIManager.UpdateUpgradeInfo(2, ballSpeedLevel, ballSpeedCost);
+        UIManager.UpdateMoney(money);
         PlayerPrefs.SetInt("BallSpeedLevel", ballSpeedLevel);
         PlayerPrefs.SetInt("BallSpeedCost", ballSpeedCost);
+        PlayerPrefs.SetInt("Money", money);
     }
 
     public void HandleUpgrade3() {
@@ -306,8 +311,10 @@ public class Manager : MonoBehaviour {
         }
         UpdateUpgradeValues();
         UIManager.UpdateUpgradeInfo(3, incomeLevel, incomeCost);
+        UIManager.UpdateMoney(money);
         PlayerPrefs.SetInt("IncomeLevel", incomeLevel);
         PlayerPrefs.SetInt("IncomeCost", incomeCost);
+        PlayerPrefs.SetInt("Money", money);
     }
 
     public void HandleReward() {
