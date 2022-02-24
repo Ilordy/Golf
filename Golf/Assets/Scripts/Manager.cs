@@ -41,12 +41,12 @@ public class Manager : MonoBehaviour {
 
     //Upgrades
     float fireRate = 0.5f;
-    float ballSpeed = 25f;
+    int maxBounces = 4;
     int income = 1;
     int fireRateLevel = 1;
     int fireRateCost = 100;
-    int ballSpeedLevel = 1;
-    int ballSpeedCost = 100;
+    int ballBounceLevel = 4;
+    int ballBounceCost = 100;
     int incomeLevel = 1;
     int incomeCost = 100;
     int upgradeMaxLevel = 20;
@@ -77,8 +77,8 @@ public class Manager : MonoBehaviour {
         money = PlayerPrefs.GetInt("Money", 0);
         fireRateLevel = PlayerPrefs.GetInt("FireRateLevel", 1);
         fireRateCost = PlayerPrefs.GetInt("FireRateCost", 100);
-        ballSpeedLevel = PlayerPrefs.GetInt("BallSpeedLevel", 1);
-        ballSpeedCost = PlayerPrefs.GetInt("BallSpeedCost", 100);
+        ballBounceLevel = PlayerPrefs.GetInt("BallBounceLevel", 1);
+        ballBounceCost = PlayerPrefs.GetInt("BallBounceCost", 1000);
         incomeLevel = PlayerPrefs.GetInt("IncomeLevel", 1);
         incomeCost = PlayerPrefs.GetInt("IncomeCost", 100);
         soundEnabled = PlayerPrefs.GetInt("SoundEnabled", 1);
@@ -91,11 +91,12 @@ public class Manager : MonoBehaviour {
         UpdateUpgradeValues();
 
         //Update UI
+        money = 5000000;
         UIManager.UpdateSettings();
         UIManager.UpdateLevel(level);
         UIManager.UpdateMoney(money);
         UIManager.UpdateUpgradeInfo(1, fireRateLevel, fireRateCost);
-        UIManager.UpdateUpgradeInfo(2, ballSpeedLevel, ballSpeedCost);
+        UIManager.UpdateUpgradeInfo(2, ballBounceLevel, ballBounceCost);
         UIManager.UpdateUpgradeInfo(3, incomeLevel, incomeCost);
 
         // int count = 5;
@@ -108,7 +109,7 @@ public class Manager : MonoBehaviour {
         //     // i = y
         //     // j = count
         //     Instantiate(animProjectile, player.transform.position + new Vector3(0,y,x),Quaternion.identity);
-        // }
+        // };
     }
 
     void Update() {
@@ -199,7 +200,8 @@ public class Manager : MonoBehaviour {
             GameObject p = Instantiate(projectile, spawner.transform.position, Quaternion.identity);
             p.transform.LookAt(flatAimTarget);
             p.GetComponent<Rigidbody>().useGravity = true;
-            p.GetComponent<Rigidbody>().velocity = p.transform.forward * ballSpeed;
+            // p.GetComponent<Rigidbody>().velocity = p.transform.forward * 10f;
+            p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 500f, ForceMode.Impulse);
         }
     }
 
@@ -216,7 +218,7 @@ public class Manager : MonoBehaviour {
 
     void UpdateUpgradeValues() {
         fireRate = Mathf.Lerp(1.0f,5.0f,(float)fireRateLevel/upgradeMaxLevel);
-        ballSpeed = Mathf.Lerp(25f,50f,ballSpeedLevel/upgradeMaxLevel);
+        maxBounces = ballBounceLevel;
         playerAnimator.SetFloat("Speed", fireRate);
         income = incomeLevel;
     }
@@ -277,6 +279,10 @@ public class Manager : MonoBehaviour {
         return level;
     }
 
+    public int GetMaxBounces() {
+        return maxBounces;
+    }
+
     public void HandleUpgrade1() {
         if (money > fireRateCost && fireRateLevel < upgradeMaxLevel) {
             money -= fireRateCost;
@@ -292,16 +298,16 @@ public class Manager : MonoBehaviour {
     }
 
     public void HandleUpgrade2() {
-        if (money > ballSpeedCost && ballSpeedLevel < upgradeMaxLevel) {
-            money -= ballSpeedCost;
-            ballSpeedLevel++;
-            ballSpeedCost += 100;
+        if (money > ballBounceCost && ballBounceLevel < 5) {
+            money -= ballBounceCost;
+            ballBounceLevel++;
+            ballBounceCost += 1000;
         }
         UpdateUpgradeValues();
-        UIManager.UpdateUpgradeInfo(2, ballSpeedLevel, ballSpeedCost);
+        UIManager.UpdateUpgradeInfo(2, ballBounceLevel, ballBounceCost);
         UIManager.UpdateMoney(money);
-        PlayerPrefs.SetInt("BallSpeedLevel", ballSpeedLevel);
-        PlayerPrefs.SetInt("BallSpeedCost", ballSpeedCost);
+        PlayerPrefs.SetInt("BallBounceLevel", ballBounceLevel);
+        PlayerPrefs.SetInt("BallBounceCost", ballBounceCost);
         PlayerPrefs.SetInt("Money", money);
     }
 

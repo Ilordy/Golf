@@ -5,40 +5,60 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     AudioManager AudioManager;
-
+    Manager GameManager;
     Rigidbody rb;
 
-    Vector3 initialPos;
-
     float speed;
-
-    float limit;
+    int bounces = 0;
+    bool canTarget = false;
+    
+    GameObject nearest = null;
 
     void Start()
     {
         AudioManager = GameObject.FindObjectOfType<AudioManager>();
-
+        GameManager = GameObject.FindObjectOfType<Manager>();
         rb = GetComponent<Rigidbody>();
-        limit = 300f;
-
-        initialPos = transform.position;
 
         AudioManager.PlayBallHit();
+        
+        Destroy(gameObject, 5f);
     }
 
     void Update()
     {
-        rb.useGravity = false;
+        if (bounces >= GameManager.GetMaxBounces()) {
+            Destroy(gameObject);
+        }
 
-        if (Vector3.Distance(initialPos, transform.position) > limit) {
+        if (canTarget && nearest != null) {
+            transform.LookAt(nearest.transform.position);
+        } else if (canTarget && nearest == null) {
             Destroy(gameObject);
         }
     }
 
     void OnCollisionEnter(Collision collision) {
         if (collision.gameObject.tag == "Enemy") {
+            canTarget = false;
             collision.gameObject.GetComponent<EnemyClass>().health--;
-            Destroy(gameObject);
+            bounces++;
+            float dist = float.MaxValue;
+            nearest = null;
+            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
+            foreach (GameObject enemy in enemies) {
+                float currentDist = Vector3.Distance(transform.position, enemy.transform.position);
+                if (currentDist < dist && enemy != collision.gameObject) {
+                    dist = currentDist;
+                    nearest = enemy;
+                }
+            }
+            if (nearest != null) {
+                canTarget = true;
+                rb.velocity = Vector3.zero;
+                rb.AddForce(transform.forward * 500f, ForceMode.Impulse);
+            }
+            //Destroy(gameObject);
         }
     }
 }

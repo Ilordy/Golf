@@ -164,7 +164,7 @@ public class UIManager : MonoBehaviour
             upgradeCostText1.text = upgradeCost.ToString();
         }
         if (upgradeNumber == 2) {
-            upgradeLevelText2.text = "Ball Speed " + upgradeLevel.ToString();
+            upgradeLevelText2.text = "Ball Bounce " + upgradeLevel.ToString();
             upgradeCostText2.text = upgradeCost.ToString();
         }
         if (upgradeNumber == 3) {
