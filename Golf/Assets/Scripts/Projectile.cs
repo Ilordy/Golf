@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
+    AudioManager AudioManager;
+
     Rigidbody rb;
 
     Vector3 initialPos;
@@ -14,10 +16,14 @@ public class Projectile : MonoBehaviour
 
     void Start()
     {
+        AudioManager = GameObject.FindObjectOfType<AudioManager>();
+
         rb = GetComponent<Rigidbody>();
         limit = 300f;
 
         initialPos = transform.position;
+
+        AudioManager.PlayBallHit();
     }
 
     void Update()

@@ -8,9 +8,8 @@ using TMPro;
 public class Manager : MonoBehaviour {
 
     public UIManager UIManager;
-    private EnemyClass EnemyClass;
     public PowerUpAnimation PowerUpAnimation;
-    public GameObject animProjectile;
+    private EnemyClass EnemyClass;
 
     public GameObject player;
     public GameObject enemy;
@@ -22,8 +21,8 @@ public class Manager : MonoBehaviour {
     Animator playerAnimator;
 
     //Settings
-    int soundEnabled = 1;
-    int hapticsEnabled = 1;
+    public int soundEnabled = 1;
+    public int hapticsEnabled = 1;
 
     //Power Up
     GameObject[] enemies;
@@ -175,7 +174,7 @@ public class Manager : MonoBehaviour {
                 playerAnimator.SetBool("Swing",false);
                 playerAnimator.SetBool("Swing",true);
                 pot = 0;
-                //cancel animation
+                PowerUpAnimation.DeleteAnimation();
                 UIManager.UpdatePowerUpSlider(EnemyClass.GetData("KilledCount"));
             }
         }
@@ -228,9 +227,11 @@ public class Manager : MonoBehaviour {
         calculateDifficulty(level);
         UIManager.HandleVictory(level, earned);
         Enemy.ResetStatics();
+        PowerUpAnimation.DeleteAnimation();
     }
 
     public void HandleDefeat() {
+        PowerUpAnimation.DeleteAnimation();
         playGame = false;
         UIManager.HandleDefeat();
         Enemy.ResetStatics();
@@ -316,15 +317,14 @@ public class Manager : MonoBehaviour {
     public void AwardRegular() {
         money += earned;
         earned = 0;
+        PlayerPrefs.SetInt("Money", money);
+        UIManager.UpdateMoney(money);
     }
 
     public void AwardDouble() {
         money += earned*2;
         earned = 0;
-    }
-
-    public void PlaySmack() {
-        GetComponent<AudioSource>().pitch = Random.Range(1f,1.5f);
-        GetComponent<AudioSource>().PlayOneShot(GetComponent<AudioSource>().clip);
+        PlayerPrefs.SetInt("Money", money);
+        UIManager.UpdateMoney(money);
     }
 }

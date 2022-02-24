@@ -4,21 +4,24 @@ using UnityEngine;
 
 public class PowerUpProjectile : MonoBehaviour
 {
+    AudioManager AudioManager;
+
     Rigidbody rb;
 
     Vector3 initialPos;
-
-    Manager manager;
 
     float limit;
 
     void Start()
     {
-        manager = GameObject.Find("Manager").GetComponent<Manager>();
+        AudioManager = GameObject.FindObjectOfType<AudioManager>();
+
         rb = GetComponent<Rigidbody>();
         limit = 300f;
 
         initialPos = transform.position;
+
+        AudioManager.PlayBallHit();
     }
 
     void Update()

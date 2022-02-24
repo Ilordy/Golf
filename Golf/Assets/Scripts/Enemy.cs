@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : EnemyClass
-{
+public class Enemy : EnemyClass {
     bool isDead = false;
 
-    void Start()
+    protected override void Start()
     {
+        base.Start();
+
+        AudioManager = GameObject.FindObjectOfType<AudioManager>();
+
         AliveCount++;
 
         health = 1;
@@ -39,5 +42,9 @@ public class Enemy : EnemyClass
             transform.LookAt(playerPos);
             transform.Translate(0,0,speed * Time.deltaTime);
         }
+    }
+
+    protected override void OnCollisionEnter(Collision collision) {
+        base.OnCollisionEnter(collision);
     }
 }

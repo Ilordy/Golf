@@ -6,7 +6,9 @@ public class CartEnemy : EnemyClass {
     public GameObject[] frags;
     public GameObject regularEnemy;
 
-    void Start() {
+    protected override void Start() {
+        base.Start();
+
         AliveCount++;
 
         health = 3;

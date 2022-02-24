@@ -6,6 +6,7 @@ public class EnemyClass : MonoBehaviour
 {
     protected Vector3 playerPos;
     protected Manager GameManager;
+    protected AudioManager AudioManager;
     public int health = 1;
     protected float speed = 1;
     protected bool increase = false;
@@ -13,6 +14,10 @@ public class EnemyClass : MonoBehaviour
     protected static int AliveCount = 0;
     protected static int TotalKilledCount = 0;
     protected static int KilledCount = 0;
+
+    protected virtual void Start() {
+        AudioManager = GameObject.FindObjectOfType<AudioManager>();
+    }
 
     public int GetData(string name) {
         switch (name) {
@@ -38,9 +43,10 @@ public class EnemyClass : MonoBehaviour
     }
 
     protected virtual void OnCollisionEnter(Collision collision) {
-        if (collision.gameObject.tag == "PowerUpProjectile" || collision.gameObject.tag == "Projectile") {
-            GameManager.PlaySmack();
-        }
+        string tag = collision.gameObject.tag;
+
+        if(tag == "Projectile" || tag == "PowerUpProjectile") AudioManager.PlayEnemyHit();
+
         if (collision.gameObject.tag == "PowerUpProjectile") {
             increase = false;
         } else {
