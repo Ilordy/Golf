@@ -223,6 +223,7 @@ public class Manager : MonoBehaviour {
 
     void HandleVictory() {
         playGame = false;
+        playerAnimator.SetBool("Swing", false);
         level++;
         PlayerPrefs.SetInt("Level", level);
         calculateDifficulty(level);
@@ -234,6 +235,7 @@ public class Manager : MonoBehaviour {
     public void HandleDefeat() {
         PowerUpAnimation.DeleteAnimation();
         playGame = false;
+        playerAnimator.SetBool("Swing", false);
         UIManager.HandleDefeat();
         Enemy.ResetStatics();
         GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");

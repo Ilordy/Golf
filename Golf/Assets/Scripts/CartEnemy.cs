@@ -13,7 +13,7 @@ public class CartEnemy : EnemyClass {
 
         health = 3;
 
-        speed = 0.01f;
+        speed = 2f;
 
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
         playerPos = GameObject.Find("Player").transform.position;
@@ -31,7 +31,7 @@ public class CartEnemy : EnemyClass {
             }
         } else {
             transform.LookAt(playerPos);
-            transform.Translate(0,0,speed);
+            transform.Translate(0,0,speed * Time.deltaTime);
         }
     }
 
