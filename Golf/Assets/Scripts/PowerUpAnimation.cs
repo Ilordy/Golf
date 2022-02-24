@@ -10,10 +10,16 @@ public class PowerUpAnimation : MonoBehaviour {
     public Transform spawner;
 
     List<GameObject> spawns = new List<GameObject>();
+    Animator animator;
     int spawned = 0;
     float c = 0;
 
+    void Start() {
+        animator = GetComponent<Animator>();
+    }
+
     public void AnimatePowerUp(int enemiesLength, float pot) {
+        animator.SetBool("Animate", true);
         AudioManager.PlayCharge();
         c += Time.deltaTime*2;
         if (spawned < enemiesLength) {
@@ -32,10 +38,13 @@ public class PowerUpAnimation : MonoBehaviour {
 
             spawns[i].transform.position = new Vector3(x,y,z);
         }
+        
+        if (c > 1) animator.SetBool("Animate", false);
     }
 
     public void DeleteAnimation() {
         AudioManager.StopCharge();
+        animator.SetBool("Animate", false);
         spawned = 0;
         c = 0;
         for (int i = 0; i < spawns.Count; i++) {
