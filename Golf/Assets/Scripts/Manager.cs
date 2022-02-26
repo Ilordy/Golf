@@ -14,6 +14,7 @@ public class Manager : MonoBehaviour {
     public GameObject player;
     public GameObject enemy;
     public GameObject cartEnemy;
+    public GameObject shieldEnemy;
     public GameObject projectile;
     public GameObject powerUpProjectile;
     public GameObject spawner;
@@ -125,6 +126,8 @@ public class Manager : MonoBehaviour {
                 float chance = Random.Range(0f,1f);
                 if (chance < 0.1f) {
                     Instantiate(cartEnemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
+                } else if (chance > 0.1f && chance < 0.9f) {
+                    Instantiate(shieldEnemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
                 } else {
                     Instantiate(enemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
                 }

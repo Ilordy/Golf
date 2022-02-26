@@ -21,7 +21,7 @@ public class Enemy : EnemyClass {
         playerPos = GameObject.Find("Player").transform.position;
     }
 
-    void Update()
+    protected virtual void Update()
     {
         if(health <= 0) {
             TotalKilledCount++;

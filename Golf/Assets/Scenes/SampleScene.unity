@@ -5576,6 +5576,8 @@ MonoBehaviour:
   enemy: {fileID: 5631945564213548173, guid: 2169185bb9f593748a74510ac2755df8, type: 3}
   cartEnemy: {fileID: 602819925841741181, guid: 88212c3d2d47c5840b2db2f44171e968,
     type: 3}
+  shieldEnemy: {fileID: 835195716798131512, guid: 1d8cbaec165aedf408d0abc6b81437e9,
+    type: 3}
   projectile: {fileID: 1162225672377599536, guid: f71373e91a63c954c8efecfdd4913ce9,
     type: 3}
   powerUpProjectile: {fileID: 8350444720997931790, guid: c6c058bb5c581ba4a949db5a7ad19e6b,
