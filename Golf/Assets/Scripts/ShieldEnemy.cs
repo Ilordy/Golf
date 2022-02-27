@@ -23,7 +23,6 @@ public class ShieldEnemy : Enemy
         enemyAnimator = GetComponent<Animator>();
     }
 
-    // Update is called once per frame
     protected override void Update()
     {
         base.Update();

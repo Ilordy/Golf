@@ -19,6 +19,7 @@ public class Projectile : MonoBehaviour
         AudioManager = GameObject.FindObjectOfType<AudioManager>();
         GameManager = GameObject.FindObjectOfType<Manager>();
         rb = GetComponent<Rigidbody>();
+        rb.useGravity = false;
 
         AudioManager.PlayBallHit();
         
@@ -56,7 +57,7 @@ public class Projectile : MonoBehaviour
             if (nearest != null) {
                 canTarget = true;
                 rb.velocity = Vector3.zero;
-                rb.AddForce(transform.forward * 500f, ForceMode.Impulse);
+                rb.AddForce(transform.forward * 25f, ForceMode.Impulse);
             }
             //Destroy(gameObject);
         }

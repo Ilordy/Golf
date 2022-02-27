@@ -204,14 +204,15 @@ public class Manager : MonoBehaviour {
             p.transform.LookAt(flatAimTarget);
             p.GetComponent<Rigidbody>().useGravity = true;
             // p.GetComponent<Rigidbody>().velocity = p.transform.forward * 10f;
-            p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 500f, ForceMode.Impulse);
+            p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 25f, ForceMode.Impulse);
         }
     }
 
     Vector3 calculateTarget() {
         Vector3 cursorRay = Camera.main.ScreenPointToRay(Input.mousePosition).direction;
         Vector3 screenPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        return screenPoint + cursorRay / Mathf.Abs(cursorRay.y) * Mathf.Abs(screenPoint.y - spawner.transform.position.y);
+        Vector3 target = screenPoint + cursorRay / Mathf.Abs(cursorRay.y) * Mathf.Abs(screenPoint.y - spawner.transform.position.y);
+        return new Vector3(target.x, 0.63f, target.z);
     }
 
     void calculateDifficulty (int level) {
