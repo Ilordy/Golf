@@ -32,6 +32,11 @@ PrefabInstance:
       propertyPath: m_TagString
       value: PowerUpProjectile
       objectReference: {fileID: 0}
+    - target: {fileID: 2552217222039505270, guid: f71373e91a63c954c8efecfdd4913ce9,
+        type: 3}
+      propertyPath: m_Constraints
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3083878212111394184, guid: f71373e91a63c954c8efecfdd4913ce9,
         type: 3}
       propertyPath: m_RootOrder

@@ -23,6 +23,13 @@ public class UIManager : MonoBehaviour
     Stack<Transform> menuStack = new Stack<Transform>();
 
     void Start() {
+        GameEvents.current.OnKillsChange += UpdatePowerUpSlider;
+        GameEvents.current.OnUpgradesChange += UpdateUpgradeInfo;
+        GameEvents.current.OnMoneyChange += UpdateMoney;
+        GameEvents.current.OnSettingsChange += UpdateSettings;
+        GameEvents.current.OnHandleVictory += HandleVictory;
+        GameEvents.current.OnHandleDefeat += HandleDefeat;
+
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
 
         //Cache Main UI Components
@@ -141,7 +148,7 @@ public class UIManager : MonoBehaviour
         UpdateSettings();
     }
 
-    public void UpdateSettings() {
+    void UpdateSettings() {
         if (GameManager.GetSound() > 0) {
             soundsButtonImage.color = colorEnabled;
         } else {
@@ -158,7 +165,7 @@ public class UIManager : MonoBehaviour
         //Restore Purchase for IOS
     }
 
-    public void UpdateUpgradeInfo(int upgradeNumber, int upgradeLevel, int upgradeCost) {
+    void UpdateUpgradeInfo(int upgradeNumber, int upgradeLevel, int upgradeCost) {
         if (upgradeNumber == 1) {
             upgradeLevelText1.text = "Fire Rate " + upgradeLevel.ToString();
             upgradeCostText1.text = upgradeCost.ToString();
@@ -173,7 +180,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void UpdateMoney(int money) {
+    void UpdateMoney(int money) {
         if (money > 99999) {
             moneyCounterText.text = "99999";
         } else {
@@ -181,15 +188,15 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void UpdateLevel(int level) {
+    void UpdateLevel(int level) {
         levelText.text = "Level: " + level.ToString();
     }
 
-    public void UpdatePowerUpSlider(float value) {
+    void UpdatePowerUpSlider(float value) {
         powerUpSlider.value = value;
     }
 
-    public void HandleVictory(int level, int earned) {
+    void HandleVictory(int level, int earned) {
         UpdateLevel(level);
         victoryEarnedText.text = "You earned " + earned.ToString() + " coins";
         victoryDoubleButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Claim 2x\n" + (earned*2).ToString();
@@ -210,7 +217,7 @@ public class UIManager : MonoBehaviour
         OpenMainMenu();
     }
 
-    public void HandleDefeat() {
+    void HandleDefeat() {
         ingameUI.SetActive(false);
         defeatUI.SetActive(true);
     }

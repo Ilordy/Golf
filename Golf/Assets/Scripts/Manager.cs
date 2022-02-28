@@ -1,13 +1,9 @@
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
-using System.Collections.Generic;
-using TMPro;
+using System.Collections;
 
 
 public class Manager : MonoBehaviour {
 
-    public UIManager UIManager;
     public PowerUpAnimation PowerUpAnimation;
     private EnemyClass EnemyClass;
 
@@ -36,6 +32,7 @@ public class Manager : MonoBehaviour {
     int     powerUpReq = 5;
 
     //Enemy Spawning
+    IEnumerator StartedSpawning;
     int     enemiesToSpawn = 0;
     float   enemySpawnInterval = 1f;
     float   currentTime = 0f;
@@ -93,46 +90,23 @@ public class Manager : MonoBehaviour {
 
         //Update UI
         money = 5000000;
-        UIManager.UpdateSettings();
-        UIManager.UpdateLevel(level);
-        UIManager.UpdateMoney(money);
-        UIManager.UpdateUpgradeInfo(1, fireRateLevel, fireRateCost);
-        UIManager.UpdateUpgradeInfo(2, ballBounceLevel, ballBounceCost);
-        UIManager.UpdateUpgradeInfo(3, incomeLevel, incomeCost);
-
-        // int count = 5;
-        // for (int i = 0; i < count; i++) {
-        //     int r = 3;
-        //     float x = r * Mathf.Cos(Mathf.PI/2.5f + ((Mathf.PI/2 * i) / count/(Mathf.PI/2)));
-        //     float y = r * Mathf.Sin(Mathf.PI/2.5f + ((Mathf.PI/2 * i) / count/(Mathf.PI/2)));
-        //     //Mathf.PI/2.5f + ((Mathf.PI/2 * i) / count/(Mathf.PI/2))
-        //     // x = mathf.pi
-        //     // i = y
-        //     // j = count
-        //     Instantiate(animProjectile, player.transform.position + new Vector3(0,y,x),Quaternion.identity);
-        // };
+        GameEvents.current.SettingsChange();
+        GameEvents.current.LevelChange(level);
+        GameEvents.current.MoneyChange(money);
+        GameEvents.current.UpgradesChange(1, fireRateLevel, fireRateCost);
+        GameEvents.current.UpgradesChange(2, ballBounceLevel, ballBounceCost);
+        GameEvents.current.UpgradesChange(3, incomeLevel, incomeCost);
     }
 
     void Update() {
         //Gameplay
         if (!playGame) return;
 
-        //Spawn Enemies
-        if (EnemyClass.GetData("AliveCount") < enemiesToSpawn) {
-            if (currentTime < enemySpawnInterval) {
-                currentTime += Time.deltaTime;
-            } else {
-                currentTime = 0;
-                float chance = Random.Range(0f,1f);
-                if (chance < 0.1f) {
-                    Instantiate(cartEnemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
-                } else if (chance > 0.1f && chance < 0.9f) {
-                    Instantiate(shieldEnemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
-                } else {
-                    Instantiate(enemy, new Vector3(-30-Random.Range(0,10),2,Random.Range(-4.7f,4.7f)), Quaternion.identity);
-                }
-            }
-        } else { //HANDLE VICTORY
+        if (StartedSpawning == null) {
+            StartedSpawning = SpawnEnemy();
+            StartCoroutine(SpawnEnemy());
+        } else {
+            //HANDLE VICTORY
             if (EnemyClass.GetData("TotalKilledCount") == EnemyClass.GetData("AliveCount")) {
                 HandleVictory();
             }
@@ -140,7 +114,7 @@ public class Manager : MonoBehaviour {
 
         // Adjust Power Up Slider
         if (EnemyClass.GetData("KilledCount") <= powerUpReq) {
-            UIManager.UpdatePowerUpSlider(EnemyClass.GetData("KilledCount"));
+            GameEvents.current.KillsChange(EnemyClass.GetData("KilledCount"));
         }
 
         // Shooting / Power up
@@ -154,7 +128,7 @@ public class Manager : MonoBehaviour {
                 enemies = GameObject.FindGameObjectsWithTag("Enemy");
                 pot += Time.deltaTime;
                 PowerUpAnimation.AnimatePowerUp(enemies.Length, pot);
-                UIManager.UpdatePowerUpSlider(Mathf.Lerp(powerUpReq, 0, pot / 1f));
+                GameEvents.current.KillsChange(Mathf.Lerp(powerUpReq, 0, pot / 1f));
             }
         }
 
@@ -180,7 +154,7 @@ public class Manager : MonoBehaviour {
                 playerAnimator.SetBool("Swing",true);
                 pot = 0;
                 PowerUpAnimation.DeleteAnimation();
-                UIManager.UpdatePowerUpSlider(EnemyClass.GetData("KilledCount"));
+                GameEvents.current.KillsChange(EnemyClass.GetData("KilledCount"));
             }
         }
 
@@ -194,6 +168,24 @@ public class Manager : MonoBehaviour {
     }
 
     // Functions
+
+    IEnumerator SpawnEnemy() {
+        while (EnemyClass.GetData("AliveCount") < enemiesToSpawn) {
+            float chance = Random.Range(0f,1f);
+            float xPos = Random.Range(-47f,-32f);
+            float zPos = Random.Range(-3.65f,3.65f);
+            GameObject selected = null;
+            if (chance < 0.1f) {
+                selected = cartEnemy;
+            } else if (chance > 0.1f && chance < 0.9f) {
+                selected = shieldEnemy;
+            } else {
+                selected = enemy;
+            }
+            Instantiate(selected, new Vector3(xPos,2,zPos), Quaternion.identity);
+            yield return new WaitForSeconds(1);
+        }
+    }
 
     //FIRE PROJECTILES
     void fireProjectile(ref float fireRateCounter, float nextFire) {
@@ -228,12 +220,13 @@ public class Manager : MonoBehaviour {
     }
 
     void HandleVictory() {
+        StartedSpawning = null;
         playGame = false;
         playerAnimator.SetBool("Swing", false);
         level++;
         PlayerPrefs.SetInt("Level", level);
         calculateDifficulty(level);
-        UIManager.HandleVictory(level, earned);
+        GameEvents.current.HandleVictory(level, earned);
         Enemy.ResetStatics();
         PowerUpAnimation.DeleteAnimation();
     }
@@ -242,7 +235,7 @@ public class Manager : MonoBehaviour {
         PowerUpAnimation.DeleteAnimation();
         playGame = false;
         playerAnimator.SetBool("Swing", false);
-        UIManager.HandleDefeat();
+        GameEvents.current.HandleDefeat();
         Enemy.ResetStatics();
         GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject i in e) {
@@ -253,7 +246,7 @@ public class Manager : MonoBehaviour {
     public void SkipLevel() {
         level++;
         PlayerPrefs.SetInt("Level", level);
-        UIManager.UpdateLevel(level);
+        GameEvents.current.LevelChange(level);
         calculateDifficulty(level);
     }
 
@@ -294,8 +287,8 @@ public class Manager : MonoBehaviour {
             fireRateCost += 100;
         }
         UpdateUpgradeValues();
-        UIManager.UpdateUpgradeInfo(1, fireRateLevel, fireRateCost);
-        UIManager.UpdateMoney(money);
+        GameEvents.current.UpgradesChange(1, fireRateLevel, fireRateCost);
+        GameEvents.current.MoneyChange(money);
         PlayerPrefs.SetInt("FireRateLevel", fireRateLevel);
         PlayerPrefs.SetInt("FireRateCost", fireRateCost);
         PlayerPrefs.SetInt("Money", money);
@@ -308,8 +301,8 @@ public class Manager : MonoBehaviour {
             ballBounceCost += 1000;
         }
         UpdateUpgradeValues();
-        UIManager.UpdateUpgradeInfo(2, ballBounceLevel, ballBounceCost);
-        UIManager.UpdateMoney(money);
+        GameEvents.current.UpgradesChange(2, ballBounceLevel, ballBounceCost);
+        GameEvents.current.MoneyChange(money);
         PlayerPrefs.SetInt("BallBounceLevel", ballBounceLevel);
         PlayerPrefs.SetInt("BallBounceCost", ballBounceCost);
         PlayerPrefs.SetInt("Money", money);
@@ -322,8 +315,8 @@ public class Manager : MonoBehaviour {
             incomeCost += 100;
         }
         UpdateUpgradeValues();
-        UIManager.UpdateUpgradeInfo(3, incomeLevel, incomeCost);
-        UIManager.UpdateMoney(money);
+        GameEvents.current.UpgradesChange(3, incomeLevel, incomeCost);
+        GameEvents.current.MoneyChange(money);
         PlayerPrefs.SetInt("IncomeLevel", incomeLevel);
         PlayerPrefs.SetInt("IncomeCost", incomeCost);
         PlayerPrefs.SetInt("Money", money);
@@ -337,13 +330,13 @@ public class Manager : MonoBehaviour {
         money += earned;
         earned = 0;
         PlayerPrefs.SetInt("Money", money);
-        UIManager.UpdateMoney(money);
+        GameEvents.current.MoneyChange(money);
     }
 
     public void AwardDouble() {
         money += earned*2;
         earned = 0;
         PlayerPrefs.SetInt("Money", money);
-        UIManager.UpdateMoney(money);
+        GameEvents.current.MoneyChange(money);
     }
 }
