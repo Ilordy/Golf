@@ -13,50 +13,36 @@ public class GameEvents : MonoBehaviour
 
     public event Action<float> OnKillsChange;
     public void KillsChange(float n) {
-        if (OnKillsChange != null) {
-            OnKillsChange(n);
-        }
+        OnKillsChange?.Invoke(n);
     }
 
     public event Action<int, int, int> OnUpgradesChange;
     public void UpgradesChange(int n, int level, int cost) {
-        if (OnUpgradesChange != null) {
-            OnUpgradesChange(n, level, cost);
-        }
+        OnUpgradesChange?.Invoke(n,level,cost);
     }
 
     public event Action<int> OnMoneyChange;
     public void MoneyChange(int n) {
-        if (OnMoneyChange != null) {
-            OnMoneyChange(n);
-        }
+        OnMoneyChange?.Invoke(n);
     }
 
     public event Action<int> OnLevelChange;
     public void LevelChange(int n) {
-        if (OnLevelChange != null) {
-            OnLevelChange(n);
-        }
+        OnLevelChange?.Invoke(n);
     }
 
     public event Action OnSettingsChange;
     public void SettingsChange() {
-        if (OnSettingsChange != null) {
-            OnSettingsChange();
-        }
+        OnSettingsChange?.Invoke();
     }
 
     public event Action<int, int> OnHandleVictory;
     public void HandleVictory(int n, int j) {
-        if (OnHandleVictory != null) {
-            OnHandleVictory(n, j);
-        }
+        OnHandleVictory?.Invoke(n,j);
     }
 
     public event Action OnHandleDefeat;
     public void HandleDefeat() {
-        if (OnHandleDefeat != null) {
-            OnHandleDefeat();
-        }
+        OnHandleDefeat?.Invoke();
     }
 }
