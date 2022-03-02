@@ -52,7 +52,7 @@ public class Manager : MonoBehaviour {
     int earned = 0;
 
     //Game loop
-    public bool playGame = false;
+    [SerializeField] public bool playGame = false;
     public bool willDeleteSaves = false;
     [SerializeField] int level = 1;
 
@@ -75,6 +75,7 @@ public class Manager : MonoBehaviour {
         GameEvents.current.OnSkipLevelPressed += SkipLevel;
         GameEvents.current.OnDefeat += HandleDefeat;
         GameEvents.current.OnReward += HandleReward;
+        GameEvents.current.OnReturnMainMenu += ResetGame;
 
         //Debug delete
         if(willDeleteSaves) {
@@ -120,7 +121,7 @@ public class Manager : MonoBehaviour {
 
         if (StartedSpawning == null) {
             StartedSpawning = SpawnEnemy();
-            StartCoroutine(SpawnEnemy());
+            StartCoroutine(StartedSpawning);
         } else {
             //HANDLE VICTORY
             if (EnemyClass.TotalKilledCount == EnemyClass.AliveCount) {
@@ -232,24 +233,25 @@ public class Manager : MonoBehaviour {
     }
 
     void HandleVictory() {
-        StartedSpawning = null;
-        playGame = false;
-        playerAnimator.SetBool("Swing", false);
+        ResetGame();
         level++;
         PlayerPrefs.SetInt("Level", level);
         calculateDifficulty(level);
         GameEvents.current.HandleVictory(level, earned);
-        Enemy.ResetStatics();
-        PowerUpAnimation.DeleteAnimation();
     }
 
     public void HandleDefeat() {
+        ResetGame();
+        GameEvents.current.HandleDefeat();
+    }
+
+    public void ResetGame() {
+        StopCoroutine(StartedSpawning);
         StartedSpawning = null;
-        PowerUpAnimation.DeleteAnimation();
         playGame = false;
         playerAnimator.SetBool("Swing", false);
-        GameEvents.current.HandleDefeat();
         Enemy.ResetStatics();
+        PowerUpAnimation.DeleteAnimation();
         GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject i in e) {
             Destroy(i);

@@ -7,9 +7,9 @@ public class UIManager : MonoBehaviour
 {
 
     Manager GameManager;
-    GameObject mainMenu, settingsMenu, shopMenu, ingameUI, victoryUI, defeatUI;
+    GameObject mainMenu, settingsMenu, shopMenu, ingameUI, victoryUI, defeatUI, pauseUI;
     Button playButton, upgradeButton1, upgradeButton2, upgradeButton3, settingsButton, shopButton, soundsButton, hapticsButton, restoreButton, settingsBackButton;
-    Button victoryDoubleButton, victorySkipButton, defeatSkipLevelButton, defeatTryAgainButton, pauseButton;
+    Button victoryDoubleButton, victorySkipButton, defeatSkipLevelButton, defeatTryAgainButton, pauseButton, resumeButton, mainMenuButton;
     TextMeshProUGUI levelText, moneyCounterText, upgradeLevelText1, upgradeLevelText2, upgradeLevelText3, upgradeCostText1, upgradeCostText2, upgradeCostText3;
     TextMeshProUGUI victoryText, victoryEarnedText, defeatText, progressText;
     Slider powerUpSlider, progressBar;
@@ -41,6 +41,7 @@ public class UIManager : MonoBehaviour
         ingameUI = gameObject.transform.GetChild(3).gameObject;
         victoryUI = gameObject.transform.GetChild(4).gameObject;
         defeatUI = gameObject.transform.GetChild(5).gameObject;
+        pauseUI = gameObject.transform.GetChild(6).gameObject;
 
         //Set default active UI elements
         mainMenu.SetActive(true);
@@ -91,6 +92,10 @@ public class UIManager : MonoBehaviour
         defeatTryAgainButton = defeatUI.transform.GetChild(3).GetComponent<Button>();
         defeatText = defeatUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
 
+        //Cache Pause UI Components
+        resumeButton = pauseUI.transform.GetChild(3).GetComponent<Button>();
+        mainMenuButton = pauseUI.transform.GetChild(4).GetComponent<Button>();
+
         //Add Listeners for Main Menu Buttons
         playButton.onClick.AddListener(Play);
         upgradeButton1.onClick.AddListener(() => GameEvents.current.Upgrade1Request());
@@ -112,7 +117,11 @@ public class UIManager : MonoBehaviour
         defeatTryAgainButton.onClick.AddListener(() => OpenMainMenu());
 
         //Add Listeners for ingame UI
-        pauseButton.onClick.AddListener(() => OpenMainMenu());
+        pauseButton.onClick.AddListener(OpenPauseMenu);
+
+        //Add Listeners for pause UI
+        resumeButton.onClick.AddListener(Resume);
+        mainMenuButton.onClick.AddListener(ReturnToMainMenu);
 
         //Add Main Menu as first item in menu stack
         menuStack.Push(mainMenu.transform);
@@ -126,6 +135,7 @@ public class UIManager : MonoBehaviour
         ingameUI.SetActive(false);
         victoryUI.SetActive(false);
         defeatUI.SetActive(false);
+        pauseUI.SetActive(false);
     }
 
     void Play() {
@@ -239,6 +249,24 @@ public class UIManager : MonoBehaviour
     void SkipLevel() {
         GameEvents.current.SkipLevelPressed();
         OpenMainMenu();
+    }
+
+    void OpenPauseMenu() {
+        ingameUI.SetActive(false);
+        pauseUI.SetActive(true);
+        Time.timeScale = 0f;
+    }
+
+    void Resume() {
+        pauseUI.SetActive(false);
+        ingameUI.SetActive(true);
+        Time.timeScale = 1f;
+    }
+
+    void ReturnToMainMenu() {
+        GameEvents.current.ReturnMainMenu();
+        OpenMainMenu();
+        Time.timeScale = 1f;
     }
 
     void Back() {

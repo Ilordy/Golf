@@ -93,6 +93,11 @@ public class GameEvents : MonoBehaviour
         OnReward?.Invoke();
     }
 
+    public event Action OnReturnMainMenu;
+    public void ReturnMainMenu() {
+        OnReturnMainMenu?.Invoke();
+    }
+
     // AUDIO MANAGER EVENTS
     public event Action OnEnemyHit;
     public void EnemyHit() {
