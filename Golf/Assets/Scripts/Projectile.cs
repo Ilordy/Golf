@@ -28,7 +28,7 @@ public class Projectile : MonoBehaviour
 
     void Update()
     {
-        if (bounces >= GameManager.GetMaxBounces()) {
+        if (bounces >= GameManager.MaxBounces) {
             Destroy(gameObject);
         }
 

@@ -18,8 +18,8 @@ public class Manager : MonoBehaviour {
     Animator playerAnimator;
 
     //Settings
-    public int soundEnabled = 1;
-    public int hapticsEnabled = 1;
+    int soundEnabled = 1;
+    int hapticsEnabled = 1;
 
     //Power Up
     GameObject[] enemies;
@@ -48,22 +48,27 @@ public class Manager : MonoBehaviour {
     int incomeLevel = 1;
     int incomeCost = 100;
     int upgradeMaxLevel = 20;
-    [SerializeField] int money = 0;
-    [SerializeField] int earned = 0;
+    int money = 0;
+    public int Money {get;}
+    int earned = 0;
 
     //Game loop
     public bool playGame = false;
     public bool willDeleteSaves = false;
-    int level = 1;
+    [SerializeField] int level = 1;
+
+    //Properties
+    public int SoundEnabled {get;set;}
+    public int HapticsEnabled {get;set;}
+    public int MaxBounces {get{return maxBounces;}}
+    public int Level {get;}
+
 
     void Start() {
         //Debug delete
         if(willDeleteSaves) {
             PlayerPrefs.DeleteAll();
         }
-
-        //Debug set power up
-        //EnemyClass.SetKilledCount(5);
 
         //Get EnemyClass
         EnemyClass = GetComponent<EnemyClass>();
@@ -248,36 +253,6 @@ public class Manager : MonoBehaviour {
         PlayerPrefs.SetInt("Level", level);
         GameEvents.current.LevelChange(level);
         calculateDifficulty(level);
-    }
-
-    public int GetSound() {
-        return soundEnabled;
-    }
-
-    public void SetSound(int value) {
-        soundEnabled = value;
-        PlayerPrefs.SetInt("SoundEnabled", soundEnabled);
-    }
-
-    public int GetHaptics() {
-        return hapticsEnabled;
-    }
-
-    public void SetHaptics(int value) {
-        hapticsEnabled = value;
-        PlayerPrefs.SetInt("HapticsEnabled", hapticsEnabled);
-    }
-
-    public int GetMoney() {
-        return money;
-    }
-
-    public int GetLevel() {
-        return level;
-    }
-
-    public int GetMaxBounces() {
-        return maxBounces;
     }
 
     public void HandleUpgrade1() {

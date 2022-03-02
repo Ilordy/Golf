@@ -27,6 +27,7 @@ public class UIManager : MonoBehaviour
         GameEvents.current.OnUpgradesChange += UpdateUpgradeInfo;
         GameEvents.current.OnMoneyChange += UpdateMoney;
         GameEvents.current.OnSettingsChange += UpdateSettings;
+        GameEvents.current.OnLevelChange += UpdateLevel;
         GameEvents.current.OnHandleVictory += HandleVictory;
         GameEvents.current.OnHandleDefeat += HandleDefeat;
 
@@ -138,23 +139,23 @@ public class UIManager : MonoBehaviour
     }
 
     void ToggleSound() {
-        GameManager.SetSound(-GameManager.GetSound());
-        Debug.Log(GameManager.GetSound());
+        GameManager.SoundEnabled = -GameManager.SoundEnabled;
+        Debug.Log(GameManager.SoundEnabled);
         UpdateSettings();
     }
 
     void ToggleHaptics() {
-        GameManager.SetHaptics(-GameManager.GetHaptics());
+        GameManager.HapticsEnabled = -GameManager.HapticsEnabled;
         UpdateSettings();
     }
 
     void UpdateSettings() {
-        if (GameManager.GetSound() > 0) {
+        if (GameManager.SoundEnabled > 0) {
             soundsButtonImage.color = colorEnabled;
         } else {
             soundsButtonImage.color = colorDisabled;
         }
-        if (GameManager.GetHaptics() > 0) {
+        if (GameManager.HapticsEnabled > 0) {
             hapticsButtonImage.color = colorEnabled;
         } else {
             hapticsButtonImage.color = colorDisabled;
@@ -207,13 +208,13 @@ public class UIManager : MonoBehaviour
 
     void AwardRegular() {
         GameManager.AwardRegular();
-        UpdateMoney(GameManager.GetMoney());
+        UpdateMoney(GameManager.Money);
         OpenMainMenu();
     }
 
     void AwardDouble() {
         GameManager.AwardDouble();
-        UpdateMoney(GameManager.GetMoney());
+        UpdateMoney(GameManager.Money);
         OpenMainMenu();
     }
 

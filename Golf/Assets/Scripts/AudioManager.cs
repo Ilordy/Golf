@@ -17,24 +17,24 @@ public class AudioManager : MonoBehaviour {
     }
 
     public void PlayEnemyHit() {
-        if (GameManager.soundEnabled < 0) return;
+        if (GameManager.SoundEnabled < 0) return;
         enemyHitSource.PlayOneShot(enemyHit);
     }
     public void PlayBallHit() {
-        if (GameManager.soundEnabled < 0) return;
+        if (GameManager.SoundEnabled < 0) return;
         ballHitSource.PlayOneShot(ballHit);
     }
     public void PlayCharge() {
-        if (GameManager.soundEnabled < 0) return;
+        if (GameManager.SoundEnabled < 0) return;
         chargeSource.clip = charge;
         if (!chargeSource.isPlaying) chargeSource.Play();
     }
     public void StopCharge() {
-        if (GameManager.soundEnabled < 0) return;
+        if (GameManager.SoundEnabled < 0) return;
         chargeSource.Stop();
     }
     public void PlayPowerUp() {
-        if (GameManager.soundEnabled < 0) return;
+        if (GameManager.SoundEnabled < 0) return;
         powerUpSource.PlayOneShot(powerUp);
     }
 }
