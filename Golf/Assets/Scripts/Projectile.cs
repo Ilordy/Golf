@@ -32,10 +32,10 @@ public class Projectile : MonoBehaviour
             Destroy(gameObject);
         }
 
-        if (canTarget && nearest != null) {
-            transform.LookAt(nearest.transform.position);
+        if (canTarget) {
+            //transform.LookAt(nearest.transform.position);
         } else if (canTarget && nearest == null) {
-            Destroy(gameObject);
+            //Destroy(gameObject);
         }
     }
 
@@ -49,17 +49,16 @@ public class Projectile : MonoBehaviour
             GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
             foreach (GameObject enemy in enemies) {
                 float currentDist = Vector3.Distance(transform.position, enemy.transform.position);
-                if (currentDist < dist && enemy != collision.gameObject) {
+                if (currentDist < dist && enemy != collision.gameObject && collision.gameObject != null) {
                     dist = currentDist;
                     nearest = enemy;
                 }
             }
             if (nearest != null) {
-                canTarget = true;
-                rb.velocity = Vector3.zero;
-                rb.AddForce(transform.forward * 25f, ForceMode.Impulse);
+                //canTarget = true;
+                //rb.velocity = Vector3.zero;
+                //rb.AddForce(transform.forward * 25f, ForceMode.Impulse);
             }
-            //Destroy(gameObject);
         }
     }
 }

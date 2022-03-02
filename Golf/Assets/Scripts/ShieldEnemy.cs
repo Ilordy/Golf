@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ShieldEnemy : Enemy
 {
-    GameObject shield;
+    Transform shield;
     Rigidbody shieldRb;
     Rigidbody enemyRb;
 
@@ -17,7 +17,7 @@ public class ShieldEnemy : Enemy
         health = 2;
         speed = 2f;
 
-        shield = transform.GetChild(2).gameObject;
+        shield = transform.Find("shield");
         shieldRb = shield.GetComponent<Rigidbody>();
         enemyRb = GetComponent<Rigidbody>();
         enemyAnimator = GetComponent<Animator>();
@@ -31,16 +31,15 @@ public class ShieldEnemy : Enemy
     protected override void OnCollisionEnter(Collision collision) {
         base.OnCollisionEnter(collision);
 
-        if (health == 1) {
-            if (shield != null) {
-                shield.transform.parent = null;
-                shieldRb.useGravity = true;
-                shieldRb.AddForce(transform.forward * Random.Range(5f,10f), ForceMode.Impulse);
-            }
-
-            enemyRb.isKinematic = false;
-            enemyAnimator.SetBool("run", true);
-            speed = 3f;
+        if (shield != null) {
+            shield.parent = null;
+            shieldRb.useGravity = true;
+            shieldRb.AddForce(transform.forward * Random.Range(5f,10f), ForceMode.Impulse);
+            shield = null;
         }
+
+        enemyRb.isKinematic = false;
+        enemyAnimator.SetBool("run", true);
+        speed = 3f;
     }
 }

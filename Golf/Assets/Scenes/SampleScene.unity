@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.44709164, g: 0.4969964, b: 0.5751074, a: 1}
+  m_IndirectSpecularColor: {r: 0.44709188, g: 0.49699694, b: 0.5751082, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -5686,7 +5686,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8dae8e6d3559514a97370c6c35d2c36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UIManager: {fileID: 916942930}
   PowerUpAnimation: {fileID: 1121940671}
   player: {fileID: 1100214020}
   enemy: {fileID: 5631945564213548173, guid: 2169185bb9f593748a74510ac2755df8, type: 3}
@@ -5699,12 +5698,9 @@ MonoBehaviour:
   powerUpProjectile: {fileID: 8350444720997931790, guid: c6c058bb5c581ba4a949db5a7ad19e6b,
     type: 3}
   spawner: {fileID: 706628349}
-  soundEnabled: 1
-  hapticsEnabled: 1
-  money: 0
-  earned: 0
   playGame: 0
   willDeleteSaves: 0
+  level: 1
 --- !u!4 &981665294
 Transform:
   m_ObjectHideFlags: 0

@@ -237,6 +237,7 @@ public class Manager : MonoBehaviour {
     }
 
     public void HandleDefeat() {
+        StartedSpawning = null;
         PowerUpAnimation.DeleteAnimation();
         playGame = false;
         playerAnimator.SetBool("Swing", false);
