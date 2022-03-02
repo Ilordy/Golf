@@ -35,7 +35,6 @@ public class Manager : MonoBehaviour {
     IEnumerator StartedSpawning;
     int     enemiesToSpawn = 0;
     float   enemySpawnInterval = 1f;
-    float   currentTime = 0f;
 
     //Upgrades
     float fireRate = 0.5f;
@@ -65,6 +64,17 @@ public class Manager : MonoBehaviour {
 
 
     void Start() {
+
+        //Subscribe to events
+        GameEvents.current.OnUpgrade1Request += HandleUpgrade1;
+        GameEvents.current.OnUpgrade2Request += HandleUpgrade2;
+        GameEvents.current.OnUpgrade3Request += HandleUpgrade3;
+        GameEvents.current.OnAwardRegularPressed += AwardRegular;
+        GameEvents.current.OnAwardDoublePressed += AwardDouble;
+        GameEvents.current.OnSkipLevelPressed += SkipLevel;
+        GameEvents.current.OnDefeat += HandleDefeat;
+        GameEvents.current.OnReward += HandleReward;
+
         //Debug delete
         if(willDeleteSaves) {
             PlayerPrefs.DeleteAll();
@@ -112,14 +122,14 @@ public class Manager : MonoBehaviour {
             StartCoroutine(SpawnEnemy());
         } else {
             //HANDLE VICTORY
-            if (EnemyClass.GetData("TotalKilledCount") == EnemyClass.GetData("AliveCount")) {
+            if (EnemyClass.TotalKilledCount == EnemyClass.AliveCount) {
                 HandleVictory();
             }
         }
 
         // Adjust Power Up Slider
-        if (EnemyClass.GetData("KilledCount") <= powerUpReq) {
-            GameEvents.current.KillsChange(EnemyClass.GetData("KilledCount"));
+        if (EnemyClass.KilledCount <= powerUpReq) {
+            GameEvents.current.KillsChange(EnemyClass.KilledCount);
         }
 
         // Shooting / Power up
@@ -129,7 +139,7 @@ public class Manager : MonoBehaviour {
 
         if (Input.GetMouseButton(0)) {
             float holdTime = Time.time - beganHolding;
-            if (EnemyClass.GetData("KilledCount") >= powerUpReq && holdTime > 0.1f) {
+            if (EnemyClass.KilledCount >= powerUpReq && holdTime > 0.1f) {
                 enemies = GameObject.FindGameObjectsWithTag("Enemy");
                 pot += Time.deltaTime;
                 PowerUpAnimation.AnimatePowerUp(enemies.Length, pot);
@@ -139,7 +149,7 @@ public class Manager : MonoBehaviour {
 
         if (Input.GetMouseButtonUp(0)) {
             float holdTime = Time.time - beganHolding;
-            if (holdTime >= 1f && EnemyClass.GetData("KilledCount") >= powerUpReq) {
+            if (holdTime >= 1f && EnemyClass.KilledCount >= powerUpReq) {
                 //enemies = GameObject.FindGameObjectsWithTag("Enemy");
                 powerUpProjectiles = new GameObject[enemies.Length];
                 for (int i = 0; i <= enemies.Length - 1; i++) {
@@ -151,15 +161,16 @@ public class Manager : MonoBehaviour {
                     powerUpProjectiles[i].transform.LookAt(enemies[i].transform.position);
                     powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = powerUpProjectiles[i].transform.forward * 100f;
                 }
-                EnemyClass.SetKilledCount(0);
+                EnemyClass.KilledCount = 0;
                 pot = 0;
                 PowerUpAnimation.DeleteAnimation();
+                GameEvents.current.PowerUp();
             } else {
                 playerAnimator.SetBool("Swing",false);
                 playerAnimator.SetBool("Swing",true);
                 pot = 0;
                 PowerUpAnimation.DeleteAnimation();
-                GameEvents.current.KillsChange(EnemyClass.GetData("KilledCount"));
+                GameEvents.current.KillsChange(EnemyClass.KilledCount);
             }
         }
 
@@ -175,7 +186,7 @@ public class Manager : MonoBehaviour {
     // Functions
 
     IEnumerator SpawnEnemy() {
-        while (EnemyClass.GetData("AliveCount") < enemiesToSpawn) {
+        while (EnemyClass.AliveCount < enemiesToSpawn) {
             float chance = Random.Range(0f,1f);
             float xPos = Random.Range(-47f,-32f);
             float zPos = Random.Range(-3.65f,3.65f);

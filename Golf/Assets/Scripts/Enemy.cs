@@ -5,33 +5,28 @@ using UnityEngine;
 public class Enemy : EnemyClass {
     bool isDead = false;
 
-    protected override void Start()
+    protected virtual void Start()
     {
-        base.Start();
-
-        AudioManager = GameObject.FindObjectOfType<AudioManager>();
-
-        AliveCount++;
+        aliveCount++;
 
         health = 1;
         
         speed = 3f;
 
-        GameManager = GameObject.Find("Manager").GetComponent<Manager>();
         playerPos = GameObject.Find("Player").transform.position;
     }
 
     protected virtual void Update()
     {
         if(health <= 0) {
-            TotalKilledCount++;
+            totalKilledCount++;
             if (increase) {
-                KilledCount++;
+                killedCount++;
             }
             health = 10000;
             isDead = true;
             gameObject.tag = "Dead";
-            GameManager.HandleReward();
+            GameEvents.current.Reward();
             gameObject.GetComponent<CapsuleCollider>().enabled = false;
             gameObject.GetComponent<Animator>().enabled = false;
             gameObject.GetComponent<ParticleSystem>().Stop(true,UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);

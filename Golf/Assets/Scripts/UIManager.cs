@@ -89,9 +89,9 @@ public class UIManager : MonoBehaviour
 
         //Add Listeners for Main Menu Buttons
         playButton.onClick.AddListener(Play);
-        upgradeButton1.onClick.AddListener(() => GameManager.HandleUpgrade1());
-        upgradeButton2.onClick.AddListener(() => GameManager.HandleUpgrade2());
-        upgradeButton3.onClick.AddListener(() => GameManager.HandleUpgrade3());
+        upgradeButton1.onClick.AddListener(() => GameEvents.current.Upgrade1Request());
+        upgradeButton2.onClick.AddListener(() => GameEvents.current.Upgrade2Request());
+        upgradeButton3.onClick.AddListener(() => GameEvents.current.Upgrade3Request());
         settingsButton.onClick.AddListener(OpenSettings);
         //shopButton.onClick.AddListener(OpenShop);
 
@@ -207,13 +207,13 @@ public class UIManager : MonoBehaviour
     }
 
     void AwardRegular() {
-        GameManager.AwardRegular();
+        GameEvents.current.AwardRegularPressed();
         UpdateMoney(GameManager.Money);
         OpenMainMenu();
     }
 
     void AwardDouble() {
-        GameManager.AwardDouble();
+        GameEvents.current.AwardDoublePressed();
         UpdateMoney(GameManager.Money);
         OpenMainMenu();
     }
@@ -224,7 +224,7 @@ public class UIManager : MonoBehaviour
     }
 
     void SkipLevel() {
-        GameManager.SkipLevel();
+        GameEvents.current.SkipLevelPressed();
         OpenMainMenu();
     }
 

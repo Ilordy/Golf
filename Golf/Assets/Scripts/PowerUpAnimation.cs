@@ -5,7 +5,6 @@ using UnityEngine;
 public class PowerUpAnimation : MonoBehaviour {
     public GameObject animProjectile;
     public Manager GameManager;
-    public AudioManager AudioManager;
     public GameObject player;
     public Transform spawner;
 
@@ -20,7 +19,7 @@ public class PowerUpAnimation : MonoBehaviour {
 
     public void AnimatePowerUp(int enemiesLength, float pot) {
         animator.SetBool("Animate", true);
-        AudioManager.PlayCharge();
+        GameEvents.current.ChargeStart();
         c += Time.deltaTime*2;
         if (spawned < enemiesLength) {
             spawns.Add(Instantiate(animProjectile,Vector3.zero,Quaternion.identity));
@@ -43,7 +42,7 @@ public class PowerUpAnimation : MonoBehaviour {
     }
 
     public void DeleteAnimation() {
-        AudioManager.StopCharge();
+        GameEvents.current.ChargeStop();
         animator.SetBool("Animate", false);
         spawned = 0;
         c = 0;

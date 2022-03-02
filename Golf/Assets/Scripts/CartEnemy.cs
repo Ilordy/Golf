@@ -6,10 +6,8 @@ public class CartEnemy : EnemyClass {
     public GameObject[] frags;
     public GameObject regularEnemy;
 
-    protected override void Start() {
-        base.Start();
-
-        AliveCount++;
+    protected void Start() {
+        aliveCount++;
 
         health = 3;
 
@@ -25,9 +23,9 @@ public class CartEnemy : EnemyClass {
                 Instantiate(regularEnemy,transform.position + new Vector3(Random.Range(0,3),0,Random.Range(0,3)),Quaternion.identity);
             }
             Destroy(gameObject);
-            TotalKilledCount++;
+            totalKilledCount++;
             if (increase) {
-                KilledCount++;
+                killedCount++;
             }
         } else {
             transform.LookAt(playerPos);

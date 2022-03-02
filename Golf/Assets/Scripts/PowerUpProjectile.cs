@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class PowerUpProjectile : MonoBehaviour
 {
-    AudioManager AudioManager;
-
     Rigidbody rb;
 
     Vector3 initialPos;
@@ -14,14 +12,12 @@ public class PowerUpProjectile : MonoBehaviour
 
     void Start()
     {
-        AudioManager = GameObject.FindObjectOfType<AudioManager>();
-
         rb = GetComponent<Rigidbody>();
         limit = 300f;
 
         initialPos = transform.position;
 
-        AudioManager.PlayBallHit();
+        GameEvents.current.BallHit();
     }
 
     void Update()
@@ -35,7 +31,7 @@ public class PowerUpProjectile : MonoBehaviour
 
     void OnCollisionEnter(Collision collision) {
         if (collision.gameObject.tag == "Enemy") {
-            collision.gameObject.GetComponent<EnemyClass>().health--;
+            collision.gameObject.GetComponent<EnemyClass>().Health--;
             Destroy(gameObject);
         }
     }

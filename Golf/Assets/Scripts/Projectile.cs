@@ -4,24 +4,19 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    AudioManager AudioManager;
     Manager GameManager;
     Rigidbody rb;
 
     float speed;
     int bounces = 0;
-    bool canTarget = false;
-    
-    GameObject nearest = null;
 
     void Start()
     {
-        AudioManager = GameObject.FindObjectOfType<AudioManager>();
         GameManager = GameObject.FindObjectOfType<Manager>();
         rb = GetComponent<Rigidbody>();
         rb.useGravity = false;
 
-        AudioManager.PlayBallHit();
+        GameEvents.current.BallHit();
         
         Destroy(gameObject, 5f);
     }
@@ -31,34 +26,12 @@ public class Projectile : MonoBehaviour
         if (bounces >= GameManager.MaxBounces) {
             Destroy(gameObject);
         }
-
-        if (canTarget) {
-            //transform.LookAt(nearest.transform.position);
-        } else if (canTarget && nearest == null) {
-            //Destroy(gameObject);
-        }
     }
 
     void OnCollisionEnter(Collision collision) {
         if (collision.gameObject.tag == "Enemy") {
-            canTarget = false;
-            collision.gameObject.GetComponent<EnemyClass>().health--;
+            collision.gameObject.GetComponent<EnemyClass>().Health--;
             bounces++;
-            float dist = float.MaxValue;
-            nearest = null;
-            GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-            foreach (GameObject enemy in enemies) {
-                float currentDist = Vector3.Distance(transform.position, enemy.transform.position);
-                if (currentDist < dist && enemy != collision.gameObject && collision.gameObject != null) {
-                    dist = currentDist;
-                    nearest = enemy;
-                }
-            }
-            if (nearest != null) {
-                //canTarget = true;
-                //rb.velocity = Vector3.zero;
-                //rb.AddForce(transform.forward * 25f, ForceMode.Impulse);
-            }
         }
     }
 }

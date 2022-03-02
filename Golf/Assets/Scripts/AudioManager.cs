@@ -9,6 +9,13 @@ public class AudioManager : MonoBehaviour {
     AudioSource enemyHitSource, ballHitSource, chargeSource, powerUpSource;
 
     void Start() {
+        //Subscribe to events
+        GameEvents.current.OnEnemyHit += PlayEnemyHit;
+        GameEvents.current.OnBallHit += PlayBallHit;
+        GameEvents.current.OnChargeStart += PlayCharge;
+        GameEvents.current.OnChargeStop += StopCharge;
+        GameEvents.current.OnPowerUp += PlayPowerUp;
+
         AudioSource[] sources = gameObject.GetComponents<AudioSource>();
         enemyHitSource = sources[0];
         ballHitSource = sources[1];

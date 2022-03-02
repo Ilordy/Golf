@@ -35,11 +35,10 @@ public class ShieldEnemy : Enemy
             shield.parent = null;
             shieldRb.useGravity = true;
             shieldRb.AddForce(transform.forward * Random.Range(5f,10f), ForceMode.Impulse);
+            enemyRb.isKinematic = false;
+            enemyAnimator.SetBool("run", true);
+            speed = 3f;
             shield = null;
         }
-
-        enemyRb.isKinematic = false;
-        enemyAnimator.SetBool("run", true);
-        speed = 3f;
     }
 }
