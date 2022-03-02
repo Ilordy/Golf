@@ -5,7 +5,7 @@ using System.Collections;
 public class Manager : MonoBehaviour {
 
     public PowerUpAnimation PowerUpAnimation;
-    private EnemyClass EnemyClass;
+    EnemyClass EnemyClass;
 
     public GameObject player;
     public GameObject enemy;
@@ -52,11 +52,12 @@ public class Manager : MonoBehaviour {
     int earned = 0;
 
     //Game loop
-    [SerializeField] public bool playGame = false;
-    public bool willDeleteSaves = false;
-    [SerializeField] int level = 1;
+    bool playGame = false;
+    int level = 1;
+    [SerializeField] bool willDeleteSaves = false;
 
     //Properties
+    public bool PlayGame {set{playGame = value;}}
     public int SoundEnabled {get;set;}
     public int HapticsEnabled {get;set;}
     public int MaxBounces {get{return maxBounces;}}
@@ -65,7 +66,6 @@ public class Manager : MonoBehaviour {
 
 
     void Start() {
-
         //Subscribe to events
         GameEvents.current.OnUpgrade1Request += HandleUpgrade1;
         GameEvents.current.OnUpgrade2Request += HandleUpgrade2;
@@ -147,7 +147,6 @@ public class Manager : MonoBehaviour {
         if (Input.GetMouseButtonUp(0)) {
             float holdTime = Time.time - beganHolding;
             if (holdTime >= 1f && EnemyClass.KilledCount >= powerUpReq) {
-                //enemies = GameObject.FindGameObjectsWithTag("Enemy");
                 powerUpProjectiles = new GameObject[enemies.Length];
                 for (int i = 0; i <= enemies.Length - 1; i++) {
                     int r = 3;
@@ -163,7 +162,7 @@ public class Manager : MonoBehaviour {
                 PowerUpAnimation.DeleteAnimation();
                 GameEvents.current.PowerUp();
             } else {
-                playerAnimator.SetBool("Swing",false);
+                //playerAnimator.SetBool("Swing",false);
                 playerAnimator.SetBool("Swing",true);
                 pot = 0;
                 PowerUpAnimation.DeleteAnimation();

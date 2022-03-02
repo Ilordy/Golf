@@ -141,7 +141,7 @@ public class UIManager : MonoBehaviour
     void Play() {
         mainMenu.SetActive(false);
         ingameUI.SetActive(true);
-        GameManager.playGame = true;
+        GameManager.PlayGame = true;
         menuStack.Push(ingameUI.transform);
     }
 
@@ -220,8 +220,14 @@ public class UIManager : MonoBehaviour
         progressText.text = (progress * 100).ToString("F2") + "%"; 
     }
 
+    void ResetProgressBar() {
+        progressBar.value = 0;
+        progressText.text = "0%";
+    }
+
     void HandleVictory(int level, int earned) {
         UpdateLevel(level);
+        ResetProgressBar();
         victoryEarnedText.text = "You earned " + earned.ToString() + " coins";
         victoryDoubleButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Claim 2x\n" + (earned*2).ToString();
         victorySkipButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Get " + earned.ToString();
@@ -242,6 +248,7 @@ public class UIManager : MonoBehaviour
     }
 
     void HandleDefeat() {
+        ResetProgressBar();
         ingameUI.SetActive(false);
         defeatUI.SetActive(true);
     }
@@ -264,6 +271,7 @@ public class UIManager : MonoBehaviour
     }
 
     void ReturnToMainMenu() {
+        ResetProgressBar();
         GameEvents.current.ReturnMainMenu();
         OpenMainMenu();
         Time.timeScale = 1f;
