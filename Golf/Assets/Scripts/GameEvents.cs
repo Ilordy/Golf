@@ -47,6 +47,11 @@ public class GameEvents : MonoBehaviour
         OnHandleDefeat?.Invoke();
     }
 
+    public event Action<int> OnProgressChange;
+    public void ProgressChange(int n) {
+        OnProgressChange?.Invoke(n);
+    }
+
     // MANAGER EVENTS
     public event Action OnUpgrade1Request;
     public void Upgrade1Request() {

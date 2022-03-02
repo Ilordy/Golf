@@ -24,8 +24,12 @@ public class CartEnemy : EnemyClass {
             }
             Destroy(gameObject);
             totalKilledCount++;
+            GameEvents.current.ProgressChange(totalKilledCount);
             if (increase) {
                 killedCount++;
+                if (killedCount <= 5) {
+                    GameEvents.current.KillsChange(killedCount);
+                }
             }
         } else {
             transform.LookAt(playerPos);

@@ -61,6 +61,7 @@ public class Manager : MonoBehaviour {
     public int HapticsEnabled {get;set;}
     public int MaxBounces {get{return maxBounces;}}
     public int Level {get;}
+    public int EnemiesToSpawn {get{return enemiesToSpawn;}}
 
 
     void Start() {
@@ -125,11 +126,6 @@ public class Manager : MonoBehaviour {
             if (EnemyClass.TotalKilledCount == EnemyClass.AliveCount) {
                 HandleVictory();
             }
-        }
-
-        // Adjust Power Up Slider
-        if (EnemyClass.KilledCount <= powerUpReq) {
-            GameEvents.current.KillsChange(EnemyClass.KilledCount);
         }
 
         // Shooting / Power up

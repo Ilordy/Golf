@@ -9,10 +9,10 @@ public class UIManager : MonoBehaviour
     Manager GameManager;
     GameObject mainMenu, settingsMenu, shopMenu, ingameUI, victoryUI, defeatUI;
     Button playButton, upgradeButton1, upgradeButton2, upgradeButton3, settingsButton, shopButton, soundsButton, hapticsButton, restoreButton, settingsBackButton;
-    Button victoryDoubleButton, victorySkipButton, defeatSkipLevelButton, defeatTryAgainButton;
+    Button victoryDoubleButton, victorySkipButton, defeatSkipLevelButton, defeatTryAgainButton, pauseButton;
     TextMeshProUGUI levelText, moneyCounterText, upgradeLevelText1, upgradeLevelText2, upgradeLevelText3, upgradeCostText1, upgradeCostText2, upgradeCostText3;
-    TextMeshProUGUI victoryText, victoryEarnedText, defeatText;
-    Slider powerUpSlider;
+    TextMeshProUGUI victoryText, victoryEarnedText, defeatText, progressText;
+    Slider powerUpSlider, progressBar;
 
     Image soundsButtonImage;
     Image hapticsButtonImage;
@@ -30,6 +30,7 @@ public class UIManager : MonoBehaviour
         GameEvents.current.OnLevelChange += UpdateLevel;
         GameEvents.current.OnHandleVictory += HandleVictory;
         GameEvents.current.OnHandleDefeat += HandleDefeat;
+        GameEvents.current.OnProgressChange += UpdateProgressBar;
 
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
 
@@ -77,6 +78,9 @@ public class UIManager : MonoBehaviour
 
         //Cache ingame UI Components
         powerUpSlider = ingameUI.transform.GetChild(0).GetComponent<Slider>();
+        progressBar = ingameUI.transform.GetChild(1).GetComponent<Slider>();
+        progressText = ingameUI.transform.GetChild(1).transform.GetChild(2).GetComponent<TextMeshProUGUI>();
+        pauseButton = ingameUI.transform.GetChild(2).GetComponent<Button>();
 
         //Cache Victory/Defeat UI Components
         victoryDoubleButton = victoryUI.transform.GetChild(3).GetComponent<Button>();
@@ -106,6 +110,9 @@ public class UIManager : MonoBehaviour
         victorySkipButton.onClick.AddListener(AwardRegular);
         defeatSkipLevelButton.onClick.AddListener(SkipLevel);
         defeatTryAgainButton.onClick.AddListener(() => OpenMainMenu());
+
+        //Add Listeners for ingame UI
+        pauseButton.onClick.AddListener(() => OpenMainMenu());
 
         //Add Main Menu as first item in menu stack
         menuStack.Push(mainMenu.transform);
@@ -195,6 +202,12 @@ public class UIManager : MonoBehaviour
 
     void UpdatePowerUpSlider(float value) {
         powerUpSlider.value = value;
+    }
+
+    void UpdateProgressBar(int value) {
+        float progress = (float)value/GameManager.EnemiesToSpawn;
+        progressBar.value = progress;
+        progressText.text = (progress * 100).ToString("F2") + "%"; 
     }
 
     void HandleVictory(int level, int earned) {
