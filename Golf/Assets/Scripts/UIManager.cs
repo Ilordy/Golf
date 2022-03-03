@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -133,6 +134,11 @@ public class UIManager : MonoBehaviour
         UpdateSettings();
     }
 
+    IEnumerator StartGame() {
+        yield return new WaitForSeconds(0.1f);
+        GameManager.PlayGame = true;
+    }
+
     public void OpenMainMenu() {
         mainMenu.SetActive(true);
         ingameUI.SetActive(false);
@@ -144,16 +150,19 @@ public class UIManager : MonoBehaviour
     void Play() {
         mainMenu.SetActive(false);
         ingameUI.SetActive(true);
-        GameManager.PlayGame = true;
+        //GameManager.PlayGame = true;
+        StartCoroutine(StartGame());
         menuStack.Push(ingameUI.transform);
     }
 
     void OpenSettings() {
+        DisableInteractable();
         settingsMenu.SetActive(true);
         menuStack.Push(settingsMenu.transform);
     }
 
     void OpenShop() {
+        //DisableInteractable();
         menuStack.Push(shopMenu.transform);
         shopMenu.SetActive(true);
     }
@@ -279,9 +288,30 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
+    void DisableInteractable() {
+        shopButton.interactable = false;
+        settingsButton.interactable = false;
+        playButton.interactable = false;
+        upgradeButton1.interactable = false;
+        upgradeButton2.interactable = false;
+        upgradeButton3.interactable = false;
+    }
+
+    void EnableInteractable() {
+        shopButton.interactable = true;
+        settingsButton.interactable = true;
+        playButton.interactable = true;
+        upgradeButton1.interactable = true;
+        upgradeButton2.interactable = true;
+        upgradeButton3.interactable = true;
+    }
+
     void Back() {
         menuStack.Peek().gameObject.SetActive(false);
         menuStack.Pop();
         menuStack.Peek().gameObject.SetActive(true);
+        if (menuStack.Peek().gameObject == mainMenu) {
+            EnableInteractable();
+        }
     }
 }

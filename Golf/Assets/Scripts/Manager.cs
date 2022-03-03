@@ -53,6 +53,7 @@ public class Manager : MonoBehaviour {
 
     //Game loop
     bool playGame = false;
+    bool firstShot = true;
     int level = 1;
     [SerializeField] bool willDeleteSaves = false;
 
@@ -148,10 +149,10 @@ public class Manager : MonoBehaviour {
             float holdTime = Time.time - beganHolding;
             if (holdTime >= 1f && EnemyClass.KilledCount >= powerUpReq) {
                 powerUpProjectiles = new GameObject[enemies.Length];
-                for (int i = 0; i <= enemies.Length - 1; i++) {
+                for (int i = 0; i < enemies.Length; i++) {
                     int r = 3;
-                    float x = r * Mathf.Cos(i * (Mathf.PI / (enemies.Length - 1)));
-                    float y = r * Mathf.Sin(i * (Mathf.PI / (enemies.Length - 1)));
+                    float x = r * Mathf.Cos(i * (Mathf.PI / (enemies.Length)));
+                    float y = r * Mathf.Sin(i * (Mathf.PI / (enemies.Length)));
                     powerUpProjectiles[i] = Instantiate(powerUpProjectile, spawner.transform.position + new Vector3(0, y, x), Quaternion.identity);
                     powerUpProjectiles[i].GetComponent<Rigidbody>().useGravity = true;
                     powerUpProjectiles[i].transform.LookAt(enemies[i].transform.position);
@@ -169,6 +170,8 @@ public class Manager : MonoBehaviour {
                 GameEvents.current.KillsChange(EnemyClass.KilledCount);
             }
         }
+        
+        firstShot = false;
 
         if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f) {
             playerAnimator.SetBool("Swing",false);
