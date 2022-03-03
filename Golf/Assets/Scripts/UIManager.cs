@@ -22,6 +22,8 @@ public class UIManager : MonoBehaviour
 
     Stack<Transform> menuStack = new Stack<Transform>();
 
+    public Stack<Transform> MenuStack {get{return menuStack;}set{menuStack = value;}}
+
     void Start() {
         GameEvents.current.OnKillsChange += UpdatePowerUpSlider;
         GameEvents.current.OnUpgradesChange += UpdateUpgradeInfo;
@@ -38,10 +40,10 @@ public class UIManager : MonoBehaviour
         mainMenu = gameObject.transform.GetChild(0).gameObject;
         settingsMenu = gameObject.transform.GetChild(1).gameObject;
         shopMenu = gameObject.transform.GetChild(2).gameObject;
-        ingameUI = gameObject.transform.GetChild(3).gameObject;
-        victoryUI = gameObject.transform.GetChild(4).gameObject;
-        defeatUI = gameObject.transform.GetChild(5).gameObject;
-        pauseUI = gameObject.transform.GetChild(6).gameObject;
+        ingameUI = gameObject.transform.GetChild(6).gameObject;
+        victoryUI = gameObject.transform.GetChild(7).gameObject;
+        defeatUI = gameObject.transform.GetChild(8).gameObject;
+        pauseUI = gameObject.transform.GetChild(9).gameObject;
 
         //Set default active UI elements
         mainMenu.SetActive(true);
@@ -152,8 +154,8 @@ public class UIManager : MonoBehaviour
     }
 
     void OpenShop() {
-        shopMenu.SetActive(true);
         menuStack.Push(shopMenu.transform);
+        shopMenu.SetActive(true);
     }
 
     void ToggleSound() {
