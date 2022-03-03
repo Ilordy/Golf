@@ -58,10 +58,10 @@ public class Manager : MonoBehaviour {
 
     //Properties
     public bool PlayGame {set{playGame = value;}}
-    public int SoundEnabled {get;set;}
-    public int HapticsEnabled {get;set;}
+    public int SoundEnabled {get{return soundEnabled;}set{soundEnabled = value;}}
+    public int HapticsEnabled {get{return hapticsEnabled;}set{hapticsEnabled = value;}}
     public int MaxBounces {get{return maxBounces;}}
-    public int Level {get;}
+    public int Level {get{return level;}}
     public int EnemiesToSpawn {get{return enemiesToSpawn;}}
 
 

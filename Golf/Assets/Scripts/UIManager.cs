@@ -102,6 +102,7 @@ public class UIManager : MonoBehaviour
         upgradeButton2.onClick.AddListener(() => GameEvents.current.Upgrade2Request());
         upgradeButton3.onClick.AddListener(() => GameEvents.current.Upgrade3Request());
         settingsButton.onClick.AddListener(OpenSettings);
+        shopButton.onClick.AddListener(OpenShop);
         //shopButton.onClick.AddListener(OpenShop);
 
         //Add Listeners for Settings Menu Buttons
@@ -151,13 +152,12 @@ public class UIManager : MonoBehaviour
     }
 
     void OpenShop() {
-        settingsMenu.SetActive(true);
+        shopMenu.SetActive(true);
         menuStack.Push(shopMenu.transform);
     }
 
     void ToggleSound() {
         GameManager.SoundEnabled = -GameManager.SoundEnabled;
-        Debug.Log(GameManager.SoundEnabled);
         UpdateSettings();
     }
 
