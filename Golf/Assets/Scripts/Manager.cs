@@ -47,7 +47,7 @@ public class Manager : MonoBehaviour {
     int incomeLevel = 1;
     int incomeCost = 100;
     int upgradeMaxLevel = 20;
-    int money = 0;
+    [SerializeField] int money = 0;
     public int Money {get;}
     int earned = 0;
 
@@ -107,7 +107,7 @@ public class Manager : MonoBehaviour {
         UpdateUpgradeValues();
 
         //Update UI
-        money = 5000000;
+        money = 2000;
         GameEvents.current.SettingsChange();
         GameEvents.current.LevelChange(level);
         GameEvents.current.MoneyChange(money);
@@ -273,9 +273,10 @@ public class Manager : MonoBehaviour {
             fireRateLevel++;
             fireRateCost += 100;
         }
+        CheckMoney();
         UpdateUpgradeValues();
-        GameEvents.current.UpgradesChange(1, fireRateLevel, fireRateCost);
         GameEvents.current.MoneyChange(money);
+        GameEvents.current.UpgradesChange(1, fireRateLevel, fireRateCost);
         PlayerPrefs.SetInt("FireRateLevel", fireRateLevel);
         PlayerPrefs.SetInt("FireRateCost", fireRateCost);
         PlayerPrefs.SetInt("Money", money);
@@ -287,9 +288,10 @@ public class Manager : MonoBehaviour {
             ballBounceLevel++;
             ballBounceCost += 1000;
         }
+        CheckMoney();
         UpdateUpgradeValues();
-        GameEvents.current.UpgradesChange(2, ballBounceLevel, ballBounceCost);
         GameEvents.current.MoneyChange(money);
+        GameEvents.current.UpgradesChange(2, ballBounceLevel, ballBounceCost);
         PlayerPrefs.SetInt("BallBounceLevel", ballBounceLevel);
         PlayerPrefs.SetInt("BallBounceCost", ballBounceCost);
         PlayerPrefs.SetInt("Money", money);
@@ -301,12 +303,29 @@ public class Manager : MonoBehaviour {
             incomeLevel++;
             incomeCost += 100;
         }
+        CheckMoney();
         UpdateUpgradeValues();
-        GameEvents.current.UpgradesChange(3, incomeLevel, incomeCost);
         GameEvents.current.MoneyChange(money);
+        GameEvents.current.UpgradesChange(3, incomeLevel, incomeCost);
         PlayerPrefs.SetInt("IncomeLevel", incomeLevel);
         PlayerPrefs.SetInt("IncomeCost", incomeCost);
         PlayerPrefs.SetInt("Money", money);
+    }
+
+    public void CheckMoney() {
+        bool disable1 = false;
+        bool disable2 = false;
+        bool disable3 = false;
+        if (money < fireRateCost) {
+            disable1 = true;
+        }
+        if (money < ballBounceCost) {
+            disable2 = true;
+        }
+        if (money < incomeCost) {
+            disable3 = true;
+        }
+        GameEvents.current.CheckAfford(disable1, disable2, disable3);
     }
 
     public void HandleReward() {
@@ -318,6 +337,7 @@ public class Manager : MonoBehaviour {
         earned = 0;
         PlayerPrefs.SetInt("Money", money);
         GameEvents.current.MoneyChange(money);
+        CheckMoney();
     }
 
     public void AwardDouble() {
@@ -325,5 +345,6 @@ public class Manager : MonoBehaviour {
         earned = 0;
         PlayerPrefs.SetInt("Money", money);
         GameEvents.current.MoneyChange(money);
+        CheckMoney();
     }
 }

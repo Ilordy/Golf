@@ -23,6 +23,8 @@ public class UIManager : MonoBehaviour
 
     Stack<Transform> menuStack = new Stack<Transform>();
 
+    int currentMoney;
+
     public Stack<Transform> MenuStack {get{return menuStack;}set{menuStack = value;}}
 
     void Start() {
@@ -34,6 +36,7 @@ public class UIManager : MonoBehaviour
         GameEvents.current.OnHandleVictory += HandleVictory;
         GameEvents.current.OnHandleDefeat += HandleDefeat;
         GameEvents.current.OnProgressChange += UpdateProgressBar;
+        GameEvents.current.OnCheckAfford += CheckAfford;
 
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
 
@@ -150,19 +153,16 @@ public class UIManager : MonoBehaviour
     void Play() {
         mainMenu.SetActive(false);
         ingameUI.SetActive(true);
-        //GameManager.PlayGame = true;
         StartCoroutine(StartGame());
-        //menuStack.Push(ingameUI.transform);
     }
 
     void OpenSettings() {
-        DisableInteractable();
+        ToggleInteractable();
         settingsMenu.SetActive(true);
         menuStack.Push(settingsMenu.transform);
     }
 
     void OpenShop() {
-        //DisableInteractable();
         menuStack.Push(shopMenu.transform);
         shopMenu.SetActive(true);
     }
@@ -178,15 +178,14 @@ public class UIManager : MonoBehaviour
     }
 
     void UpdateSettings() {
+        soundsButtonImage.color = colorDisabled;
+        hapticsButtonImage.color = colorDisabled;
+
         if (GameManager.SoundEnabled > 0) {
             soundsButtonImage.color = colorEnabled;
-        } else {
-            soundsButtonImage.color = colorDisabled;
         }
         if (GameManager.HapticsEnabled > 0) {
             hapticsButtonImage.color = colorEnabled;
-        } else {
-            hapticsButtonImage.color = colorDisabled;
         }
     }
 
@@ -214,6 +213,22 @@ public class UIManager : MonoBehaviour
             moneyCounterText.text = "99999";
         } else {
             moneyCounterText.text = money.ToString();
+        }
+        currentMoney = money;
+    }
+
+    void CheckAfford(bool disable1, bool disable2, bool disable3) {
+        upgradeButton1.interactable = true;
+        upgradeButton2.interactable = true;
+        upgradeButton3.interactable = true;
+        if (disable1) {
+            upgradeButton1.interactable = false;
+        }
+        if (disable2) {
+            upgradeButton2.interactable = false;
+        }
+        if (disable3) {
+            upgradeButton3.interactable = false;
         }
     }
 
@@ -248,13 +263,11 @@ public class UIManager : MonoBehaviour
 
     void AwardRegular() {
         GameEvents.current.AwardRegularPressed();
-        UpdateMoney(GameManager.Money);
         OpenMainMenu();
     }
 
     void AwardDouble() {
         GameEvents.current.AwardDoublePressed();
-        UpdateMoney(GameManager.Money);
         OpenMainMenu();
     }
 
@@ -288,22 +301,13 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    void DisableInteractable() {
-        shopButton.interactable = false;
-        settingsButton.interactable = false;
-        playButton.interactable = false;
-        upgradeButton1.interactable = false;
-        upgradeButton2.interactable = false;
-        upgradeButton3.interactable = false;
-    }
-
-    void EnableInteractable() {
-        shopButton.interactable = true;
-        settingsButton.interactable = true;
-        playButton.interactable = true;
-        upgradeButton1.interactable = true;
-        upgradeButton2.interactable = true;
-        upgradeButton3.interactable = true;
+    void ToggleInteractable() {
+        shopButton.interactable = !shopButton.interactable;
+        settingsButton.interactable = !settingsButton.interactable;
+        playButton.interactable = !playButton.interactable;
+        upgradeButton1.interactable = !upgradeButton1.interactable;
+        upgradeButton2.interactable = !upgradeButton2.interactable;
+        upgradeButton3.interactable = !upgradeButton3.interactable;
     }
 
     void Back() {
@@ -311,7 +315,7 @@ public class UIManager : MonoBehaviour
         menuStack.Pop();
         menuStack.Peek().gameObject.SetActive(true);
         if (menuStack.Peek().gameObject == mainMenu) {
-            EnableInteractable();
+            ToggleInteractable();
         }
     }
 }

@@ -52,6 +52,11 @@ public class GameEvents : MonoBehaviour
         OnProgressChange?.Invoke(n);
     }
 
+    public event Action<bool, bool, bool> OnCheckAfford;
+    public void CheckAfford(bool disable1, bool disable2, bool disable3) {
+        OnCheckAfford?.Invoke(disable1, disable2, disable3);
+    }
+
     // MANAGER EVENTS
     public event Action OnUpgrade1Request;
     public void Upgrade1Request() {
