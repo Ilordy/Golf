@@ -48,7 +48,6 @@ public class Manager : MonoBehaviour {
     int incomeCost = 100;
     int upgradeMaxLevel = 20;
     [SerializeField] int money = 0;
-    public int Money {get;}
     int earned = 0;
 
     //Game loop
@@ -64,6 +63,7 @@ public class Manager : MonoBehaviour {
     public int MaxBounces {get{return maxBounces;}}
     public int Level {get{return level;}}
     public int EnemiesToSpawn {get{return enemiesToSpawn;}}
+    public int Money {get => money;}
 
 
     void Start() {

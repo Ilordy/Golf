@@ -5,6 +5,6 @@ using UnityEngine;
 public class TestSpin : MonoBehaviour {
     public int multiplier = 5;
     void Update() {
-        transform.Rotate(Vector3.one * multiplier);
+        transform.GetChild(0).transform.Rotate(Vector3.one * multiplier);
     }
 }

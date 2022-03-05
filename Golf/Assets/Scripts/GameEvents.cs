@@ -129,7 +129,7 @@ public class GameEvents : MonoBehaviour
         OnPowerUp?.Invoke();
     }
 
-    // Cosmetics Manager Events
+    // Cosmetics Events
     public event Action<int> OnEquipCosmetic;
     public void EquipCosmetic(int i) {
         OnEquipCosmetic?.Invoke(i);

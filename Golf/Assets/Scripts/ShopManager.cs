@@ -9,6 +9,7 @@ public class ShopManager : MonoBehaviour {
     GameObject hatShop, skinShop, trailShop;
     Button hatsButton, skinsButton, trailsButton, mainBackButton;
     Button hatBackButton, skinBackButton, trailBackButton;
+    public Button[] hatsPurchaseButtons;
     Stack<Transform> menuStack;
 
     void Awake() {
@@ -46,6 +47,10 @@ public class ShopManager : MonoBehaviour {
 
         //Add Listeners to Trails Shop Elements
         trailBackButton.onClick.AddListener(Back);
+
+        foreach (Button button in hatsPurchaseButtons) {
+            button.onClick.AddListener(() => {});
+        }
     }
 
     void OnEnable() {
