@@ -152,7 +152,7 @@ public class UIManager : MonoBehaviour
         ingameUI.SetActive(true);
         //GameManager.PlayGame = true;
         StartCoroutine(StartGame());
-        menuStack.Push(ingameUI.transform);
+        //menuStack.Push(ingameUI.transform);
     }
 
     void OpenSettings() {
