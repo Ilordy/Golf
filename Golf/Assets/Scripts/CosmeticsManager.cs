@@ -8,6 +8,7 @@ public class CosmeticsManager : MonoBehaviour {
     [SerializeField] CosmeticItem[,] cosmetics = new CosmeticItem[3,5]; 
 
     GameObject[] equipped = new GameObject[3];
+    CosmeticItem[] equippedScriptReference = new CosmeticItem[3];
 
     void Start() {
         GameEvents.current.OnGetCosmetics += GetCosmetics;
@@ -24,7 +25,13 @@ public class CosmeticsManager : MonoBehaviour {
             if (equipped[type].name == cosmetics[type,i].model.name + "(Clone)") {
                 Destroy(equipped[type]);
                 cosmetics[type,i].SetEquip();
-                return;}
+                equippedScriptReference[type] = null;
+                return;
+            }
+        }
+
+        if (equippedScriptReference[type] != null) {
+            equippedScriptReference[type].SetEquip();
         }
 
         Destroy(equipped[type]);
@@ -34,6 +41,7 @@ public class CosmeticsManager : MonoBehaviour {
         instance.transform.parent = player.transform;
         instance.transform.position = player.transform.position;
         equipped[type] = instance;
+        equippedScriptReference[type] = cosmetics[type,i];
     }
 
     void GetCosmetics(int type) {
