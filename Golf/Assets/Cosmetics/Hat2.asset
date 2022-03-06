@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6fbce410de70e24fac3dba503ebc070, type: 3}
   m_Name: Hat2
   m_EditorClassIdentifier: 
-  Type: hat
-  Cost: 2000
+  Type: 0
+  Index: 1
+  Cost: 10
   Model: {fileID: 8997619088999007271, guid: 1a25c44ec04dd1a40ae8c4a4d2e9f65f, type: 3}

@@ -130,13 +130,18 @@ public class GameEvents : MonoBehaviour
     }
 
     // Cosmetics Events
-    public event Action<int> OnEquipCosmetic;
-    public void EquipCosmetic(int i) {
-        OnEquipCosmetic?.Invoke(i);
+    public event Action<int> OnGetCosmetics;
+    public void GetCosmetics(int type) {
+        OnGetCosmetics?.Invoke(type);
     }
 
-    public event Action<int> OnUnequipCosmetic;
-    public void UnequipCosmetic(int i) {
-        OnUnequipCosmetic?.Invoke(i);
+    public event Action<int, int> OnPurchaseCosmetic;
+    public void PurchaseCosmetic(int type, int i) {
+        OnPurchaseCosmetic?.Invoke(type, i);
+    }
+
+    public event Action<int, int> OnEquipCosmetic;
+    public void EquipCosmetic(int type, int i) {
+        OnEquipCosmetic?.Invoke(type, i);
     }
 }

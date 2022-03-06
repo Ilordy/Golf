@@ -6,10 +6,10 @@ using TMPro;
 
 public class CosmeticItem : MonoBehaviour {
     public Cosmetic data;
-
-    string type;
+    public int index;
+    public int type;
     int cost;
-    GameObject model;
+    public GameObject model;
 
     Manager GameManager;
     Button purchaseButton;
@@ -22,6 +22,7 @@ public class CosmeticItem : MonoBehaviour {
         type = data.Type;
         cost = data.Cost;
         model = data.Model;
+        index = data.Index;
 
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
         purchaseButton = transform.parent.parent.GetChild(2).GetComponent<Button>();
@@ -40,21 +41,30 @@ public class CosmeticItem : MonoBehaviour {
     }
 
     void OnEnable() {
-        if (CanBuy()) {
-            purchaseButton.interactable = true;
-        } else {
+        purchaseButton.interactable = true;
+        if (!purchased && !CanBuy()) {
             purchaseButton.interactable = false;
         }
     }
 
     bool CanBuy() {
-        if (GameManager.Money > cost) return true; return false;
+        if (GameManager.Money >= cost) return true; return false;
     }
 
     void Purchase() {
-        if (CanBuy()) {
-            purchased = true;
-            equipped = true;
+        if (!purchased) {
+            if (CanBuy()) {
+                purchased = true;
+                GameEvents.current.PurchaseCosmetic(type, index);
+            }
+        } else {
+            GameEvents.current.EquipCosmetic(type,index);
         }
+    }
+
+    public void SetEquip() {
+        equipped = !equipped;
+        string action = equipped ? "Unequip" : "Equip";
+        purchaseButtonText.text = action.ToString();
     }
 }

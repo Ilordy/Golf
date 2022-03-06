@@ -4,36 +4,44 @@ using UnityEngine;
 
 public class CosmeticsManager : MonoBehaviour {
     [SerializeField] GameObject player;
-    [SerializeField] GameObject[] hats = new GameObject[5];
-    int[] hatsState = new int[5];
-    GameObject equippedHat;
+
+    [SerializeField] CosmeticItem[,] cosmetics = new CosmeticItem[3,5]; 
+
+    GameObject[] equipped = new GameObject[3];
 
     void Start() {
-        GameEvents.current.OnEquipCosmetic += EquipCosmetic;
-        GameEvents.current.OnUnequipCosmetic += UnequipCosmetic;
+        GameEvents.current.OnGetCosmetics += GetCosmetics;
+        GameEvents.current.OnPurchaseCosmetic += Purchase;
+        GameEvents.current.OnEquipCosmetic += Equip;
     }
 
-    void EquipCosmetic(int i) {
-        if (hatsState[i] == 1) {
-            Debug.Log("Cosmetic already equipped");
+    void Purchase(int type, int i) {
+        Equip(type, i);
+    }
+
+    void Equip(int type, int i) {
+        if (equipped[type] != null) {
+            if (equipped[type].name == cosmetics[type,i].model.name + "(Clone)") {
+                Destroy(equipped[type]);
+                cosmetics[type,i].SetEquip();
+                return;}
         }
-        if (hatsState[i] == -1) {
-            Debug.Log("Cosmetic not purchased");
-        }
-        hatsState[i] = 1;
-        GameObject instance = Instantiate(hats[i], player.transform.position, Quaternion.identity);
+
+        Destroy(equipped[type]);
+        
+        cosmetics[type,i].SetEquip();
+        GameObject instance = Instantiate(cosmetics[type,i].model, Vector3.zero, Quaternion.identity);
         instance.transform.parent = player.transform;
-        equippedHat = instance;
+        instance.transform.position = player.transform.position;
+        equipped[type] = instance;
     }
 
-    void UnequipCosmetic(int i) {
-        if (hatsState[i] == 0) {
-            Debug.Log("Cosmetic not currently equipped");
+    void GetCosmetics(int type) {
+        CosmeticItem[] cosmeticsInScene = GameObject.FindObjectsOfType<CosmeticItem>();
+        foreach (CosmeticItem cosmetic in cosmeticsInScene) {
+            if (cosmetic.type == type) {
+                cosmetics[type, cosmetic.index] = cosmetic;
+            }
         }
-        if (hatsState[i] == -1) {
-            Debug.Log("Cosmetic not purchased");
-        }
-        hatsState[i] = 0;
-        Destroy(equippedHat);
     }
 }
