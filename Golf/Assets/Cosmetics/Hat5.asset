@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Type: 0
   Index: 4
-  Cost: 10
+  Cost: 2147483647
   Model: {fileID: 5574376818013290018, guid: 40d3d35bf2fa88840bee7221b8cb1327, type: 3}

@@ -1,6 +1,9 @@
 using UnityEngine;
+using System;
 using System.Collections;
 
+
+namespace UnityEngine {
 
 public class Manager : MonoBehaviour {
 
@@ -50,6 +53,10 @@ public class Manager : MonoBehaviour {
     [SerializeField] int money = 0;
     int earned = 0;
 
+    //Cosmetics
+
+    int[,,] cosmetics = new int[3,5,2];
+
     //Game loop
     bool playGame = false;
     bool firstShot = true;
@@ -77,6 +84,8 @@ public class Manager : MonoBehaviour {
         GameEvents.current.OnDefeat += HandleDefeat;
         GameEvents.current.OnReward += HandleReward;
         GameEvents.current.OnReturnMainMenu += ResetGame;
+        GameEvents.current.OnRequestCosmetic += HandleCosmetic;
+        GameEvents.current.OnSetEquip += HandleCosmeticState;
 
         //Debug delete
         if(willDeleteSaves) {
@@ -110,7 +119,7 @@ public class Manager : MonoBehaviour {
         money = 2000;
         GameEvents.current.SettingsChange();
         GameEvents.current.LevelChange(level);
-        GameEvents.current.MoneyChange(money);
+        GameEvents.current.MoneyChange();
         GameEvents.current.UpgradesChange(1, fireRateLevel, fireRateCost);
         GameEvents.current.UpgradesChange(2, ballBounceLevel, ballBounceCost);
         GameEvents.current.UpgradesChange(3, incomeLevel, incomeCost);
@@ -275,7 +284,7 @@ public class Manager : MonoBehaviour {
         }
         CheckMoney();
         UpdateUpgradeValues();
-        GameEvents.current.MoneyChange(money);
+        GameEvents.current.MoneyChange();
         GameEvents.current.UpgradesChange(1, fireRateLevel, fireRateCost);
         PlayerPrefs.SetInt("FireRateLevel", fireRateLevel);
         PlayerPrefs.SetInt("FireRateCost", fireRateCost);
@@ -290,7 +299,7 @@ public class Manager : MonoBehaviour {
         }
         CheckMoney();
         UpdateUpgradeValues();
-        GameEvents.current.MoneyChange(money);
+        GameEvents.current.MoneyChange();
         GameEvents.current.UpgradesChange(2, ballBounceLevel, ballBounceCost);
         PlayerPrefs.SetInt("BallBounceLevel", ballBounceLevel);
         PlayerPrefs.SetInt("BallBounceCost", ballBounceCost);
@@ -305,11 +314,27 @@ public class Manager : MonoBehaviour {
         }
         CheckMoney();
         UpdateUpgradeValues();
-        GameEvents.current.MoneyChange(money);
+        GameEvents.current.MoneyChange();
         GameEvents.current.UpgradesChange(3, incomeLevel, incomeCost);
         PlayerPrefs.SetInt("IncomeLevel", incomeLevel);
         PlayerPrefs.SetInt("IncomeCost", incomeCost);
         PlayerPrefs.SetInt("Money", money);
+    }
+
+    void HandleCosmetic(int type, int i, int cost) {
+        if (cost <= money) {
+            money -= cost;
+            PlayerPrefs.SetInt("Money", money);
+            GameEvents.current.MoneyChange();
+            GameEvents.current.PurchaseCosmetic(true, type, i);
+            cosmetics[type,i,0] = 1;
+        } else {
+            GameEvents.current.PurchaseCosmetic(true, type, i);
+        }
+    }
+
+    void HandleCosmeticState(int type, int i, int state) {
+        cosmetics[type,i,1] = state;
     }
 
     public void CheckMoney() {
@@ -336,7 +361,7 @@ public class Manager : MonoBehaviour {
         money += earned;
         earned = 0;
         PlayerPrefs.SetInt("Money", money);
-        GameEvents.current.MoneyChange(money);
+        GameEvents.current.MoneyChange();
         CheckMoney();
     }
 
@@ -344,7 +369,8 @@ public class Manager : MonoBehaviour {
         money += earned*2;
         earned = 0;
         PlayerPrefs.SetInt("Money", money);
-        GameEvents.current.MoneyChange(money);
+        GameEvents.current.MoneyChange();
         CheckMoney();
     }
+}
 }

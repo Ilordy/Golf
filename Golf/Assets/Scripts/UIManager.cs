@@ -208,7 +208,8 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    void UpdateMoney(int money) {
+    void UpdateMoney() {
+        int money = GameManager.Money;
         if (money > 99999) {
             moneyCounterText.text = "99999";
         } else {

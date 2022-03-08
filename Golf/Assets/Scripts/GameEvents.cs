@@ -22,9 +22,9 @@ public class GameEvents : MonoBehaviour
         OnUpgradesChange?.Invoke(n,level,cost);
     }
 
-    public event Action<int> OnMoneyChange;
-    public void MoneyChange(int n) {
-        OnMoneyChange?.Invoke(n);
+    public event Action OnMoneyChange;
+    public void MoneyChange() {
+        OnMoneyChange?.Invoke();
     }
 
     public event Action<int> OnLevelChange;
@@ -130,18 +130,23 @@ public class GameEvents : MonoBehaviour
     }
 
     // Cosmetics Events
-    public event Action<int> OnGetCosmetics;
-    public void GetCosmetics(int type) {
-        OnGetCosmetics?.Invoke(type);
+    public event Action<int, int, int> OnRequestCosmetic;
+    public void RequestCosmetic(int type, int i, int cost) {
+        OnRequestCosmetic?.Invoke(type, i, cost);
     }
 
-    public event Action<int, int> OnPurchaseCosmetic;
-    public void PurchaseCosmetic(int type, int i) {
-        OnPurchaseCosmetic?.Invoke(type, i);
+    public event Action<bool, int, int> OnPurchaseCosmetic;
+    public void PurchaseCosmetic(bool answer, int type, int i) {
+        OnPurchaseCosmetic?.Invoke(answer, type, i);
     }
 
-    public event Action<int, int> OnEquipCosmetic;
-    public void EquipCosmetic(int type, int i) {
-        OnEquipCosmetic?.Invoke(type, i);
+    public event Action<int,int,int> OnSetEquip;
+    public void SetEquip(int type, int i, int state) {
+        OnSetEquip?.Invoke(type, i, state);
+    }
+
+    public event Action<int, int> OnUnequipOthers;
+    public void UnequipOthers(int type, int i) {
+        OnUnequipOthers?.Invoke(type, i);
     }
 }

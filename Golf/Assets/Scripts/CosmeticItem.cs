@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,10 +7,14 @@ using TMPro;
 
 public class CosmeticItem : MonoBehaviour {
     public Cosmetic data;
-    public int index;
-    public int type;
+
+    int index;
+    int type;
     int cost;
-    public GameObject model;
+    GameObject model;
+
+    GameObject player;
+    GameObject cosmeticInstance;
 
     Manager GameManager;
     Button purchaseButton;
@@ -24,6 +29,7 @@ public class CosmeticItem : MonoBehaviour {
         model = data.Model;
         index = data.Index;
 
+        player = GameObject.Find("Player");
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
         purchaseButton = transform.parent.parent.GetChild(2).GetComponent<Button>();
         purchaseButtonText = purchaseButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
@@ -32,6 +38,9 @@ public class CosmeticItem : MonoBehaviour {
         instance.layer = 5;
         instance.transform.parent = gameObject.transform;
         instance.transform.position = transform.position;
+
+        GameEvents.current.OnPurchaseCosmetic += HandlePurchase;
+        GameEvents.current.OnUnequipOthers += UnequipOthers;
     }
 
     void Start() {
@@ -41,9 +50,9 @@ public class CosmeticItem : MonoBehaviour {
     }
 
     void OnEnable() {
-        purchaseButton.interactable = true;
-        if (!purchased && !CanBuy()) {
-            purchaseButton.interactable = false;
+        purchaseButton.interactable = false;
+        if (!purchased && CanBuy()) {
+            purchaseButton.interactable = true;
         }
     }
 
@@ -53,16 +62,45 @@ public class CosmeticItem : MonoBehaviour {
 
     void Purchase() {
         if (!purchased) {
-            if (CanBuy()) {
-                purchased = true;
-                GameEvents.current.PurchaseCosmetic(type, index);
-            }
+            GameEvents.current.RequestCosmetic(type, index, cost);
+        } else if (equipped) {
+            Unequip();
         } else {
-            GameEvents.current.EquipCosmetic(type,index);
+            Equip();
         }
     }
 
-    public void SetEquip() {
+    void HandlePurchase(bool answer, int t, int i) {
+        if (t == type && i == index) {
+            if (answer) {
+                Equip();
+                purchased = true;
+            }
+        }
+    }
+
+    void Equip() {
+        SetEquip();
+        GameEvents.current.SetEquip(type, index, 1);
+        GameEvents.current.UnequipOthers(type, index);
+        cosmeticInstance = Instantiate(model, Vector3.zero, Quaternion.identity);
+        cosmeticInstance.transform.parent = player.transform;
+        cosmeticInstance.transform.position = player.transform.position;
+    }
+
+    void Unequip() {
+        SetEquip();
+        GameEvents.current.SetEquip(type, index, 0);
+        Destroy(cosmeticInstance);
+    }
+
+    void UnequipOthers(int t, int i) {
+        if (t == type && i != index && equipped) {
+            Unequip();
+        }
+    }
+
+    void SetEquip() {
         equipped = !equipped;
         string action = equipped ? "Unequip" : "Equip";
         purchaseButtonText.text = action.ToString();

@@ -34,9 +34,9 @@ public class ShopManager : MonoBehaviour {
         trailBackButton = trailShop.transform.GetChild(2).GetComponent<Button>();
 
         //Add Listeners to Main Shop Elements
-        hatsButton.onClick.AddListener(()=>{gameObject.SetActive(false); hatShop.SetActive(true); menuStack.Push(hatShop.transform);GameEvents.current.GetCosmetics(0);});
-        skinsButton.onClick.AddListener(()=>{gameObject.SetActive(false); skinShop.SetActive(true); menuStack.Push(skinShop.transform);GameEvents.current.GetCosmetics(1);});
-        trailsButton.onClick.AddListener(()=>{gameObject.SetActive(false); trailShop.SetActive(true); menuStack.Push(trailShop.transform);GameEvents.current.GetCosmetics(2);});
+        hatsButton.onClick.AddListener(()=>{gameObject.SetActive(false); hatShop.SetActive(true); menuStack.Push(hatShop.transform);});
+        skinsButton.onClick.AddListener(()=>{gameObject.SetActive(false); skinShop.SetActive(true); menuStack.Push(skinShop.transform);});
+        trailsButton.onClick.AddListener(()=>{gameObject.SetActive(false); trailShop.SetActive(true); menuStack.Push(trailShop.transform);});
         mainBackButton.onClick.AddListener(Back);
 
         //Add Listeners to Hats Shop Elements
