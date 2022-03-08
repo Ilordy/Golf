@@ -71,11 +71,9 @@ public class CosmeticItem : MonoBehaviour {
     }
 
     void HandlePurchase(bool answer, int t, int i) {
-        if (t == type && i == index) {
-            if (answer) {
-                Equip();
-                purchased = true;
-            }
+        if (t == type && i == index && answer) {
+            Equip();
+            purchased = true;
         }
     }
 

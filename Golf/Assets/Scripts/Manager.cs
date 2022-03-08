@@ -329,7 +329,7 @@ public class Manager : MonoBehaviour {
             GameEvents.current.PurchaseCosmetic(true, type, i);
             cosmetics[type,i,0] = 1;
         } else {
-            GameEvents.current.PurchaseCosmetic(true, type, i);
+            GameEvents.current.PurchaseCosmetic(false, type, i);
         }
     }
 
