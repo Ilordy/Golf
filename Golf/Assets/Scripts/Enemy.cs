@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Enemy : EnemyClass {
     bool isDead = false;
-    CapsuleCollider collider;
+    CapsuleCollider col;
     Animator animator;
     ParticleSystem particles;
 
@@ -15,7 +15,7 @@ public class Enemy : EnemyClass {
         speed = 3f;
 
         playerPos = GameObject.Find("Player").transform.position;
-        collider = GetComponent<CapsuleCollider>();
+        col = GetComponent<CapsuleCollider>();
         animator = GetComponent<Animator>();
         particles = GetComponent<ParticleSystem>();
     }
@@ -35,7 +35,7 @@ public class Enemy : EnemyClass {
             isDead = true;
             gameObject.tag = "Dead";
             GameEvents.current.Reward();
-            collider.enabled = false;
+            col.enabled = false;
             animator.enabled = false;
             particles.Stop(true,UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
             Destroy(gameObject,5);

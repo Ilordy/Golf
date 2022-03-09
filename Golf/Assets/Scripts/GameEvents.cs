@@ -135,9 +135,9 @@ public class GameEvents : MonoBehaviour
         OnRequestCosmetic?.Invoke(type, i, cost);
     }
 
-    public event Action<bool, int, int> OnPurchaseCosmetic;
-    public void PurchaseCosmetic(bool answer, int type, int i) {
-        OnPurchaseCosmetic?.Invoke(answer, type, i);
+    public event Action<bool, int, int> OnAnswerRequest;
+    public void AnswerRequest(bool answer, int type, int i) {
+        OnAnswerRequest?.Invoke(answer, type, i);
     }
 
     public event Action<int,int,int> OnSetEquip;
@@ -148,5 +148,15 @@ public class GameEvents : MonoBehaviour
     public event Action<int, int> OnUnequipOthers;
     public void UnequipOthers(int type, int i) {
         OnUnequipOthers?.Invoke(type, i);
+    }
+
+    public event Action<Gradient> OnLoadTrail;
+    public void LoadTrail(Gradient trail) {
+        OnLoadTrail?.Invoke(trail);
+    }
+
+    public event Action OnUnloadTrail;
+    public void UnloadTrail() {
+        OnUnloadTrail?.Invoke();
     }
 }

@@ -56,10 +56,10 @@ public class Manager : MonoBehaviour {
     //Cosmetics
 
     int[,,] cosmetics = new int[3,5,2];
+    Gradient currTrail;
 
     //Game loop
     bool playGame = false;
-    bool firstShot = true;
     int level = 1;
     [SerializeField] bool willDeleteSaves = false;
 
@@ -86,6 +86,7 @@ public class Manager : MonoBehaviour {
         GameEvents.current.OnReturnMainMenu += ResetGame;
         GameEvents.current.OnRequestCosmetic += HandleCosmetic;
         GameEvents.current.OnSetEquip += HandleCosmeticState;
+        GameEvents.current.OnLoadTrail += LoadTrail;
 
         //Debug delete
         if(willDeleteSaves) {
@@ -163,6 +164,7 @@ public class Manager : MonoBehaviour {
                     float x = r * Mathf.Cos(i * (Mathf.PI / (enemies.Length)));
                     float y = r * Mathf.Sin(i * (Mathf.PI / (enemies.Length)));
                     powerUpProjectiles[i] = Instantiate(powerUpProjectile, spawner.transform.position + new Vector3(0, y, x), Quaternion.identity);
+                    if (currTrail != null) powerUpProjectiles[i].GetComponent<TrailRenderer>().colorGradient = currTrail;
                     powerUpProjectiles[i].GetComponent<Rigidbody>().useGravity = true;
                     powerUpProjectiles[i].transform.LookAt(enemies[i].transform.position);
                     powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = powerUpProjectiles[i].transform.forward * 100f;
@@ -179,8 +181,6 @@ public class Manager : MonoBehaviour {
                 GameEvents.current.KillsChange(EnemyClass.KilledCount);
             }
         }
-        
-        firstShot = false;
 
         if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f) {
             playerAnimator.SetBool("Swing",false);
@@ -189,6 +189,11 @@ public class Manager : MonoBehaviour {
         if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.5f) {
             fireProjectile(ref fireRateCounter, Mathf.Lerp(0.8f,0.4f, (float)fireRateLevel/upgradeMaxLevel));
         }
+    }
+
+    // TESTING
+    void OnApplicationFocus(bool hasFocus) {
+        Debug.Log(hasFocus);
     }
 
     // Functions
@@ -217,6 +222,7 @@ public class Manager : MonoBehaviour {
             fireRateCounter = Time.time + nextFire;
             Vector3 flatAimTarget = calculateTarget();
             GameObject p = Instantiate(projectile, spawner.transform.position, Quaternion.identity);
+            if (currTrail != null) p.GetComponent<TrailRenderer>().colorGradient = currTrail;
             p.transform.LookAt(flatAimTarget);
             p.GetComponent<Rigidbody>().useGravity = true;
             // p.GetComponent<Rigidbody>().velocity = p.transform.forward * 10f;
@@ -326,10 +332,10 @@ public class Manager : MonoBehaviour {
             money -= cost;
             PlayerPrefs.SetInt("Money", money);
             GameEvents.current.MoneyChange();
-            GameEvents.current.PurchaseCosmetic(true, type, i);
+            GameEvents.current.AnswerRequest(true, type, i);
             cosmetics[type,i,0] = 1;
         } else {
-            GameEvents.current.PurchaseCosmetic(false, type, i);
+            GameEvents.current.AnswerRequest(false, type, i);
         }
     }
 
@@ -371,6 +377,14 @@ public class Manager : MonoBehaviour {
         PlayerPrefs.SetInt("Money", money);
         GameEvents.current.MoneyChange();
         CheckMoney();
+    }
+
+    void LoadTrail (Gradient trail) {
+        currTrail = trail;
+    }
+
+    void UnloadTrail () {
+        currTrail = null;
     }
 }
 }
