@@ -15,7 +15,11 @@ public class CosmeticItem : MonoBehaviour {
 
     GameObject player;
     GameObject cosmeticInstance;
-    Color defaultPlayer;
+
+    Color defaultMat;
+    Color thisMat;
+
+    Gradient thisTrail;
 
     Manager GameManager;
     Button purchaseButton;
@@ -33,16 +37,24 @@ public class CosmeticItem : MonoBehaviour {
 
         // Get relevant references
         player = GameObject.Find("Player");
-        defaultPlayer = player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial.color;
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
         purchaseButton = transform.parent.parent.GetChild(2).GetComponent<Button>();
         purchaseButtonText = purchaseButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+
+        if (type == 1) {
+            defaultMat = player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial.color;
+            thisMat = model.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial.color;
+        } else if (type == 2) {
+            thisTrail = model.GetComponent<TrailRenderer>().colorGradient;
+        }
 
         // Instantiate UI showcase
         GameObject instance = Instantiate(model, Vector3.zero, Quaternion.identity);
         instance.layer = 5;
         instance.transform.parent = gameObject.transform;
         instance.transform.position = transform.position;
+
+        if (type == 1) instance.transform.position -= new Vector3(0,0.5f,0);
 
         GameEvents.current.OnAnswerRequest += HandleRequestAnswer;
         GameEvents.current.OnUnequipOthers += UnequipOthers;
@@ -55,8 +67,9 @@ public class CosmeticItem : MonoBehaviour {
     }
 
     void OnEnable() {
-        purchaseButton.interactable = false;
-        if (!purchased && CanBuy()) {
+        if (!purchased && !CanBuy()) {
+            purchaseButton.interactable = false;
+        } else {
             purchaseButton.interactable = true;
         }
     }
@@ -91,9 +104,9 @@ public class CosmeticItem : MonoBehaviour {
             cosmeticInstance.transform.parent = player.transform;
             cosmeticInstance.transform.position = player.transform.position;
         } else if (t == 1) {
-            player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().material.color = model.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial.color;
+            player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial.color = thisMat;
         } else if (t == 2) {
-            GameEvents.current.LoadTrail(model.GetComponent<TrailRenderer>().colorGradient);
+            GameEvents.current.LoadTrail(thisTrail);
         }
     }
 
@@ -103,7 +116,7 @@ public class CosmeticItem : MonoBehaviour {
         if (t == 0) {
             Destroy(cosmeticInstance);
         } else if (t == 1) {
-            player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().material.color = defaultPlayer;
+            player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial.color = defaultMat;
         } else if (t == 2) {
             GameEvents.current.UnloadTrail();
         }

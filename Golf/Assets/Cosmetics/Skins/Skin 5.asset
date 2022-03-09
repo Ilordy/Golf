@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Skin 5
   m_EditorClassIdentifier: 
   Type: 1
-  Index: 0
-  Cost: 1000
-  Model: {fileID: 0}
+  Index: 4
+  Cost: 1
+  Model: {fileID: 4214754233056934865, guid: 3623b1fa196bb1144b17351abd406505, type: 3}
