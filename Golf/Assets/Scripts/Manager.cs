@@ -57,6 +57,7 @@ public class Manager : MonoBehaviour {
 
     int[,,] cosmetics = new int[3,5,2];
     Gradient currTrail;
+    public Material defaultMat;
 
     //Game loop
     bool playGame = false;
@@ -87,6 +88,8 @@ public class Manager : MonoBehaviour {
         GameEvents.current.OnRequestCosmetic += HandleCosmetic;
         GameEvents.current.OnSetEquip += HandleCosmeticState;
         GameEvents.current.OnLoadTrail += LoadTrail;
+        GameEvents.current.OnSetStartMaterial += SetPlayerMaterial;
+        GameEvents.current.OnRequestCosmeticStates += SendCosmeticStates;
 
         //Debug delete
         if(willDeleteSaves) {
@@ -109,6 +112,9 @@ public class Manager : MonoBehaviour {
         incomeCost = PlayerPrefs.GetInt("IncomeCost", 100);
         soundEnabled = PlayerPrefs.GetInt("SoundEnabled", 1);
         hapticsEnabled = PlayerPrefs.GetInt("HapticsEnabled", 1);
+
+        //Set player default material
+        player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial = defaultMat;
 
         //Calculate difficulty for current level
         calculateDifficulty(level);
@@ -193,7 +199,7 @@ public class Manager : MonoBehaviour {
 
     // TESTING
     void OnApplicationFocus(bool hasFocus) {
-        Debug.Log(hasFocus);
+        
     }
 
     // Functions
@@ -386,6 +392,14 @@ public class Manager : MonoBehaviour {
 
     void UnloadTrail () {
         currTrail = null;
+    }
+
+    void SetPlayerMaterial(Material mat) {
+        defaultMat = mat;
+    }
+
+    void SendCosmeticStates() {
+        GameEvents.current.SendCosmeticStates(cosmetics);
     }
 }
 }

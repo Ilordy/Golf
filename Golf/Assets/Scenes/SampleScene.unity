@@ -6509,6 +6509,7 @@ MonoBehaviour:
     type: 3}
   spawner: {fileID: 706628349}
   money: 0
+  defaultMat: {fileID: 2100000, guid: 3f3d716ece93c0c49b7fa6187e02095a, type: 2}
   willDeleteSaves: 1
 --- !u!4 &981665294
 Transform:

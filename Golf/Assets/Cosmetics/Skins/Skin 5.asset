@@ -16,3 +16,5 @@ MonoBehaviour:
   Index: 4
   Cost: 1
   Model: {fileID: 4214754233056934865, guid: 3623b1fa196bb1144b17351abd406505, type: 3}
+  PlayerDefaultMaterial: {fileID: 2100000, guid: 3f3d716ece93c0c49b7fa6187e02095a,
+    type: 2}

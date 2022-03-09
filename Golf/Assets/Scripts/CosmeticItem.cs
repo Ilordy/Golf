@@ -16,8 +16,8 @@ public class CosmeticItem : MonoBehaviour {
     GameObject player;
     GameObject cosmeticInstance;
 
-    Color defaultMat;
-    Color thisMat;
+    Material defaultMat;
+    Material thisMat;
 
     Gradient thisTrail;
 
@@ -42,8 +42,8 @@ public class CosmeticItem : MonoBehaviour {
         purchaseButtonText = purchaseButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
 
         if (type == 1) {
-            defaultMat = player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial.color;
-            thisMat = model.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial.color;
+            defaultMat = data.PlayerDefaultMaterial;
+            thisMat = model.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial;
         } else if (type == 2) {
             thisTrail = model.GetComponent<TrailRenderer>().colorGradient;
         }
@@ -58,15 +58,26 @@ public class CosmeticItem : MonoBehaviour {
 
         GameEvents.current.OnAnswerRequest += HandleRequestAnswer;
         GameEvents.current.OnUnequipOthers += UnequipOthers;
+        GameEvents.current.OnSendCosmeticStates += SetStates;
+
+        GameEvents.current.RequestcosmeticStates();
     }
 
     void Start() {
-        purchaseButtonText.text = cost.ToString();
-
         purchaseButton.onClick.AddListener(Purchase);
     }
 
     void OnEnable() {
+        if (!purchased) {
+            purchaseButtonText.text = cost.ToString();
+        } else {
+            if (equipped) {
+                purchaseButtonText.text = "Unequip";
+            } else {
+                purchaseButtonText.text = "Equip";
+            }
+        }
+
         if (!purchased && !CanBuy()) {
             purchaseButton.interactable = false;
         } else {
@@ -104,7 +115,8 @@ public class CosmeticItem : MonoBehaviour {
             cosmeticInstance.transform.parent = player.transform;
             cosmeticInstance.transform.position = player.transform.position;
         } else if (t == 1) {
-            player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial.color = thisMat;
+            player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().material = thisMat;
+            GameEvents.current.SetStartMaterial(thisMat);
         } else if (t == 2) {
             GameEvents.current.LoadTrail(thisTrail);
         }
@@ -116,7 +128,8 @@ public class CosmeticItem : MonoBehaviour {
         if (t == 0) {
             Destroy(cosmeticInstance);
         } else if (t == 1) {
-            player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial.color = defaultMat;
+            player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().material = defaultMat;
+            GameEvents.current.SetStartMaterial(defaultMat);
         } else if (t == 2) {
             GameEvents.current.UnloadTrail();
         }
@@ -133,5 +146,18 @@ public class CosmeticItem : MonoBehaviour {
         equipped = !equipped;
         string action = equipped ? "Unequip" : "Equip";
         purchaseButtonText.text = action.ToString();
+    }
+
+    void SetStates(int[,,] cosmetics) {
+        if (cosmetics[type,index,0] < 1) {
+            purchased = false;
+        } else {
+            purchased = true;
+        }
+        if (cosmetics[type,index,1] < 1) {
+            equipped = false;
+        } else {
+            equipped = true;
+        }
     }
 }

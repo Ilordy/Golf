@@ -130,6 +130,16 @@ public class GameEvents : MonoBehaviour
     }
 
     // Cosmetics Events
+    public event Action OnRequestCosmeticStates;
+    public void RequestcosmeticStates() {
+        OnRequestCosmeticStates?.Invoke();
+    }
+
+    public event Action<int[,,]> OnSendCosmeticStates;
+    public void SendCosmeticStates(int[,,] cosmetics) {
+        OnSendCosmeticStates?.Invoke(cosmetics);
+    }
+
     public event Action<int, int, int> OnRequestCosmetic;
     public void RequestCosmetic(int type, int i, int cost) {
         OnRequestCosmetic?.Invoke(type, i, cost);
@@ -158,5 +168,10 @@ public class GameEvents : MonoBehaviour
     public event Action OnUnloadTrail;
     public void UnloadTrail() {
         OnUnloadTrail?.Invoke();
+    }
+
+    public event Action<Material> OnSetStartMaterial;
+    public void SetStartMaterial(Material mat) {
+        OnSetStartMaterial?.Invoke(mat);
     }
 }

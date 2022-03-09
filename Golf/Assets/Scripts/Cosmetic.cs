@@ -9,4 +9,5 @@ public class Cosmetic : ScriptableObject {
     public int Index = 0;
     public int Cost = 1000;
     public GameObject Model;
+    public Material PlayerDefaultMaterial;
 }
