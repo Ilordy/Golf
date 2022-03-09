@@ -241,8 +241,8 @@ public class UIManager : MonoBehaviour
         powerUpSlider.value = value;
     }
 
-    void UpdateProgressBar(int value) {
-        float progress = (float)value/GameManager.EnemiesToSpawn;
+    void UpdateProgressBar(int killed, int alive) {
+        float progress = (float)killed/(GameManager.EnemiesToSpawn - (GameManager.EnemiesToSpawn - alive));
         progressBar.value = progress;
         progressText.text = (progress * 100).ToString("F2") + "%"; 
     }

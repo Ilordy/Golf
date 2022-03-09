@@ -249,39 +249,7 @@ public class Manager : MonoBehaviour {
         income = incomeLevel;
     }
 
-    void HandleVictory() {
-        ResetGame();
-        level++;
-        PlayerPrefs.SetInt("Level", level);
-        calculateDifficulty(level);
-        GameEvents.current.HandleVictory(level, earned);
-    }
-
-    public void HandleDefeat() {
-        ResetGame();
-        GameEvents.current.HandleDefeat();
-    }
-
-    public void ResetGame() {
-        StopCoroutine(StartedSpawning);
-        StartedSpawning = null;
-        playGame = false;
-        playerAnimator.SetBool("Swing", false);
-        Enemy.ResetStatics();
-        PowerUpAnimation.DeleteAnimation();
-        GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");
-        foreach (GameObject i in e) {
-            Destroy(i);
-        }
-    }
-
-    public void SkipLevel() {
-        level++;
-        PlayerPrefs.SetInt("Level", level);
-        GameEvents.current.LevelChange(level);
-        calculateDifficulty(level);
-    }
-
+    // EVENT FUNCTIONS
     public void HandleUpgrade1() {
         if (money > fireRateCost && fireRateLevel < upgradeMaxLevel) {
             money -= fireRateCost;
@@ -327,6 +295,59 @@ public class Manager : MonoBehaviour {
         PlayerPrefs.SetInt("Money", money);
     }
 
+    public void AwardRegular() {
+        money += earned;
+        earned = 0;
+        PlayerPrefs.SetInt("Money", money);
+        GameEvents.current.MoneyChange();
+        CheckMoney();
+    }
+
+    public void AwardDouble() {
+        money += earned*2;
+        earned = 0;
+        PlayerPrefs.SetInt("Money", money);
+        GameEvents.current.MoneyChange();
+        CheckMoney();
+    }
+
+    public void SkipLevel() {
+        level++;
+        PlayerPrefs.SetInt("Level", level);
+        GameEvents.current.LevelChange(level);
+        calculateDifficulty(level);
+    }
+
+    void HandleVictory() {
+        ResetGame();
+        level++;
+        PlayerPrefs.SetInt("Level", level);
+        calculateDifficulty(level);
+        GameEvents.current.HandleVictory(level, earned);
+    }
+
+    public void HandleDefeat() {
+        ResetGame();
+        GameEvents.current.HandleDefeat();
+    }
+
+    void HandleReward() {
+        earned += Random.Range(1, income);
+    }
+
+    public void ResetGame() {
+        StopCoroutine(StartedSpawning);
+        StartedSpawning = null;
+        playGame = false;
+        playerAnimator.SetBool("Swing", false);
+        Enemy.ResetStatics();
+        PowerUpAnimation.DeleteAnimation();
+        GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (GameObject i in e) {
+            Destroy(i);
+        }
+    }
+
     void HandleCosmetic(int type, int i, int cost) {
         if (cost <= money) {
             money -= cost;
@@ -357,26 +378,6 @@ public class Manager : MonoBehaviour {
             disable3 = true;
         }
         GameEvents.current.CheckAfford(disable1, disable2, disable3);
-    }
-
-    public void HandleReward() {
-        earned += Random.Range(1, income);
-    }
-
-    public void AwardRegular() {
-        money += earned;
-        earned = 0;
-        PlayerPrefs.SetInt("Money", money);
-        GameEvents.current.MoneyChange();
-        CheckMoney();
-    }
-
-    public void AwardDouble() {
-        money += earned*2;
-        earned = 0;
-        PlayerPrefs.SetInt("Money", money);
-        GameEvents.current.MoneyChange();
-        CheckMoney();
     }
 
     void LoadTrail (Gradient trail) {

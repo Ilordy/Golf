@@ -47,9 +47,9 @@ public class GameEvents : MonoBehaviour
         OnHandleDefeat?.Invoke();
     }
 
-    public event Action<int> OnProgressChange;
-    public void ProgressChange(int n) {
-        OnProgressChange?.Invoke(n);
+    public event Action<int, int> OnProgressChange;
+    public void ProgressChange(int n, int m) {
+        OnProgressChange?.Invoke(n, m);
     }
 
     public event Action<bool, bool, bool> OnCheckAfford;

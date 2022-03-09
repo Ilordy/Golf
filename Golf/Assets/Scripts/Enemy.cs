@@ -24,7 +24,7 @@ public class Enemy : EnemyClass {
     {
         if(health <= 0) {
             totalKilledCount++;
-            GameEvents.current.ProgressChange(totalKilledCount);
+            GameEvents.current.ProgressChange(totalKilledCount, aliveCount);
             if (increase) {
                 killedCount++;
                 if (killedCount <= 5) {
