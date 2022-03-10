@@ -12,6 +12,7 @@ public class CosmeticItem : MonoBehaviour {
     int type;
     int cost;
     Vector3 offset;
+    Vector3 rotation;
     GameObject model;
 
     GameObject player;
@@ -36,6 +37,7 @@ public class CosmeticItem : MonoBehaviour {
         model = data.Model;
         index = data.Index;
         offset = data.Offset;
+        rotation = data.Rotation;
 
         // Get relevant references
         player = GameObject.Find("Player");
@@ -115,7 +117,7 @@ public class CosmeticItem : MonoBehaviour {
             cosmeticInstance = Instantiate(model, Vector3.zero, Quaternion.identity);
             cosmeticInstance.transform.parent = player.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(2).GetChild(0);
             cosmeticInstance.transform.position = player.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(2).GetChild(0).position;
-            cosmeticInstance.transform.rotation = player.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(2).GetChild(0).rotation;
+            cosmeticInstance.transform.localEulerAngles = rotation;
         } else if (t == 1) {
             player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().material = thisMat;
             GameEvents.current.SetStartMaterial(thisMat);
