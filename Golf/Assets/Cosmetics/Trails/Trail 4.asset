@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Type: 2
   Index: 3
-  Cost: 1
+  Cost: 1000
   Offset: {x: 0, y: 0, z: -10}
+  Rotation: {x: 0, y: 0, z: 0}
   Model: {fileID: 6712186436350706317, guid: 22eaf3bf2121868439ab80f3a9eb2b92, type: 3}
   PlayerDefaultMaterial: {fileID: 0}

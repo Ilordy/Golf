@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b6fbce410de70e24fac3dba503ebc070, type: 3}
-  m_Name: Hat2
+  m_Name: Trail 6
   m_EditorClassIdentifier: 
-  Type: 0
-  Index: 1
-  Cost: 10
-  Offset: {x: 0, y: -0.3, z: -10}
-  Rotation: {x: 0, y: -90, z: 0}
-  Model: {fileID: 7290053269072353586, guid: f669274f8752bc44991bc945bc5e86b0, type: 3}
+  Type: 2
+  Index: 4
+  Cost: 2000
+  Offset: {x: 0, y: 0, z: -10}
+  Rotation: {x: 0, y: 0, z: 0}
+  Model: {fileID: 6712186436350706317, guid: d9455939960198542bd3fde2e98318e4, type: 3}
   PlayerDefaultMaterial: {fileID: 0}

@@ -83,7 +83,7 @@ TrailRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.32366943
+        value: 0.72946167
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -152,7 +152,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24903d52d0d4c824793f4a3bdebed4f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 200
 --- !u!120 &-3244547588580266746
 LineRenderer:
   m_ObjectHideFlags: 0
