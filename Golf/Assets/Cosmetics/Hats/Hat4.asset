@@ -15,4 +15,6 @@ MonoBehaviour:
   Type: 0
   Index: 3
   Cost: 10
-  Model: {fileID: 2255929593412109618, guid: 611f103b4471a0d40b550dd8a092654a, type: 3}
+  Offset: {x: 0, y: -0.5, z: -10}
+  Model: {fileID: 1803816904012406628, guid: ebe5095f947523145afe32f1fb8f3c14, type: 3}
+  PlayerDefaultMaterial: {fileID: 0}

@@ -11,6 +11,7 @@ public class CosmeticItem : MonoBehaviour {
     int index;
     int type;
     int cost;
+    Vector3 offset;
     GameObject model;
 
     GameObject player;
@@ -34,6 +35,7 @@ public class CosmeticItem : MonoBehaviour {
         cost = data.Cost;
         model = data.Model;
         index = data.Index;
+        offset = data.Offset;
 
         // Get relevant references
         player = GameObject.Find("Player");
@@ -53,8 +55,7 @@ public class CosmeticItem : MonoBehaviour {
         instance.layer = 5;
         instance.transform.parent = gameObject.transform;
         instance.transform.position = transform.position;
-
-        if (type == 1) instance.transform.position -= new Vector3(0,0.5f,0);
+        instance.transform.position += offset;
 
         GameEvents.current.OnAnswerRequest += HandleRequestAnswer;
         GameEvents.current.OnUnequipOthers += UnequipOthers;
@@ -112,8 +113,9 @@ public class CosmeticItem : MonoBehaviour {
         GameEvents.current.UnequipOthers(type, index);
         if (t == 0) {
             cosmeticInstance = Instantiate(model, Vector3.zero, Quaternion.identity);
-            cosmeticInstance.transform.parent = player.transform;
-            cosmeticInstance.transform.position = player.transform.position;
+            cosmeticInstance.transform.parent = player.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(2).GetChild(0);
+            cosmeticInstance.transform.position = player.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(2).GetChild(0).position;
+            cosmeticInstance.transform.rotation = player.transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetChild(2).GetChild(0).rotation;
         } else if (t == 1) {
             player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().material = thisMat;
             GameEvents.current.SetStartMaterial(thisMat);

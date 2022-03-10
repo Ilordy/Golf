@@ -15,4 +15,6 @@ MonoBehaviour:
   Type: 0
   Index: 4
   Cost: 2147483647
-  Model: {fileID: 5574376818013290018, guid: 40d3d35bf2fa88840bee7221b8cb1327, type: 3}
+  Offset: {x: 0, y: -0.5, z: -10}
+  Model: {fileID: 4273810931371322946, guid: eedcbbf857bc9664f8fb2698cbd8dce7, type: 3}
+  PlayerDefaultMaterial: {fileID: 0}

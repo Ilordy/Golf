@@ -2080,6 +2080,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 86f9e8d928872ee4ea959110fb95cde3,
         type: 2}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Skin
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -2544,6 +2549,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: ShopItem (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 326952321783586165, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: rotation.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Trail
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -2868,6 +2883,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 52bac87a165a5d3479de8ead45fd3664,
         type: 2}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Skin
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -3861,6 +3881,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ShopItem (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 326952321783586165, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: rotation.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Trail
       objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
@@ -5614,12 +5644,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: ShopItem (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 326952321783586165, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: rotation.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3208546713912231010, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: data
       value: 
       objectReference: {fileID: 11400000, guid: e82937b87a423034b85d3d91264e20da,
         type: 2}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Horns
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -6301,6 +6341,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 4e4f3b4281a672a4ab0b7827ce08354d,
         type: 2}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Skin
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -6809,6 +6854,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ShopItem (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 326952321783586165, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: rotation.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Trail
       objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
@@ -9234,6 +9289,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: b3686fe0ede2ad541b74ae3df3b61d6f,
         type: 2}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Skin
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -10724,12 +10784,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: ShopItem (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 326952321783586165, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: rotation.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3208546713912231010, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: data
       value: 
       objectReference: {fileID: 11400000, guid: 883cfd6d7a35b9f4ab222715a15f8cc2,
         type: 2}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Chicken
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -11204,12 +11274,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: ShopItem (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 326952321783586165, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: rotation.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3208546713912231010, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: data
       value: 
       objectReference: {fileID: 11400000, guid: 09ae901492cfaf647a7884cfd5bb6f61,
         type: 2}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Legionary
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -11355,12 +11435,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: ShopItem (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 326952321783586165, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: rotation.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3208546713912231010, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: data
       value: 
       objectReference: {fileID: 11400000, guid: 92b1823daffaae74e9863bd47caa46a8,
         type: 2}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Defensive
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -11647,6 +11737,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: 2f8f42a4579b0864485cda34c9b5752f,
         type: 2}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Skin
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -13261,6 +13356,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: ShopItem (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 326952321783586165, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: rotation.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Trail
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -13389,6 +13494,36 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 3208546713912231010, guid: 46d8c0d29c28c7543b49941ae7c676dd, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 46d8c0d29c28c7543b49941ae7c676dd, type: 3}
+--- !u!1 &2002074730
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2002074731}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2002074731
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2002074730}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 3.64, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2009505485
 GameObject:
   m_ObjectHideFlags: 0
@@ -13952,6 +14087,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ShopItem
+      objectReference: {fileID: 0}
+    - target: {fileID: 326952321783586165, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 326952321783586165, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: rotation.z
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Trail
       objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
@@ -15010,12 +15160,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: ShopItem
       objectReference: {fileID: 0}
+    - target: {fileID: 326952321783586165, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: rotation.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3208546713912231010, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: data
       value: 
       objectReference: {fileID: 11400000, guid: 23a3f6e3ed6dda345b1d1973d0a047e7,
         type: 2}
+    - target: {fileID: 5674613095270084946, guid: 46d8c0d29c28c7543b49941ae7c676dd,
+        type: 3}
+      propertyPath: m_text
+      value: Wizard
+      objectReference: {fileID: 0}
     - target: {fileID: 7396913605210349788, guid: 46d8c0d29c28c7543b49941ae7c676dd,
         type: 3}
       propertyPath: m_SizeDelta.x

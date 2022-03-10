@@ -8,6 +8,7 @@ public class Cosmetic : ScriptableObject {
     public int Type = 0;
     public int Index = 0;
     public int Cost = 1000;
+    public Vector3 Offset;
     public GameObject Model;
     public Material PlayerDefaultMaterial;
 }
