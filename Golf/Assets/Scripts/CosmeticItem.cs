@@ -16,6 +16,8 @@ public class CosmeticItem : MonoBehaviour {
     GameObject model;
 
     GameObject player;
+    GameObject bag;
+    GameObject cart;
     GameObject cosmeticInstance;
 
     Material defaultMat;
@@ -40,12 +42,15 @@ public class CosmeticItem : MonoBehaviour {
         rotation = data.Rotation;
 
         // Get relevant references
-        player = GameObject.Find("Player");
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
         purchaseButton = transform.parent.parent.GetChild(2).GetComponent<Button>();
         purchaseButtonText = purchaseButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-
-        if (type == 1) {
+        if (type == 0) {
+            player = GameObject.Find("Player");
+        } else if (type == 1) {
+            player = GameObject.Find("Player");
+            bag = GameObject.Find("GolfBag").transform.GetChild(0).gameObject;
+            cart = GameObject.Find("GolfCartSwag").transform.GetChild(6).gameObject;
             defaultMat = data.PlayerDefaultMaterial;
             thisMat = model.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial;
         } else if (type == 2) {
@@ -120,6 +125,10 @@ public class CosmeticItem : MonoBehaviour {
             cosmeticInstance.transform.localEulerAngles = rotation;
         } else if (t == 1) {
             player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().material = thisMat;
+            bag.GetComponent<MeshRenderer>().material = thisMat;
+            Material[] m = cart.GetComponent<MeshRenderer>().materials;
+            m[1] = thisMat;
+            cart.GetComponent<MeshRenderer>().materials = m;
             GameEvents.current.SetStartMaterial(thisMat);
         } else if (t == 2) {
             GameEvents.current.LoadTrail(thisTrail);
