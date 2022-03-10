@@ -33,6 +33,7 @@ public class ShieldEnemy : Enemy
 
         if (shield != null) {
             shield.parent = null;
+            shield.gameObject.layer = 12;
             shieldRb.useGravity = true;
             shieldRb.AddForce(transform.forward * Random.Range(5f,10f), ForceMode.Impulse);
             enemyRb.isKinematic = false;

@@ -55,7 +55,7 @@ public class CosmeticItem : MonoBehaviour {
         // Instantiate UI showcase
         GameObject instance = Instantiate(model, Vector3.zero, Quaternion.identity);
         instance.layer = 5;
-        instance.transform.parent = gameObject.transform;
+        instance.transform.parent = transform;
         instance.transform.position = transform.position;
         instance.transform.position += offset;
 

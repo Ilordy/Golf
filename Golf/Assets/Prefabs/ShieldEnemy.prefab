@@ -1038,7 +1038,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4394e3fc956cab4498633de883f6596d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 1
 --- !u!136 &835195716798131513
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1066,9 +1065,9 @@ Rigidbody:
   m_AngularDrag: 0.05
   m_UseGravity: 0
   m_IsKinematic: 1
-  m_Interpolate: 1
+  m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 3
+  m_CollisionDetection: 0
 --- !u!198 &1459776003240789112
 ParticleSystem:
   m_ObjectHideFlags: 0
