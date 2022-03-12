@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Trail 6
   m_EditorClassIdentifier: 
   Type: 2
-  Index: 4
+  Index: 5
   Cost: 2000
   Offset: {x: 0, y: 0, z: -10}
   Rotation: {x: 0, y: 0, z: 0}

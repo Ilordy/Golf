@@ -73,14 +73,9 @@ public class GameEvents : MonoBehaviour
         OnUpgrade3Request?.Invoke();
     }
 
-    public event Action OnAwardRegularPressed;
-    public void AwardRegularPressed() {
-        OnAwardRegularPressed?.Invoke();
-    }
-
-    public event Action OnAwardDoublePressed;
-    public void AwardDoublePressed() {
-        OnAwardDoublePressed?.Invoke();
+    public event Action<int> OnRewardVictory;
+    public void RewardVictory(int mult) {
+        OnRewardVictory?.Invoke(mult);
     }
 
     public event Action OnSkipLevelPressed;
@@ -173,5 +168,10 @@ public class GameEvents : MonoBehaviour
     public event Action<Material> OnSetStartMaterial;
     public void SetStartMaterial(Material mat) {
         OnSetStartMaterial?.Invoke(mat);
+    }
+
+    public event Action<int> OnSetTheme;
+    public void SetTheme(int n) {
+        OnSetTheme?.Invoke(n);
     }
 }

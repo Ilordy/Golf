@@ -263,12 +263,12 @@ public class UIManager : MonoBehaviour
     }
 
     void AwardRegular() {
-        GameEvents.current.AwardRegularPressed();
+        GameEvents.current.RewardVictory(1);
         OpenMainMenu();
     }
 
     void AwardDouble() {
-        GameEvents.current.AwardDoublePressed();
+        GameEvents.current.RewardVictory(2);
         OpenMainMenu();
     }
 

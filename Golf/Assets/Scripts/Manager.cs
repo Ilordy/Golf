@@ -55,12 +55,13 @@ public class Manager : MonoBehaviour {
 
     //Cosmetics
 
-    int[,,] cosmetics = new int[3,5,2];
+    int[,,] cosmetics = new int[3,6,2];
     Gradient currTrail;
     public Material defaultMat;
 
     //Game loop
     bool playGame = false;
+    bool themeSet = false;
     int level = 1;
     [SerializeField] bool willDeleteSaves = false;
 
@@ -79,8 +80,7 @@ public class Manager : MonoBehaviour {
         GameEvents.current.OnUpgrade1Request += HandleUpgrade1;
         GameEvents.current.OnUpgrade2Request += HandleUpgrade2;
         GameEvents.current.OnUpgrade3Request += HandleUpgrade3;
-        GameEvents.current.OnAwardRegularPressed += AwardRegular;
-        GameEvents.current.OnAwardDoublePressed += AwardDouble;
+        GameEvents.current.OnRewardVictory += RewardVictory;
         GameEvents.current.OnSkipLevelPressed += SkipLevel;
         GameEvents.current.OnDefeat += HandleDefeat;
         GameEvents.current.OnReward += HandleReward;
@@ -123,7 +123,7 @@ public class Manager : MonoBehaviour {
         UpdateUpgradeValues();
 
         //Update UI
-        money = 2000;
+        money = 10000;
         GameEvents.current.SettingsChange();
         GameEvents.current.LevelChange(level);
         GameEvents.current.MoneyChange();
@@ -301,30 +301,8 @@ public class Manager : MonoBehaviour {
         PlayerPrefs.SetInt("Money", money);
     }
 
-    public void AwardRegular() {
-        money += earned;
-        earned = 0;
-        PlayerPrefs.SetInt("Money", money);
-        GameEvents.current.MoneyChange();
-        CheckMoney();
-    }
-
-    public void AwardDouble() {
-        money += earned*2;
-        earned = 0;
-        PlayerPrefs.SetInt("Money", money);
-        GameEvents.current.MoneyChange();
-        CheckMoney();
-    }
-
-    public void SkipLevel() {
-        level++;
-        PlayerPrefs.SetInt("Level", level);
-        GameEvents.current.LevelChange(level);
-        calculateDifficulty(level);
-    }
-
     void HandleVictory() {
+        themeSet = false;
         ResetGame();
         level++;
         PlayerPrefs.SetInt("Level", level);
@@ -332,9 +310,26 @@ public class Manager : MonoBehaviour {
         GameEvents.current.HandleVictory(level, earned);
     }
 
+    void RewardVictory(int mult) {
+        HandleTheme();
+        money += earned*mult;
+        earned = 0;
+        PlayerPrefs.SetInt("Money", money);
+        GameEvents.current.MoneyChange();
+        CheckMoney();
+    }
+
     public void HandleDefeat() {
         ResetGame();
         GameEvents.current.HandleDefeat();
+    }
+
+    void SkipLevel() {
+        level++;
+        HandleTheme();
+        PlayerPrefs.SetInt("Level", level);
+        GameEvents.current.LevelChange(level);
+        calculateDifficulty(level);
     }
 
     void HandleReward() {
@@ -400,6 +395,13 @@ public class Manager : MonoBehaviour {
 
     void SendCosmeticStates() {
         GameEvents.current.SendCosmeticStates(cosmetics);
+    }
+
+    void HandleTheme() {
+        if (level % 5 == 0 && !themeSet) {
+            themeSet = true;
+            GameEvents.current.SetTheme(Random.Range(0,4));
+        }
     }
 }
 }
