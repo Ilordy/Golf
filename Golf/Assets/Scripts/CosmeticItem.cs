@@ -67,8 +67,7 @@ public class CosmeticItem : MonoBehaviour {
         GameEvents.current.OnAnswerRequest += HandleRequestAnswer;
         GameEvents.current.OnUnequipOthers += UnequipOthers;
         GameEvents.current.OnSendCosmeticStates += SetStates;
-
-        GameEvents.current.RequestcosmeticStates();
+        GameEvents.current.OnEquipCurrent += EquipCurrent;
     }
 
     void Start() {
@@ -76,6 +75,7 @@ public class CosmeticItem : MonoBehaviour {
     }
 
     void OnEnable() {
+        GameEvents.current.RequestcosmeticStates();
         if (!purchased) {
             purchaseButtonText.text = cost.ToString();
         } else {
@@ -90,6 +90,20 @@ public class CosmeticItem : MonoBehaviour {
             purchaseButton.interactable = false;
         } else {
             purchaseButton.interactable = true;
+        }
+    }
+
+    private IEnumerator Countdown() {
+        float duration = 3f; // 3 seconds you can change this 
+        //to whatever you want
+        float normalizedTime = 0;
+        while(normalizedTime <= 1f)
+        {
+            normalizedTime += Time.deltaTime / duration;
+            yield return null;
+        }
+        if (normalizedTime > 1f) {
+            gameObject.SetActive(false);
         }
     }
 
@@ -111,6 +125,12 @@ public class CosmeticItem : MonoBehaviour {
         if (t == type && i == index && answer) {
             Equip(type);
             purchased = true;
+        }
+    }
+
+    void EquipCurrent(int t, int i) {
+        if (t == type && i == index) {
+            Equip(type);
         }
     }
 
@@ -144,7 +164,7 @@ public class CosmeticItem : MonoBehaviour {
             player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().material = defaultMat;
             GameEvents.current.SetStartMaterial(defaultMat);
         } else if (t == 2) {
-            GameEvents.current.UnloadTrail();
+            GameEvents.current.LoadTrail(null);
         }
         
     }

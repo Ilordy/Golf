@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Type: 2
   Index: 4
-  Cost: 5000
+  Cost: 2000
   Offset: {x: 0, y: 0, z: -10}
   Rotation: {x: 0, y: 0, z: 0}
-  Model: {fileID: 6712186436350706317, guid: ee5461e90f8bb0d42aa8546bd0345e23, type: 3}
+  Model: {fileID: 6712186436350706317, guid: d9455939960198542bd3fde2e98318e4, type: 3}
   PlayerDefaultMaterial: {fileID: 0}

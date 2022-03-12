@@ -98,6 +98,16 @@ public class GameEvents : MonoBehaviour
         OnReturnMainMenu?.Invoke();
     }
 
+    public event Action<int,float> OnAnimatePowerUp;
+    public void AnimatePowerUp(int enemiesLength, float pot) {
+        OnAnimatePowerUp?.Invoke(enemiesLength,pot);
+    }
+
+    public event Action OnDeleteAnimation;
+    public void DeleteAnimation() {
+        OnDeleteAnimation?.Invoke();
+    }
+
     // AUDIO MANAGER EVENTS
     public event Action OnEnemyHit;
     public void EnemyHit() {
@@ -150,6 +160,11 @@ public class GameEvents : MonoBehaviour
         OnSetEquip?.Invoke(type, i, state);
     }
 
+    public event Action<int, int> OnEquipCurrent;
+    public void EquipCurrent(int t, int i) {
+        OnEquipCurrent?.Invoke(t,i);
+    }
+
     public event Action<int, int> OnUnequipOthers;
     public void UnequipOthers(int type, int i) {
         OnUnequipOthers?.Invoke(type, i);
@@ -158,11 +173,6 @@ public class GameEvents : MonoBehaviour
     public event Action<Gradient> OnLoadTrail;
     public void LoadTrail(Gradient trail) {
         OnLoadTrail?.Invoke(trail);
-    }
-
-    public event Action OnUnloadTrail;
-    public void UnloadTrail() {
-        OnUnloadTrail?.Invoke();
     }
 
     public event Action<Material> OnSetStartMaterial;

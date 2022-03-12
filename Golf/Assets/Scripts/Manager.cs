@@ -7,17 +7,15 @@ namespace UnityEngine {
 
 public class Manager : MonoBehaviour {
 
-    public PowerUpAnimation PowerUpAnimation;
+    [SerializeField] GameObject player;
+    [SerializeField] GameObject enemy;
+    [SerializeField] GameObject cartEnemy;
+    [SerializeField] GameObject shieldEnemy;
+    [SerializeField] GameObject projectile;
+    [SerializeField] GameObject powerUpProjectile;
+    [SerializeField] GameObject spawner;
+
     EnemyClass EnemyClass;
-
-    public GameObject player;
-    public GameObject enemy;
-    public GameObject cartEnemy;
-    public GameObject shieldEnemy;
-    public GameObject projectile;
-    public GameObject powerUpProjectile;
-    public GameObject spawner;
-
     Animator playerAnimator;
 
     //Settings
@@ -46,18 +44,18 @@ public class Manager : MonoBehaviour {
     int fireRateLevel = 1;
     int fireRateCost = 100;
     int ballBounceLevel = 4;
-    int ballBounceCost = 100;
+    int ballBounceCost = 1000;
     int incomeLevel = 1;
     int incomeCost = 100;
     int upgradeMaxLevel = 20;
-    [SerializeField] int money = 0;
+    int money = 0;
     int earned = 0;
 
     //Cosmetics
 
     int[,,] cosmetics = new int[3,6,2];
     Gradient currTrail;
-    public Material defaultMat;
+    [SerializeField] Material defaultMat;
 
     //Game loop
     bool playGame = false;
@@ -70,9 +68,16 @@ public class Manager : MonoBehaviour {
     public int SoundEnabled {get{return soundEnabled;}set{soundEnabled = value;}}
     public int HapticsEnabled {get{return hapticsEnabled;}set{hapticsEnabled = value;}}
     public int MaxBounces {get{return maxBounces;}}
-    public int Level {get{return level;}}
     public int EnemiesToSpawn {get{return enemiesToSpawn;}}
     public int Money {get => money;}
+    public int Level {get => level;}
+    public int FireRateLevel {get => fireRateLevel;}
+    public int FireRateCost {get => fireRateCost;}
+    public int BallBounceLevel {get => ballBounceLevel;}
+    public int BallBounceCost {get => ballBounceCost;}
+    public int IncomeLevel {get => incomeLevel;}
+    public int IncomeCost {get => incomeCost;}
+    public int[,,] Cosmetics {get => cosmetics;}
 
 
     void Start() {
@@ -113,6 +118,9 @@ public class Manager : MonoBehaviour {
         soundEnabled = PlayerPrefs.GetInt("SoundEnabled", 1);
         hapticsEnabled = PlayerPrefs.GetInt("HapticsEnabled", 1);
 
+        //LOAD GAME DATA
+        //LoadData();
+
         //Set player default material
         player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial = defaultMat;
 
@@ -122,8 +130,17 @@ public class Manager : MonoBehaviour {
         //Update Upgrade Values
         UpdateUpgradeValues();
 
+        //Equip current cosmetics
+        for (int i = 0; i < cosmetics.GetLength(0); i++) {
+            for (int j = 0; j < cosmetics.GetLength(1); j++) {
+                if (cosmetics[i,j,0] == 1 && cosmetics[i,j,1] == 1) {
+                    GameEvents.current.EquipCurrent(i,j);
+                    break;
+                }
+            }
+        }
+
         //Update UI
-        money = 10000;
         GameEvents.current.SettingsChange();
         GameEvents.current.LevelChange(level);
         GameEvents.current.MoneyChange();
@@ -156,7 +173,7 @@ public class Manager : MonoBehaviour {
             if (EnemyClass.KilledCount >= powerUpReq && holdTime > 0.1f) {
                 enemies = GameObject.FindGameObjectsWithTag("Enemy");
                 pot += Time.deltaTime;
-                PowerUpAnimation.AnimatePowerUp(enemies.Length, pot);
+                GameEvents.current.AnimatePowerUp(enemies.Length, pot);
                 GameEvents.current.KillsChange(Mathf.Lerp(powerUpReq, 0, pot / 1f));
             }
         }
@@ -177,13 +194,13 @@ public class Manager : MonoBehaviour {
                 }
                 EnemyClass.KilledCount = 0;
                 pot = 0;
-                PowerUpAnimation.DeleteAnimation();
+                GameEvents.current.DeleteAnimation();
                 GameEvents.current.PowerUp();
             } else {
                 //playerAnimator.SetBool("Swing",false);
                 playerAnimator.SetBool("Swing",true);
                 pot = 0;
-                PowerUpAnimation.DeleteAnimation();
+                GameEvents.current.DeleteAnimation();
                 GameEvents.current.KillsChange(EnemyClass.KilledCount);
             }
         }
@@ -199,10 +216,32 @@ public class Manager : MonoBehaviour {
 
     // TESTING
     void OnApplicationFocus(bool hasFocus) {
-        
+        SaveData();
     }
 
     // Functions
+
+    void SaveData() {
+        SaveSystem.SaveData(this);
+    }
+
+    void LoadData() {
+        GameData data = SaveSystem.LoadData();
+
+        if (data == null) return;
+
+        level = data.level;
+        money = data.money;
+        fireRateLevel = data.fireRateLevel;
+        fireRateCost = data.fireRateCost;
+        ballBounceLevel = data.ballBounceLevel;
+        ballBounceCost = data.ballBounceCost;
+        incomeLevel = data.incomeLevel;
+        incomeCost = data.incomeCost;
+        soundEnabled = data.soundEnabled;
+        hapticsEnabled = data.hapticsEnabled;
+        cosmetics = data.cosmetics;
+    }
 
     IEnumerator SpawnEnemy() {
         while (EnemyClass.AliveCount < enemiesToSpawn) {
@@ -210,9 +249,9 @@ public class Manager : MonoBehaviour {
             float xPos = Random.Range(-47f,-32f);
             float zPos = Random.Range(-3.65f,3.65f);
             GameObject selected = null;
-            if (chance < 0.1f) {
+            if (chance < 0.1f && level > 10) {
                 selected = cartEnemy;
-            } else if (chance > 0.1f && chance < 0.9f) {
+            } else if (chance > 0.1f && chance < 0.3f && level > 5) {
                 selected = shieldEnemy;
             } else {
                 selected = enemy;
@@ -244,7 +283,7 @@ public class Manager : MonoBehaviour {
     }
 
     void calculateDifficulty (int level) {
-        enemiesToSpawn = (int)Mathf.Ceil((level + 10) * 1.2f);
+        enemiesToSpawn = Mathf.Clamp((int)Mathf.Ceil((level + 10) * 1.2f), 0,300);
         enemySpawnInterval = Mathf.Clamp(1-level/100f, 0.2f,1f);
     }
 
@@ -342,7 +381,7 @@ public class Manager : MonoBehaviour {
         playGame = false;
         playerAnimator.SetBool("Swing", false);
         Enemy.ResetStatics();
-        PowerUpAnimation.DeleteAnimation();
+        GameEvents.current.DeleteAnimation();
         GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");
         foreach (GameObject i in e) {
             Destroy(i);
@@ -383,10 +422,6 @@ public class Manager : MonoBehaviour {
 
     void LoadTrail (Gradient trail) {
         currTrail = trail;
-    }
-
-    void UnloadTrail () {
-        currTrail = null;
     }
 
     void SetPlayerMaterial(Material mat) {

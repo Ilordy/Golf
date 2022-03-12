@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PowerUpAnimation : MonoBehaviour {
-    public GameObject animProjectile;
-    public Manager GameManager;
-    public GameObject player;
-    public Transform spawner;
+    [SerializeField] GameObject animProjectile;
+    [SerializeField] Manager GameManager;
+    [SerializeField] GameObject player;
+    [SerializeField] Transform spawner;
 
     List<GameObject> spawns = new List<GameObject>();
     Animator animator;
@@ -15,9 +15,12 @@ public class PowerUpAnimation : MonoBehaviour {
 
     void Start() {
         animator = GetComponent<Animator>();
+
+        GameEvents.current.OnAnimatePowerUp += AnimatePowerUp;
+        GameEvents.current.OnDeleteAnimation += DeleteAnimation;
     }
 
-    public void AnimatePowerUp(int enemiesLength, float pot) {
+    void AnimatePowerUp(int enemiesLength, float pot) {
         animator.SetBool("Animate", true);
         GameEvents.current.ChargeStart();
         c += Time.deltaTime*2;
@@ -41,7 +44,7 @@ public class PowerUpAnimation : MonoBehaviour {
         if (c > 1) animator.SetBool("Animate", false);
     }
 
-    public void DeleteAnimation() {
+    void DeleteAnimation() {
         GameEvents.current.ChargeStop();
         animator.SetBool("Animate", false);
         spawned = 0;

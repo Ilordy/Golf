@@ -135,6 +135,11 @@ public class UIManager : MonoBehaviour
 
         //Update UI
         UpdateSettings();
+
+        for (int i = 1; i < transform.childCount; i++) {
+            transform.GetChild(i).gameObject.SetActive(true);
+            transform.GetChild(i).gameObject.SetActive(false);
+        }
     }
 
     IEnumerator StartGame() {
