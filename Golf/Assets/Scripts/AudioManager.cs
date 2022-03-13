@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MoreMountains.NiceVibrations;
 
 public class AudioManager : MonoBehaviour {
 
@@ -37,7 +38,7 @@ public class AudioManager : MonoBehaviour {
         if (GameManager.SoundEnabled < 0) return;
         enemyHitSource.PlayOneShot(enemyHit);
         if (GameManager.HapticsEnabled < 0) return;
-        Vibrations.Vibrate(250);
+        MMVibrationManager.Haptic(HapticTypes.LightImpact);
     }
     public void PlayBallHit() {
         if (GameManager.SoundEnabled < 0) return;

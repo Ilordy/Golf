@@ -81,6 +81,7 @@ public class Manager : MonoBehaviour {
 
 
     void Start() {
+        Handheld.Vibrate();
         //Subscribe to events
         GameEvents.current.OnUpgrade1Request += HandleUpgrade1;
         GameEvents.current.OnUpgrade2Request += HandleUpgrade2;
