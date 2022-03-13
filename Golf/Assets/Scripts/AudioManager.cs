@@ -4,6 +4,16 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour {
 
+// #if UNITY_ANDROID && !UNITY_EDITOR
+//     public static AndroidJavaClass unityplayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+//     public static AndroidJavaObject currentActivity = unityplayer.GetStatic<AndroidJavaObject>("currentActivity");
+//     public static AndroidJavaObject vibrator = currentActivity.Call<AndroidJavaObject>("getSystemService", "Vibrator");
+// #else
+//     public static AndroidJavaClass unityplayer;
+//     public static AndroidJavaObject currentActivity;
+//     public static AndroidJavaObject vibrator;
+// #endif
+
     public Manager GameManager;
     public AudioClip enemyHit, ballHit, charge, powerUp;
     AudioSource enemyHitSource, ballHitSource, chargeSource, powerUpSource;
@@ -26,6 +36,8 @@ public class AudioManager : MonoBehaviour {
     public void PlayEnemyHit() {
         if (GameManager.SoundEnabled < 0) return;
         enemyHitSource.PlayOneShot(enemyHit);
+        if (GameManager.HapticsEnabled < 0) return;
+        Vibrations.Vibrate(250);
     }
     public void PlayBallHit() {
         if (GameManager.SoundEnabled < 0) return;
@@ -44,4 +56,26 @@ public class AudioManager : MonoBehaviour {
         if (GameManager.SoundEnabled < 0) return;
         powerUpSource.PlayOneShot(powerUp);
     }
+
+//     bool IsAndroid() {
+// #if UNITY_ANDROID && !UNITY_EDITOR
+//          return true;
+// #else
+//          return false;
+// #endif
+//     }
+
+//     void Vibrate(long milliseconds) {
+//         if (IsAndroid()) {
+//             vibrator.Call("vibrate", milliseconds);
+//         } else {
+//             Handheld.Vibrate();
+//         }
+//     }
+
+//     void Cancel() {
+//         if (IsAndroid()) {
+//             vibrator.Call("cancel");
+//         }
+//     }
 }
