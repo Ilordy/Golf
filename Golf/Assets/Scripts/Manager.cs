@@ -53,7 +53,7 @@ public class Manager : MonoBehaviour {
 
     //Cosmetics
 
-    int[,,] cosmetics = new int[3,6,2];
+    int[,,] cosmetics = new int[3,7,2];
     Gradient currTrail;
     [SerializeField] Material defaultMat;
 
@@ -86,6 +86,7 @@ public class Manager : MonoBehaviour {
         GameEvents.current.OnUpgrade1Request += HandleUpgrade1;
         GameEvents.current.OnUpgrade2Request += HandleUpgrade2;
         GameEvents.current.OnUpgrade3Request += HandleUpgrade3;
+        GameEvents.current.OnCheckAffordUI += CheckMoney;
         GameEvents.current.OnRewardVictory += RewardVictory;
         GameEvents.current.OnSkipLevelPressed += SkipLevel;
         GameEvents.current.OnDefeat += HandleDefeat;
@@ -130,6 +131,9 @@ public class Manager : MonoBehaviour {
         
         //Update Upgrade Values
         UpdateUpgradeValues();
+        CheckMoney();
+
+        money = 20000;
 
         //Equip current cosmetics
         for (int i = 0; i < cosmetics.GetLength(0); i++) {
@@ -434,7 +438,7 @@ public class Manager : MonoBehaviour {
     }
 
     void HandleTheme() {
-        if (level % 5 == 0 && !themeSet) {
+        if (level % 10 == 0 && !themeSet) {
             themeSet = true;
             GameEvents.current.SetTheme(Random.Range(0,4));
         }

@@ -38,7 +38,7 @@ public class AudioManager : MonoBehaviour {
         if (GameManager.SoundEnabled < 0) return;
         enemyHitSource.PlayOneShot(enemyHit);
         if (GameManager.HapticsEnabled < 0) return;
-        MMVibrationManager.Haptic(HapticTypes.LightImpact);
+        MMVibrationManager.Haptic(HapticTypes.HeavyImpact);
     }
     public void PlayBallHit() {
         if (GameManager.SoundEnabled < 0) return;

@@ -57,6 +57,11 @@ public class GameEvents : MonoBehaviour
         OnCheckAfford?.Invoke(disable1, disable2, disable3);
     }
 
+    public event Action OnCheckAffordUI;
+    public void CheckAffordUI() {
+        OnCheckAffordUI?.Invoke();
+    }
+
     // MANAGER EVENTS
     public event Action OnUpgrade1Request;
     public void Upgrade1Request() {

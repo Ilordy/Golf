@@ -162,7 +162,7 @@ public class UIManager : MonoBehaviour
     }
 
     void OpenSettings() {
-        ToggleInteractable();
+        ToggleInteractable(false);
         settingsMenu.SetActive(true);
         menuStack.Push(settingsMenu.transform);
     }
@@ -307,13 +307,13 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
     }
 
-    void ToggleInteractable() {
+    void ToggleInteractable(bool state) {
         shopButton.interactable = !shopButton.interactable;
         settingsButton.interactable = !settingsButton.interactable;
         playButton.interactable = !playButton.interactable;
-        upgradeButton1.interactable = !upgradeButton1.interactable;
-        upgradeButton2.interactable = !upgradeButton2.interactable;
-        upgradeButton3.interactable = !upgradeButton3.interactable;
+        upgradeButton1.interactable = state;
+        upgradeButton2.interactable = state;
+        upgradeButton3.interactable = state;
     }
 
     void Back() {
@@ -321,7 +321,8 @@ public class UIManager : MonoBehaviour
         menuStack.Pop();
         menuStack.Peek().gameObject.SetActive(true);
         if (menuStack.Peek().gameObject == mainMenu) {
-            ToggleInteractable();
+            ToggleInteractable(false);
+            GameEvents.current.CheckAffordUI();
         }
     }
 }
