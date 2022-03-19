@@ -6578,7 +6578,7 @@ MonoBehaviour:
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 0
-  m_Antialiasing: 0
+  m_Antialiasing: 1
   m_AntialiasingQuality: 2
   m_StopNaN: 0
   m_Dithering: 0
@@ -6822,7 +6822,6 @@ MonoBehaviour:
     type: 3}
   spawner: {fileID: 706628349}
   defaultMat: {fileID: 2100000, guid: 3f3d716ece93c0c49b7fa6187e02095a, type: 2}
-  willDeleteSaves: 1
 --- !u!4 &981665294
 Transform:
   m_ObjectHideFlags: 0
@@ -13678,7 +13677,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5237ee03f6c8f8428186fe15489a345, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hatsPurchaseButtons: []
 --- !u!1 &1934381897
 GameObject:
   m_ObjectHideFlags: 0

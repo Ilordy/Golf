@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MK.Toon;
 
 public class ColorManager : MonoBehaviour {
 
@@ -16,8 +17,9 @@ public class ColorManager : MonoBehaviour {
     }
 
     void SetTheme(int n) {
-        rails.color = Themes[n][0];
+        Properties.albedoColor.SetValue(rails, Themes[n][0]);  
         runway1.color = Themes[n][1];
         runway2.color = Themes[n][2];
+        
     }
 }
