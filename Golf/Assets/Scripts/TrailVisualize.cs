@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class TrailVisualize : MonoBehaviour {
+    // USED TO VISUALIZE TRAIL COLORS IN THE UI
     LineRenderer line;
 
     void Start() {

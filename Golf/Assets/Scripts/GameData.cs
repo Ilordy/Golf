@@ -4,6 +4,7 @@ using UnityEngine;
 public class GameData {
     public int level, money, fireRateLevel, fireRateCost, ballBounceLevel, ballBounceCost, incomeLevel, incomeCost, soundEnabled, hapticsEnabled;
     public int[,,] cosmetics;
+    public int currTheme;
 
 
     public GameData(Manager GameManager) {
@@ -18,5 +19,6 @@ public class GameData {
         soundEnabled = GameManager.SoundEnabled;
         hapticsEnabled = GameManager.HapticsEnabled;
         cosmetics = GameManager.Cosmetics;
+        currTheme = GameManager.CurrTheme;
     }
 }

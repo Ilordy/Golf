@@ -32,4 +32,12 @@ public static class SaveSystem {
         }
 
     }
+
+    public static void DeleteSaves() {
+        string path = Application.persistentDataPath + "/GameData.b";
+
+        if (File.Exists(path)) {
+            File.Delete(path);
+        }
+    }
 }

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 using TMPro;
 
 public class CosmeticItem : MonoBehaviour {
-    public Cosmetic data;
+    [SerializeField] Cosmetic data;
 
     int index;
     int type;

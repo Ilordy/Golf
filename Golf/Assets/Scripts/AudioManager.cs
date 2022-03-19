@@ -15,8 +15,8 @@ public class AudioManager : MonoBehaviour {
 //     public static AndroidJavaObject vibrator;
 // #endif
 
-    public Manager GameManager;
-    public AudioClip enemyHit, ballHit, charge, powerUp;
+    [SerializeField] Manager GameManager;
+    [SerializeField] AudioClip enemyHit, ballHit, charge, powerUp;
     AudioSource enemyHitSource, ballHitSource, chargeSource, powerUpSource;
 
     void Start() {

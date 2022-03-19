@@ -7,7 +7,7 @@ public class ColorManager : MonoBehaviour {
     [SerializeField] Material runway1, runway2, rails;
 
     [SerializeField] Color[] theme1, theme2, theme3, theme4;
-
+    
     Color[][] Themes;
 
     void Start() {

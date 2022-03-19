@@ -43,7 +43,7 @@ public class Manager : MonoBehaviour {
     int income = 1;
     int fireRateLevel = 1;
     int fireRateCost = 100;
-    int ballBounceLevel = 4;
+    int ballBounceLevel = 1;
     int ballBounceCost = 1000;
     int incomeLevel = 1;
     int incomeCost = 100;
@@ -52,7 +52,6 @@ public class Manager : MonoBehaviour {
     int earned = 0;
 
     //Cosmetics
-
     int[,,] cosmetics = new int[3,7,2];
     Gradient currTrail;
     [SerializeField] Material defaultMat;
@@ -60,10 +59,10 @@ public class Manager : MonoBehaviour {
     //Game loop
     bool playGame = false;
     bool themeSet = false;
+    int currTheme;
     int level = 1;
-    [SerializeField] bool willDeleteSaves = false;
 
-    //Properties
+    //Getters/Setters
     public bool PlayGame {set{playGame = value;}}
     public int SoundEnabled {get{return soundEnabled;}set{soundEnabled = value;}}
     public int HapticsEnabled {get{return hapticsEnabled;}set{hapticsEnabled = value;}}
@@ -78,6 +77,7 @@ public class Manager : MonoBehaviour {
     public int IncomeLevel {get => incomeLevel;}
     public int IncomeCost {get => incomeCost;}
     public int[,,] Cosmetics {get => cosmetics;}
+    public int CurrTheme {get => currTheme;}
 
 
     void Start() {
@@ -98,30 +98,16 @@ public class Manager : MonoBehaviour {
         GameEvents.current.OnSetStartMaterial += SetPlayerMaterial;
         GameEvents.current.OnRequestCosmeticStates += SendCosmeticStates;
 
-        //Debug delete
-        if(willDeleteSaves) {
-            PlayerPrefs.DeleteAll();
-        }
-
         //Get EnemyClass
         EnemyClass = GetComponent<EnemyClass>();
         //Set Player Animator
         playerAnimator = player.GetComponent<Animator>();
 
-        //Get all persistent values
-        level = PlayerPrefs.GetInt("Level", 1);
-        money = PlayerPrefs.GetInt("Money", 0);
-        fireRateLevel = PlayerPrefs.GetInt("FireRateLevel", 1);
-        fireRateCost = PlayerPrefs.GetInt("FireRateCost", 100);
-        ballBounceLevel = PlayerPrefs.GetInt("BallBounceLevel", 1);
-        ballBounceCost = PlayerPrefs.GetInt("BallBounceCost", 1000);
-        incomeLevel = PlayerPrefs.GetInt("IncomeLevel", 1);
-        incomeCost = PlayerPrefs.GetInt("IncomeCost", 100);
-        soundEnabled = PlayerPrefs.GetInt("SoundEnabled", 1);
-        hapticsEnabled = PlayerPrefs.GetInt("HapticsEnabled", 1);
-
         //LOAD GAME DATA
+        //DeleteData();
         //LoadData();
+
+        money = 20000;
 
         //Set player default material
         player.transform.GetChild(1).GetComponent<SkinnedMeshRenderer>().sharedMaterial = defaultMat;
@@ -132,8 +118,6 @@ public class Manager : MonoBehaviour {
         //Update Upgrade Values
         UpdateUpgradeValues();
         CheckMoney();
-
-        money = 20000;
 
         //Equip current cosmetics
         for (int i = 0; i < cosmetics.GetLength(0); i++) {
@@ -221,10 +205,14 @@ public class Manager : MonoBehaviour {
 
     // TESTING
     void OnApplicationFocus(bool hasFocus) {
-        SaveData();
+        //SaveData();
     }
 
     // Functions
+
+    void DeleteData() {
+        SaveSystem.DeleteSaves();
+    }
 
     void SaveData() {
         SaveSystem.SaveData(this);
@@ -246,6 +234,7 @@ public class Manager : MonoBehaviour {
         soundEnabled = data.soundEnabled;
         hapticsEnabled = data.hapticsEnabled;
         cosmetics = data.cosmetics;
+        currTheme = data.currTheme;
     }
 
     IEnumerator SpawnEnemy() {
@@ -377,7 +366,7 @@ public class Manager : MonoBehaviour {
     }
 
     void HandleReward() {
-        earned += Random.Range(1, income);
+        earned += Random.Range(1, income+5);
     }
 
     public void ResetGame() {
@@ -438,9 +427,14 @@ public class Manager : MonoBehaviour {
     }
 
     void HandleTheme() {
-        if (level % 10 == 0 && !themeSet) {
+        if (level % 2 == 0 && !themeSet) {
             themeSet = true;
-            GameEvents.current.SetTheme(Random.Range(0,4));
+            int n;
+            do {
+                n = Random.Range(0,4);
+            } while (n == currTheme);
+            currTheme = n;
+            GameEvents.current.SetTheme(n);
         }
     }
 }

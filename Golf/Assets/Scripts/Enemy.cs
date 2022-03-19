@@ -12,7 +12,7 @@ public class Enemy : EnemyClass {
     {
         aliveCount++;
         health = 1;
-        speed = 3f;
+        speed = 5f;
 
         playerPos = GameObject.Find("Player").transform.position;
         col = GetComponent<CapsuleCollider>();

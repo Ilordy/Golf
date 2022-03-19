@@ -9,7 +9,6 @@ public class ShopManager : MonoBehaviour {
     GameObject hatShop, skinShop, trailShop;
     Button hatsButton, skinsButton, trailsButton, mainBackButton;
     Button hatBackButton, skinBackButton, trailBackButton;
-    public Button[] hatsPurchaseButtons;
     Stack<Transform> menuStack;
 
     void Awake() {
