@@ -20,6 +20,5 @@ public class ColorManager : MonoBehaviour {
         Properties.albedoColor.SetValue(rails, Themes[n][0]);  
         runway1.color = Themes[n][1];
         runway2.color = Themes[n][2];
-        
     }
 }

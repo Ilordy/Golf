@@ -7,9 +7,9 @@ public class Enemy : EnemyClass {
     CapsuleCollider col;
     Animator animator;
     ParticleSystem particles;
+    private Rigidbody rb;
 
-    protected virtual void Start()
-    {
+    protected virtual void Start() {
         aliveCount++;
         health = 1;
         speed = 5f;
@@ -18,11 +18,11 @@ public class Enemy : EnemyClass {
         col = GetComponent<CapsuleCollider>();
         animator = GetComponent<Animator>();
         particles = GetComponent<ParticleSystem>();
+        rb = GetComponent<Rigidbody>();
     }
 
-    protected virtual void Update()
-    {
-        if(health <= 0) {
+    protected virtual void Update() {
+        if (health <= 0) {
             totalKilledCount++;
             GameEvents.current.ProgressChange(totalKilledCount, aliveCount);
             if (increase) {
@@ -36,14 +36,15 @@ public class Enemy : EnemyClass {
             gameObject.tag = "Dead";
             GameEvents.current.Reward();
             col.enabled = false;
+            AddRagdollForce((new Vector3(0, 1.3f, 0) + -transform.forward) * 100);
             animator.enabled = false;
-            particles.Stop(true,UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
-            Destroy(gameObject,5);
+            particles.Stop(true, UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
+            Destroy(gameObject, 5);
         }
 
-        if(!isDead) {
+        if (!isDead) {
             transform.LookAt(playerPos);
-            transform.Translate(0,0,speed * Time.deltaTime);
+            transform.Translate(0, 0, speed * Time.deltaTime);
         }
     }
 

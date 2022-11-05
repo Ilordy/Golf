@@ -2,8 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyClass : MonoBehaviour
-{
+public class EnemyClass : MonoBehaviour {
     //FIELDS
     protected Vector3 playerPos;
     protected Manager GameManager;
@@ -16,10 +15,10 @@ public class EnemyClass : MonoBehaviour
     protected static int killedCount = 0;
 
     //PROPERTIES
-    public int AliveCount {get{return aliveCount;}}
-    public int TotalKilledCount {get{return totalKilledCount;}}
-    public int KilledCount {get{return killedCount;}set{killedCount = value;}}
-    public int Health {get{return health;}set{health = value;}}
+    public int AliveCount { get { return aliveCount; } }
+    public int TotalKilledCount { get { return totalKilledCount; } }
+    public int KilledCount { get { return killedCount; } set { killedCount = value; } }
+    public int Health { get { return health; } set { health = value; } }
 
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -32,12 +31,22 @@ public class EnemyClass : MonoBehaviour
     protected virtual void OnCollisionEnter(Collision collision) {
         string tag = collision.gameObject.tag;
 
-        if(tag == "Projectile" || tag == "PowerUpProjectile") GameEvents.current.EnemyHit();
+        if (tag == "Projectile" || tag == "PowerUpProjectile") GameEvents.current.EnemyHit();
 
         increase = tag == "PowerUpProjectile" ? false : true;
 
         if (collision.gameObject.tag == "Player") {
             GameEvents.current.Defeat();
+        }
+    }
+
+    /// <summary>
+    /// Adds Force to each rigidbody inside the gameobject for the ragdoll to get affected by force.
+    /// </summary>
+    /// <param name="force">The magnitude and dir to apply</param>
+    protected void AddRagdollForce(Vector3 force) {
+        foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>()) {
+            rb.AddForce(force, ForceMode.Impulse);
         }
     }
 

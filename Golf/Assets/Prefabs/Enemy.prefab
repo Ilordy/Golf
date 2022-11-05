@@ -139,7 +139,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!136 &5631945563429724838
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -249,7 +249,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!136 &5631945563453860316
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -452,7 +452,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!136 &5631945563545712438
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -686,8 +686,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.3057807, y: 0.32905233, z: 0.29146335}
-  m_Center: {x: -0.02761504, y: 0.16452616, z: -0.00035311282}
+  m_Size: {x: 0.30578074, y: 0.24790275, z: 0.29146335}
+  m_Center: {x: -0.02761504, y: 0.20510131, z: -0.000353114}
 --- !u!1 &5631945563793174454
 GameObject:
   m_ObjectHideFlags: 0
@@ -903,8 +903,8 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.087439016
-  m_Center: {x: 0, y: 0.087439016, z: 0}
+  m_Radius: 0.33
+  m_Center: {x: 0, y: 0.28, z: 0}
 --- !u!144 &5631945563975867596
 CharacterJoint:
   m_ObjectHideFlags: 0
@@ -1000,7 +1000,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!136 &5631945564001055659
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1206,7 +1206,7 @@ Animator:
   m_Controller: {fileID: 9100000, guid: 856ae2567f32cf54f81cd299d36dc65f, type: 2}
   m_CullingMode: 1
   m_UpdateMode: 0
-  m_ApplyRootMotion: 1
+  m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
@@ -1224,7 +1224,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96bc9967ef8dd4d438bb54be5a9612d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 1
 --- !u!136 &5631945564213548172
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -6106,7 +6105,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!136 &5631945564328268378
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -6240,7 +6239,7 @@ SkinnedMeshRenderer:
   m_SortingOrder: 0
   serializedVersion: 2
   m_Quality: 0
-  m_UpdateWhenOffscreen: 0
+  m_UpdateWhenOffscreen: 1
   m_SkinnedMotionVectors: 1
   m_Mesh: {fileID: 4300000, guid: fa7f36c71b9e8fa4798df3a931c2fd92, type: 3}
   m_Bones:
@@ -6328,7 +6327,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!136 &5631945564553032314
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -6438,7 +6437,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!136 &5631945564587328316
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -6548,7 +6547,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!136 &5631945564611608378
 CapsuleCollider:
   m_ObjectHideFlags: 0
