@@ -1,11 +1,12 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 
 namespace UnityEngine {
 
-    public class Manager : MonoBehaviour {
+    public class Manager : Singleton<Manager> {
         [SerializeField] GameObject player;
         [SerializeField] GameObject enemy;
         [SerializeField] GameObject cartEnemy;
@@ -13,7 +14,12 @@ namespace UnityEngine {
         [SerializeField] GameObject projectile;
         [SerializeField] GameObject powerUpProjectile;
         [SerializeField] GameObject spawner;
-        [SerializeField] bool useNewShooting;
+        [SerializeField] GameObject runWay;
+        [SerializeField] GameObject powerBoxes;
+        [SerializeField] Material defaultMat;
+        [SerializeField] GameObject allyPrefab;
+        [SerializeField] Transform[] allyPositions;
+
 
         EnemyClass EnemyClass;
         Animator playerAnimator;
@@ -36,8 +42,12 @@ namespace UnityEngine {
         IEnumerator StartedSpawning;
         int enemiesToSpawn = 0;
         float enemySpawnInterval = 1f;
+        private int allyCount;
 
         //Upgrades
+        [SerializeField, Range(0, 1)] private float powerBoxSpawnChance;
+        [SerializeField] private int powerBoxSpawnInterval;
+        private GameObject currentPowerBox;
         float fireRate = 0.5f;
         int maxBounces = 4;
         int income = 1;
@@ -54,7 +64,7 @@ namespace UnityEngine {
         //Cosmetics
         int[,,] cosmetics = new int[3, 7, 2];
         Gradient currTrail;
-        [SerializeField] Material defaultMat;
+
 
         //Game loop
         bool playGame = false;
@@ -78,7 +88,8 @@ namespace UnityEngine {
         public int IncomeCost { get => incomeCost; }
         public int[,,] Cosmetics { get => cosmetics; }
         public int CurrTheme { get => currTheme; }
-
+        public GameObject RunWay { get => runWay; set => runWay = value; }
+        public GameObject Player => player;
 
         void Start() {
             Handheld.Vibrate();
@@ -146,6 +157,7 @@ namespace UnityEngine {
             if (StartedSpawning == null) {
                 StartedSpawning = SpawnEnemy();
                 StartCoroutine(StartedSpawning);
+                StartCoroutine(SpawnPowerBox());
             } else {
                 //HANDLE VICTORY
                 if (EnemyClass.TotalKilledCount == EnemyClass.AliveCount) {
@@ -156,7 +168,6 @@ namespace UnityEngine {
             // Shooting / Power up
             if (Input.GetMouseButtonDown(0)) {
                 beganHolding = Time.time;
-                if (!useNewShooting) return;
                 Vector3 mousepos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10);
                 startPos = Camera.main.ScreenToWorldPoint(mousepos);
             }
@@ -169,7 +180,6 @@ namespace UnityEngine {
                     GameEvents.current.AnimatePowerUp(enemies.Length, pot);
                     GameEvents.current.KillsChange(Mathf.Lerp(powerUpReq, 0, pot / 1f));
                 }
-                if (!useNewShooting) return;
                 Vector3 mousepos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10);
                 endPos = Camera.main.ScreenToWorldPoint(mousepos);
                 //if (endPos != startPos)
@@ -253,6 +263,7 @@ namespace UnityEngine {
                 float chance = Random.Range(0f, 1f);
                 float xPos = Random.Range(-47f, -32f);
                 float zPos = Random.Range(-3.65f, 3.65f);
+
                 GameObject selected = null;
                 if (chance < 0.1f && level > 10) {
                     selected = cartEnemy;
@@ -261,9 +272,32 @@ namespace UnityEngine {
                 } else {
                     selected = enemy;
                 }
-                Instantiate(selected, new Vector3(xPos, 2, zPos), Quaternion.identity);
+                GameObject enemyGO = Instantiate(selected, new Vector3(xPos, 2, zPos), Quaternion.identity);
+                if (enemyGO.TryGetComponent<Enemy>(out Enemy enemyData) && allyCount < 2) {
+                    //allyCount++;
+                    ConvertToAlly(enemyData);
+                }
                 yield return new WaitForSeconds(1);
             }
+        }
+
+        IEnumerator SpawnPowerBox() {
+            while (/* currentPowerBox == null &&  */playGame) {
+                yield return new WaitForSeconds(powerBoxSpawnInterval);
+                if (powerBoxSpawnChance > Random.value) {
+                    var col = runWay.GetComponent<Collider>();//change to 1.5 later
+                    Vector3 randPos = new Vector3(Random.Range(col.bounds.min.x, col.bounds.max.x - player.transform.position.x),
+                     1.5f, Random.Range(col.bounds.min.z, col.bounds.max.z));
+                    Instantiate(powerBoxes, randPos, Quaternion.Euler(-90, 0, 0));
+                }
+            }
+        }
+
+        void ConvertToAlly(Enemy enemy) {
+            var skinMesh = enemy.gameObject.GetComponentInChildren<SkinnedMeshRenderer>();
+            //skinMesh.material = allyMat;
+            //enemy.MakeAlly(allyCount == 1 ? allyPositions[0] : allyPositions[1]);
+
         }
 
         //FIRE PROJECTILES
@@ -275,10 +309,6 @@ namespace UnityEngine {
                 if (currTrail != null) p.GetComponent<TrailRenderer>().colorGradient = currTrail;
                 p.transform.LookAt(flatAimTarget);
                 p.GetComponent<Rigidbody>().useGravity = true;
-                // p.GetComponent<Rigidbody>().velocity = p.transform.forward * 10f;
-                // if (useNewShooting) {
-                //     p.GetComponent<Rigidbody>().AddForce(p.transform.forward * Vector3.Distance(startPos, endPos), ForceMode.Impulse);
-                // }
                 p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 25f, ForceMode.Impulse);
             }
         }
@@ -299,6 +329,13 @@ namespace UnityEngine {
             maxBounces = ballBounceLevel;
             playerAnimator.SetFloat("Speed", fireRate);
             income = incomeLevel;
+        }
+
+        public void SpawnAlly() {
+            allyCount++;
+            Vector3 allyStartPos = allyCount == 1 ? allyPositions[0].position : allyPositions[1].position;
+            allyStartPos += new Vector3(0,20,0);//putting offset to spawn midair
+            Instantiate(allyPrefab, allyStartPos, Quaternion.Euler(0,-90,0));
         }
 
         // EVENT FUNCTIONS
@@ -386,6 +423,7 @@ namespace UnityEngine {
             StopCoroutine(StartedSpawning);
             StartedSpawning = null;
             playGame = false;
+            allyCount = 0;
             playerAnimator.SetBool("Swing", false);
             Enemy.ResetStatics();
             GameEvents.current.DeleteAnimation();
@@ -449,6 +487,14 @@ namespace UnityEngine {
                 currTheme = n;
                 GameEvents.current.SetTheme(n);
             }
+        }
+
+        protected override void InternalInit() {
+
+        }
+
+        protected override void InternalOnDestroy() {
+
         }
     }
 }

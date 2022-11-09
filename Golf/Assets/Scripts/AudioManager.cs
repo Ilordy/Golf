@@ -3,21 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using MoreMountains.NiceVibrations;
 
-public class AudioManager : MonoBehaviour {
+public class AudioManager : Singleton<AudioManager> {
 
-// #if UNITY_ANDROID && !UNITY_EDITOR
-//     public static AndroidJavaClass unityplayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-//     public static AndroidJavaObject currentActivity = unityplayer.GetStatic<AndroidJavaObject>("currentActivity");
-//     public static AndroidJavaObject vibrator = currentActivity.Call<AndroidJavaObject>("getSystemService", "Vibrator");
-// #else
-//     public static AndroidJavaClass unityplayer;
-//     public static AndroidJavaObject currentActivity;
-//     public static AndroidJavaObject vibrator;
-// #endif
+    // #if UNITY_ANDROID && !UNITY_EDITOR
+    //     public static AndroidJavaClass unityplayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+    //     public static AndroidJavaObject currentActivity = unityplayer.GetStatic<AndroidJavaObject>("currentActivity");
+    //     public static AndroidJavaObject vibrator = currentActivity.Call<AndroidJavaObject>("getSystemService", "Vibrator");
+    // #else
+    //     public static AndroidJavaClass unityplayer;
+    //     public static AndroidJavaObject currentActivity;
+    //     public static AndroidJavaObject vibrator;
+    // #endif
 
     [SerializeField] Manager GameManager;
     [SerializeField] AudioClip enemyHit, ballHit, charge, powerUp;
-    AudioSource enemyHitSource, ballHitSource, chargeSource, powerUpSource;
+    [SerializeField] AudioClip[] vfxClips;
+    AudioSource enemyHitSource, ballHitSource, chargeSource, powerUpSource, vfxSource;
 
     void Start() {
         //Subscribe to events
@@ -32,6 +33,7 @@ public class AudioManager : MonoBehaviour {
         ballHitSource = sources[1];
         chargeSource = sources[2];
         powerUpSource = sources[3];
+        vfxSource = sources[4];
     }
 
     public void PlayEnemyHit() {
@@ -58,25 +60,46 @@ public class AudioManager : MonoBehaviour {
         powerUpSource.PlayOneShot(powerUp);
     }
 
-//     bool IsAndroid() {
-// #if UNITY_ANDROID && !UNITY_EDITOR
-//          return true;
-// #else
-//          return false;
-// #endif
-//     }
+    /// <summary>
+    /// Plays a sound from the sound array field.
+    /// </summary>
+    /// <param name="index">The index of the sound to play inside the sound array.</param>
+    public void PlaySound(int index) {
+        if (GameManager.SoundEnabled < 0) return;
+        vfxSource.PlayOneShot(vfxClips[index]);
+    }
 
-//     void Vibrate(long milliseconds) {
-//         if (IsAndroid()) {
-//             vibrator.Call("vibrate", milliseconds);
-//         } else {
-//             Handheld.Vibrate();
-//         }
-//     }
+    protected override void InternalInit() {
 
-//     void Cancel() {
-//         if (IsAndroid()) {
-//             vibrator.Call("cancel");
-//         }
-//     }
+    }
+
+    protected override void InternalOnDestroy() {
+
+    }
+
+
+
+
+
+    //     bool IsAndroid() {
+    // #if UNITY_ANDROID && !UNITY_EDITOR
+    //          return true;
+    // #else
+    //          return false;
+    // #endif
+    //     }
+
+    //     void Vibrate(long milliseconds) {
+    //         if (IsAndroid()) {
+    //             vibrator.Call("vibrate", milliseconds);
+    //         } else {
+    //             Handheld.Vibrate();
+    //         }
+    //     }
+
+    //     void Cancel() {
+    //         if (IsAndroid()) {
+    //             vibrator.Call("cancel");
+    //         }
+    //     }
 }
