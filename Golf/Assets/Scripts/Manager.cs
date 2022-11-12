@@ -2,11 +2,14 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 
-namespace UnityEngine {
+namespace UnityEngine
+{
 
-    public class Manager : Singleton<Manager> {
+    public class Manager : Singleton<Manager>
+    {
         [SerializeField] GameObject player;
         [SerializeField] GameObject enemy;
         [SerializeField] GameObject cartEnemy;
@@ -15,7 +18,7 @@ namespace UnityEngine {
         [SerializeField] GameObject powerUpProjectile;
         [SerializeField] GameObject spawner;
         [SerializeField] GameObject runWay;
-        [SerializeField] GameObject powerBoxes;
+        [SerializeField] GameObject[] powerBoxes;
         [SerializeField] Material defaultMat;
         [SerializeField] GameObject allyPrefab;
         [SerializeField] Transform[] allyPositions;
@@ -91,7 +94,8 @@ namespace UnityEngine {
         public GameObject RunWay { get => runWay; set => runWay = value; }
         public GameObject Player => player;
 
-        void Start() {
+        void Start()
+        {
             Handheld.Vibrate();
             //Subscribe to events
             GameEvents.current.OnUpgrade1Request += HandleUpgrade1;
@@ -131,9 +135,12 @@ namespace UnityEngine {
             CheckMoney();
 
             //Equip current cosmetics
-            for (int i = 0; i < cosmetics.GetLength(0); i++) {
-                for (int j = 0; j < cosmetics.GetLength(1); j++) {
-                    if (cosmetics[i, j, 0] == 1 && cosmetics[i, j, 1] == 1) {
+            for (int i = 0; i < cosmetics.GetLength(0); i++)
+            {
+                for (int j = 0; j < cosmetics.GetLength(1); j++)
+                {
+                    if (cosmetics[i, j, 0] == 1 && cosmetics[i, j, 1] == 1)
+                    {
                         GameEvents.current.EquipCurrent(i, j);
                         break;
                     }
@@ -150,31 +157,41 @@ namespace UnityEngine {
         }
         Vector3 startPos, endPos;
 
-        void Update() {
+        void Update()
+        {
             //Gameplay
+            if (Input.GetKeyDown(KeyCode.C))
+                SpawnAlly();
             if (!playGame) return;
 
-            if (StartedSpawning == null) {
+            if (StartedSpawning == null)
+            {
                 StartedSpawning = SpawnEnemy();
                 StartCoroutine(StartedSpawning);
                 StartCoroutine(SpawnPowerBox());
-            } else {
+            }
+            else
+            {
                 //HANDLE VICTORY
-                if (EnemyClass.TotalKilledCount == EnemyClass.AliveCount) {
+                if (EnemyClass.TotalKilledCount == EnemyClass.AliveCount)
+                {
                     HandleVictory();
                 }
             }
 
             // Shooting / Power up
-            if (Input.GetMouseButtonDown(0)) {
+            if (Input.GetMouseButtonDown(0))
+            {
                 beganHolding = Time.time;
                 Vector3 mousepos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10);
                 startPos = Camera.main.ScreenToWorldPoint(mousepos);
             }
 
-            if (Input.GetMouseButton(0)) {
+            if (Input.GetMouseButton(0))
+            {
                 float holdTime = Time.time - beganHolding;
-                if (EnemyClass.KilledCount >= powerUpReq && holdTime > 0.1f) {
+                if (EnemyClass.KilledCount >= powerUpReq && holdTime > 0.1f)
+                {
                     enemies = GameObject.FindGameObjectsWithTag("Enemy");
                     pot += Time.deltaTime;
                     GameEvents.current.AnimatePowerUp(enemies.Length, pot);
@@ -187,12 +204,16 @@ namespace UnityEngine {
 
             }
 
-            if (Input.GetMouseButtonUp(0)) {
+
+            if (Input.GetMouseButtonUp(0))
+            {
 
                 float holdTime = Time.time - beganHolding;
-                if (holdTime >= 1f && EnemyClass.KilledCount >= powerUpReq) {
+                if (holdTime >= 1f && EnemyClass.KilledCount >= powerUpReq)
+                {
                     powerUpProjectiles = new GameObject[enemies.Length];
-                    for (int i = 0; i < enemies.Length; i++) {
+                    for (int i = 0; i < enemies.Length; i++)
+                    {
                         int r = 3;
                         float x = r * Mathf.Cos(i * (Mathf.PI / (enemies.Length)));
                         float y = r * Mathf.Sin(i * (Mathf.PI / (enemies.Length)));
@@ -206,7 +227,9 @@ namespace UnityEngine {
                     pot = 0;
                     GameEvents.current.DeleteAnimation();
                     GameEvents.current.PowerUp();
-                } else {
+                }
+                else
+                {
                     //playerAnimator.SetBool("Swing",false);
                     playerAnimator.SetBool("Swing", true);
                     pot = 0;
@@ -215,31 +238,37 @@ namespace UnityEngine {
                 }
             }
 
-            if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f) {
+            if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
+            {
                 playerAnimator.SetBool("Swing", false);
             }
 
-            if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.5f) {
+            if (playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.5f)
+            {
                 fireProjectile(ref fireRateCounter, Mathf.Lerp(0.8f, 0.4f, (float)fireRateLevel / upgradeMaxLevel));
             }
         }
 
         // TESTING
-        void OnApplicationFocus(bool hasFocus) {
+        void OnApplicationFocus(bool hasFocus)
+        {
             //SaveData();
         }
 
         // Functions
 
-        void DeleteData() {
+        void DeleteData()
+        {
             SaveSystem.DeleteSaves();
         }
 
-        void SaveData() {
+        void SaveData()
+        {
             SaveSystem.SaveData(this);
         }
 
-        void LoadData() {
+        void LoadData()
+        {
             GameData data = SaveSystem.LoadData();
 
             if (data == null) return;
@@ -258,51 +287,60 @@ namespace UnityEngine {
             currTheme = data.currTheme;
         }
 
-        IEnumerator SpawnEnemy() {
-            while (EnemyClass.AliveCount < enemiesToSpawn) {
+        IEnumerator SpawnEnemy()
+        {
+            while (EnemyClass.AliveCount < enemiesToSpawn)
+            {
                 float chance = Random.Range(0f, 1f);
                 float xPos = Random.Range(-47f, -32f);
                 float zPos = Random.Range(-3.65f, 3.65f);
 
                 GameObject selected = null;
-                if (chance < 0.1f && level > 10) {
+                if (chance < 0.1f && level > 10)
+                {
                     selected = cartEnemy;
-                } else if (chance > 0.1f && chance < 0.3f && level > 5) {
+                }
+                else if (chance > 0.1f && chance < 0.3f && level > 5)
+                {
                     selected = shieldEnemy;
-                } else {
+                }
+                else
+                {
                     selected = enemy;
                 }
                 GameObject enemyGO = Instantiate(selected, new Vector3(xPos, 2, zPos), Quaternion.identity);
-                if (enemyGO.TryGetComponent<Enemy>(out Enemy enemyData) && allyCount < 2) {
-                    //allyCount++;
-                    ConvertToAlly(enemyData);
-                }
                 yield return new WaitForSeconds(1);
             }
         }
 
-        IEnumerator SpawnPowerBox() {
-            while (/* currentPowerBox == null &&  */playGame) {
+        IEnumerator SpawnPowerBox()
+        {
+            while (/* currentPowerBox == null &&  */playGame)
+            {
                 yield return new WaitForSeconds(powerBoxSpawnInterval);
-                if (powerBoxSpawnChance > Random.value) {
+                if (powerBoxSpawnChance > Random.value)
+                {
                     var col = runWay.GetComponent<Collider>();//change to 1.5 later
+                    var arrayToUse = powerBoxes;
+                    GameObject powerBoxToSpawn;
+                    if (allyCount > 2)
+                    {
+                        var arr = powerBoxes.Where(p => !p.GetComponent<AllyBox>()).ToArray();
+                        arrayToUse = arr; 
+                    }
+                    powerBoxToSpawn = arrayToUse[Random.Range(0, arrayToUse.Length)];
                     Vector3 randPos = new Vector3(Random.Range(col.bounds.min.x, col.bounds.max.x - player.transform.position.x),
                      1.5f, Random.Range(col.bounds.min.z, col.bounds.max.z));
-                    Instantiate(powerBoxes, randPos, Quaternion.Euler(-90, 0, 0));
+                    Instantiate(powerBoxToSpawn, randPos, Quaternion.Euler(-90, 0, 0));
                 }
             }
         }
 
-        void ConvertToAlly(Enemy enemy) {
-            var skinMesh = enemy.gameObject.GetComponentInChildren<SkinnedMeshRenderer>();
-            //skinMesh.material = allyMat;
-            //enemy.MakeAlly(allyCount == 1 ? allyPositions[0] : allyPositions[1]);
-
-        }
-
         //FIRE PROJECTILES
-        void fireProjectile(ref float fireRateCounter, float nextFire) {
-            if (Time.time > fireRateCounter) {
+        void fireProjectile(ref float fireRateCounter, float nextFire)
+        {
+            if (Time.time > fireRateCounter)
+            {
                 fireRateCounter = Time.time + nextFire;
                 Vector3 flatAimTarget = calculateTarget();
                 GameObject p = Instantiate(projectile, spawner.transform.position, Quaternion.identity);
@@ -313,34 +351,40 @@ namespace UnityEngine {
             }
         }
 
-        Vector3 calculateTarget() {
+        Vector3 calculateTarget()
+        {
             Ray cursorRay = Camera.main.ScreenPointToRay(Input.mousePosition);
             Physics.Raycast(Camera.main.transform.position, cursorRay.direction, out RaycastHit hit);
             return new Vector3(hit.point.x >= player.transform.position.x ? -1 * hit.point.x : hit.point.x, 0.63f, hit.point.z);
         }
 
-        void calculateDifficulty(int level) {
+        void calculateDifficulty(int level)
+        {
             enemiesToSpawn = Mathf.Clamp((int)Mathf.Ceil((level + 10) * 1.2f), 0, 300);
             enemySpawnInterval = Mathf.Clamp(1 - level / 100f, 0.2f, 1f);
         }
 
-        void UpdateUpgradeValues() {
+        void UpdateUpgradeValues()
+        {
             fireRate = Mathf.Lerp(1.0f, 5.0f, (float)fireRateLevel / upgradeMaxLevel);
             maxBounces = ballBounceLevel;
             playerAnimator.SetFloat("Speed", fireRate);
             income = incomeLevel;
         }
 
-        public void SpawnAlly() {
+        public void SpawnAlly()
+        {
             allyCount++;
             Vector3 allyStartPos = allyCount == 1 ? allyPositions[0].position : allyPositions[1].position;
-            allyStartPos += new Vector3(0,20,0);//putting offset to spawn midair
-            Instantiate(allyPrefab, allyStartPos, Quaternion.Euler(0,-90,0));
+            allyStartPos += new Vector3(0, 20, 0);//putting offset to spawn midair
+            Instantiate(allyPrefab, allyStartPos, Quaternion.Euler(0, -90, 0));
         }
 
         // EVENT FUNCTIONS
-        public void HandleUpgrade1() {
-            if (money > fireRateCost && fireRateLevel < upgradeMaxLevel) {
+        public void HandleUpgrade1()
+        {
+            if (money > fireRateCost && fireRateLevel < upgradeMaxLevel)
+            {
                 money -= fireRateCost;
                 fireRateLevel++;
                 fireRateCost += 100;
@@ -354,8 +398,10 @@ namespace UnityEngine {
             PlayerPrefs.SetInt("Money", money);
         }
 
-        public void HandleUpgrade2() {
-            if (money > ballBounceCost && ballBounceLevel < 5) {
+        public void HandleUpgrade2()
+        {
+            if (money > ballBounceCost && ballBounceLevel < 5)
+            {
                 money -= ballBounceCost;
                 ballBounceLevel++;
                 ballBounceCost += 1000;
@@ -369,8 +415,10 @@ namespace UnityEngine {
             PlayerPrefs.SetInt("Money", money);
         }
 
-        public void HandleUpgrade3() {
-            if (money > incomeCost && incomeLevel < upgradeMaxLevel) {
+        public void HandleUpgrade3()
+        {
+            if (money > incomeCost && incomeLevel < upgradeMaxLevel)
+            {
                 money -= incomeCost;
                 incomeLevel++;
                 incomeCost += 100;
@@ -384,7 +432,8 @@ namespace UnityEngine {
             PlayerPrefs.SetInt("Money", money);
         }
 
-        void HandleVictory() {
+        void HandleVictory()
+        {
             themeSet = false;
             ResetGame();
             level++;
@@ -393,7 +442,8 @@ namespace UnityEngine {
             GameEvents.current.HandleVictory(level, earned);
         }
 
-        void RewardVictory(int mult) {
+        void RewardVictory(int mult)
+        {
             HandleTheme();
             money += earned * mult;
             earned = 0;
@@ -402,12 +452,14 @@ namespace UnityEngine {
             CheckMoney();
         }
 
-        public void HandleDefeat() {
+        public void HandleDefeat()
+        {
             ResetGame();
             GameEvents.current.HandleDefeat();
         }
 
-        void SkipLevel() {
+        void SkipLevel()
+        {
             level++;
             HandleTheme();
             PlayerPrefs.SetInt("Level", level);
@@ -415,11 +467,13 @@ namespace UnityEngine {
             calculateDifficulty(level);
         }
 
-        void HandleReward() {
+        void HandleReward()
+        {
             earned += Random.Range(1, income + 5);
         }
 
-        public void ResetGame() {
+        public void ResetGame()
+        {
             StopCoroutine(StartedSpawning);
             StartedSpawning = null;
             playGame = false;
@@ -428,60 +482,76 @@ namespace UnityEngine {
             Enemy.ResetStatics();
             GameEvents.current.DeleteAnimation();
             GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");
-            foreach (GameObject i in e) {
+            foreach (GameObject i in e)
+            {
                 Destroy(i);
             }
         }
 
-        void HandleCosmetic(int type, int i, int cost) {
-            if (cost <= money) {
+        void HandleCosmetic(int type, int i, int cost)
+        {
+            if (cost <= money)
+            {
                 money -= cost;
                 PlayerPrefs.SetInt("Money", money);
                 GameEvents.current.MoneyChange();
                 GameEvents.current.AnswerRequest(true, type, i);
                 cosmetics[type, i, 0] = 1;
-            } else {
+            }
+            else
+            {
                 GameEvents.current.AnswerRequest(false, type, i);
             }
         }
 
-        void HandleCosmeticState(int type, int i, int state) {
+        void HandleCosmeticState(int type, int i, int state)
+        {
             cosmetics[type, i, 1] = state;
         }
 
-        public void CheckMoney() {
+        public void CheckMoney()
+        {
             bool disable1 = false;
             bool disable2 = false;
             bool disable3 = false;
-            if (money < fireRateCost) {
+            if (money < fireRateCost)
+            {
                 disable1 = true;
             }
-            if (money < ballBounceCost) {
+            if (money < ballBounceCost)
+            {
                 disable2 = true;
             }
-            if (money < incomeCost) {
+            if (money < incomeCost)
+            {
                 disable3 = true;
             }
             GameEvents.current.CheckAfford(disable1, disable2, disable3);
         }
 
-        void LoadTrail(Gradient trail) {
+        void LoadTrail(Gradient trail)
+        {
             currTrail = trail;
         }
 
-        void SetPlayerMaterial(Material mat) {
+        void SetPlayerMaterial(Material mat)
+        {
             defaultMat = mat;
         }
 
-        void SendCosmeticStates() {
+        void SendCosmeticStates()
+        {
             GameEvents.current.SendCosmeticStates(cosmetics);
         }
 
-        void HandleTheme() {
-            if (level % 2 == 0 && !themeSet) {
+        void HandleTheme()
+        {
+            if (level % 2 == 0 && !themeSet)
+            {
                 themeSet = true;
                 int n;
-                do {
+                do
+                {
                     n = Random.Range(0, 4);
                 } while (n == currTheme);
                 currTheme = n;
@@ -489,11 +559,13 @@ namespace UnityEngine {
             }
         }
 
-        protected override void InternalInit() {
+        protected override void InternalInit()
+        {
 
         }
 
-        protected override void InternalOnDestroy() {
+        protected override void InternalOnDestroy()
+        {
 
         }
     }

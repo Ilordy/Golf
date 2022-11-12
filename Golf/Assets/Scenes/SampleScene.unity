@@ -6824,7 +6824,9 @@ MonoBehaviour:
     type: 3}
   spawner: {fileID: 706628349}
   runWay: {fileID: 952553561}
-  powerBoxes: {fileID: 1740226591187340, guid: d26b2c679e943854989969cf132a16d3, type: 3}
+  powerBoxes:
+  - {fileID: 1740226591187340, guid: d26b2c679e943854989969cf132a16d3, type: 3}
+  - {fileID: 1740226591187340, guid: 0117a89f604e4f74fb3ef30b3a586a7d, type: 3}
   defaultMat: {fileID: 2100000, guid: 3f3d716ece93c0c49b7fa6187e02095a, type: 2}
   allyPrefab: {fileID: 7156176337492968973, guid: a9a5e76c30cbff64daafad2b24f0f1c0,
     type: 3}
@@ -8210,7 +8212,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1232922955}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 14.91, y: 0.9999994, z: -3.19}
+  m_LocalPosition: {x: 14.909997, y: 1, z: -2.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1962908230}
