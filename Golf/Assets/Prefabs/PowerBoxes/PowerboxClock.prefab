@@ -4923,6 +4923,7 @@ GameObject:
   - component: {fileID: 199552412447558672}
   - component: {fileID: 6506436435561298174}
   - component: {fileID: 4409981039168052638}
+  - component: {fileID: 2446039091400498308}
   m_Layer: 13
   m_Name: PowerboxClock
   m_TagString: Untagged
@@ -9778,7 +9779,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: f652ad50a53383e4dad79796ae0075e2, type: 2}
+  - {fileID: 2100000, guid: 5d48504f7d92081418f16d32218c076b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -9853,6 +9854,19 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.2701538, y: 1.4240686, z: 0.6195875}
   m_Center: {x: 0, y: 6.701691e-16, z: 0.17215893}
+--- !u!114 &2446039091400498308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1740226591187340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9f13d68c9d2f3c43b28d077528d375a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 2
 --- !u!1 &1935452781795026
 GameObject:
   m_ObjectHideFlags: 0

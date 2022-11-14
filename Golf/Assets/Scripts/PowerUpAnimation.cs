@@ -23,7 +23,7 @@ public class PowerUpAnimation : MonoBehaviour {
     void AnimatePowerUp(int enemiesLength, float pot) {
         animator.SetBool("Animate", true);
         GameEvents.current.ChargeStart();
-        c += Time.deltaTime*2;
+        c += Time.unscaledDeltaTime*2;
         if (spawned < enemiesLength) {
             spawns.Add(Instantiate(animProjectile,Vector3.zero,Quaternion.identity));
             spawned++;
@@ -37,7 +37,6 @@ public class PowerUpAnimation : MonoBehaviour {
             float x = Mathf.Lerp(spawner.position.x,player.transform.position.x,factor);
             float y = Mathf.Lerp(spawner.position.y,player.transform.position.y + targetZ,factor);
             float z = Mathf.Lerp(spawner.position.z,player.transform.position.z + targetY,factor);
-
             spawns[i].transform.position = new Vector3(x,y,z);
         }
         

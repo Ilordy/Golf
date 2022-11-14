@@ -28,7 +28,7 @@ public class MultiplierBox : PowerBox
             {
                 GameObject p = Instantiate(other.gameObject, spawnPoint, other.gameObject.transform.rotation);
                 spawnPoint.z += zOffSet;
-                p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 25f, ForceMode.Impulse);
+                p.GetComponent<Projectile>().SetForce();
             }
         }
         base.OnCollisionEnter(other);

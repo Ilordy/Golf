@@ -6791,6 +6791,7 @@ GameObject:
   - component: {fileID: 981665293}
   - component: {fileID: 981665295}
   - component: {fileID: 981665297}
+  - component: {fileID: 981665296}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -6827,6 +6828,7 @@ MonoBehaviour:
   powerBoxes:
   - {fileID: 1740226591187340, guid: d26b2c679e943854989969cf132a16d3, type: 3}
   - {fileID: 1740226591187340, guid: 0117a89f604e4f74fb3ef30b3a586a7d, type: 3}
+  - {fileID: 1740226591187340, guid: cf7081b319095ee4cac24c4b984bad18, type: 3}
   defaultMat: {fileID: 2100000, guid: 3f3d716ece93c0c49b7fa6187e02095a, type: 2}
   allyPrefab: {fileID: 7156176337492968973, guid: a9a5e76c30cbff64daafad2b24f0f1c0,
     type: 3}
@@ -6861,6 +6863,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d71f503413788df44b66916e6aeec6a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &981665296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 981665292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bd96e05af1700d4692b00ac6fc77f5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _deactivateOnLoad: 0
+  _dontDestroyOnLoad: 0
+  slowdownFactor: 0.05
 --- !u!114 &981665297
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7594,7 +7611,7 @@ Animator:
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 848cee4d67dce0e4a818e409e7f32fcb, type: 2}
   m_CullingMode: 0
-  m_UpdateMode: 0
+  m_UpdateMode: 2
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_WarningMessage: 
@@ -13129,6 +13146,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 2614381338886446382, guid: aa9e4c7f4c51cd34aa4169e77b5b9896,
+        type: 3}
+      propertyPath: m_UpdateMode
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2614381338890691566, guid: aa9e4c7f4c51cd34aa4169e77b5b9896,
         type: 3}

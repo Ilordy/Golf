@@ -67,17 +67,18 @@ public class Ally : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(fireRate);//gotta change this later on to work with slowing down time.
+            yield return new WaitForSecondsRealtime(fireRate);//gotta change this later on to work with slowing down time.
             var enemies = FindObjectsOfType<EnemyClass>().Where(e => e.CompareTag("Enemy"));//find all enemies still alive.
             Transform target = enemies?.OrderBy(e => Vector3.Distance(transform.position, e.transform.position)).FirstOrDefault().transform;//shoot at the closest one.
             if (target)
             {
                 animator.SetBool(shootTrigger, true);
-                yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).normalizedTime / 2);
+                yield return new WaitForSecondsRealtime(animator.GetCurrentAnimatorStateInfo(0).normalizedTime / 2);
                 GameObject p = Instantiate(bullet, transform.position + new Vector3(0, .65f, 0), Quaternion.identity);
                 p.transform.LookAt(target);
                 p.GetComponent<Rigidbody>().useGravity = true;
-                p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 25f, ForceMode.Impulse);
+                p.GetComponent<Projectile>().SetForce();
+                //p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 25f, ForceMode.Impulse);
             }
         }
     }

@@ -162,6 +162,8 @@ namespace UnityEngine
             //Gameplay
             if (Input.GetKeyDown(KeyCode.C))
                 SpawnAlly();
+            if (Input.GetKeyDown(KeyCode.V))
+                EnemyClass.KilledCount = 100;
             if (!playGame) return;
 
             if (StartedSpawning == null)
@@ -182,33 +184,31 @@ namespace UnityEngine
             // Shooting / Power up
             if (Input.GetMouseButtonDown(0))
             {
-                beganHolding = Time.time;
+                beganHolding = Time.unscaledTime;
                 Vector3 mousepos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10);
                 startPos = Camera.main.ScreenToWorldPoint(mousepos);
             }
 
             if (Input.GetMouseButton(0))
             {
-                float holdTime = Time.time - beganHolding;
+                float holdTime = Time.unscaledTime - beganHolding;
                 if (EnemyClass.KilledCount >= powerUpReq && holdTime > 0.1f)
                 {
                     enemies = GameObject.FindGameObjectsWithTag("Enemy");
-                    pot += Time.deltaTime;
+                    pot += Time.unscaledDeltaTime;
                     GameEvents.current.AnimatePowerUp(enemies.Length, pot);
                     GameEvents.current.KillsChange(Mathf.Lerp(powerUpReq, 0, pot / 1f));
                 }
                 Vector3 mousepos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10);
                 endPos = Camera.main.ScreenToWorldPoint(mousepos);
                 //if (endPos != startPos)
-
-
             }
 
 
             if (Input.GetMouseButtonUp(0))
             {
 
-                float holdTime = Time.time - beganHolding;
+                float holdTime = Time.unscaledTime - beganHolding;
                 if (holdTime >= 1f && EnemyClass.KilledCount >= powerUpReq)
                 {
                     powerUpProjectiles = new GameObject[enemies.Length];
@@ -221,7 +221,7 @@ namespace UnityEngine
                         if (currTrail != null) powerUpProjectiles[i].GetComponent<TrailRenderer>().colorGradient = currTrail;
                         powerUpProjectiles[i].GetComponent<Rigidbody>().useGravity = true;
                         powerUpProjectiles[i].transform.LookAt(enemies[i].transform.position);
-                        powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = powerUpProjectiles[i].transform.forward * 100f;
+                        powerUpProjectiles[i].GetComponent<Rigidbody>().velocity = (powerUpProjectiles[i].transform.forward * 100f) / Time.timeScale;
                     }
                     EnemyClass.KilledCount = 0;
                     pot = 0;
@@ -326,7 +326,7 @@ namespace UnityEngine
                     if (allyCount > 2)
                     {
                         var arr = powerBoxes.Where(p => !p.GetComponent<AllyBox>()).ToArray();
-                        arrayToUse = arr; 
+                        arrayToUse = arr;
                     }
                     powerBoxToSpawn = arrayToUse[Random.Range(0, arrayToUse.Length)];
                     Vector3 randPos = new Vector3(Random.Range(col.bounds.min.x, col.bounds.max.x - player.transform.position.x),
@@ -339,15 +339,16 @@ namespace UnityEngine
         //FIRE PROJECTILES
         void fireProjectile(ref float fireRateCounter, float nextFire)
         {
-            if (Time.time > fireRateCounter)
+            if (Time.unscaledTime > fireRateCounter)
             {
-                fireRateCounter = Time.time + nextFire;
+                fireRateCounter = Time.unscaledTime + nextFire;
                 Vector3 flatAimTarget = calculateTarget();
                 GameObject p = Instantiate(projectile, spawner.transform.position, Quaternion.identity);
                 if (currTrail != null) p.GetComponent<TrailRenderer>().colorGradient = currTrail;
                 p.transform.LookAt(flatAimTarget);
                 p.GetComponent<Rigidbody>().useGravity = true;
-                p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 25f, ForceMode.Impulse);
+                //p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 500f, ForceMode.Impulse);
+                p.GetComponent<Projectile>().SetForce();
             }
         }
 
