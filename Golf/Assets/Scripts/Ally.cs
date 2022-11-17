@@ -47,8 +47,8 @@ public class Ally : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Untagged"))
         {
+            GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
             Destroy(GetComponent<Collider>());
-            GetComponent<Rigidbody>().useGravity = false;
             StartCoroutine(OnLanded());
         }
     }

@@ -8,6 +8,7 @@ TagManager:
   - Projectile
   - PowerUpProjectile
   - Dead
+  - Ally
   layers:
   - Default
   - TransparentFX
@@ -23,7 +24,7 @@ TagManager:
   - Player
   - No Collide
   - PowerBox
-  - 
+  - Shield
   - 
   - 
   - 

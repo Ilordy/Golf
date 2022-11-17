@@ -22,6 +22,8 @@ namespace UnityEngine
         [SerializeField] Material defaultMat;
         [SerializeField] GameObject allyPrefab;
         [SerializeField] Transform[] allyPositions;
+        [SerializeField] GameObject shield;
+        [SerializeField] int shieldHP;//for testing.
 
 
         EnemyClass EnemyClass;
@@ -161,7 +163,7 @@ namespace UnityEngine
         {
             //Gameplay
             if (Input.GetKeyDown(KeyCode.C))
-                SpawnAlly();
+                UpdateShield();
             if (Input.GetKeyDown(KeyCode.V))
                 EnemyClass.KilledCount = 100;
             if (!playGame) return;
@@ -381,6 +383,15 @@ namespace UnityEngine
             Instantiate(allyPrefab, allyStartPos, Quaternion.Euler(0, -90, 0));
         }
 
+        public void UpdateShield()
+        {
+            var mat = shield.GetComponent<Renderer>().material;
+            Shield shieldData = shield.GetComponent<Shield>();
+            shieldData.Health = shieldHP;
+            shield.SetActive(true);
+            shieldData.InitShield();
+        }
+
         // EVENT FUNCTIONS
         public void HandleUpgrade1()
         {
@@ -483,6 +494,7 @@ namespace UnityEngine
             Enemy.ResetStatics();
             GameEvents.current.DeleteAnimation();
             GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");
+            e = e.Concat(GameObject.FindGameObjectsWithTag("Ally")).ToArray();
             foreach (GameObject i in e)
             {
                 Destroy(i);
