@@ -47,7 +47,7 @@ public class Shield : MonoBehaviour
             healthSlider.DOValue(_health, 1f);
             if (_health <= 0)
                 mat.DOColor(damagedColor, fresnelProperty, .2f).OnComplete(() =>
-                
+
                     healthSlider.transform.DOScale(0, .2f).OnComplete(() => DestroyShield())
                 );
             else
@@ -64,7 +64,7 @@ public class Shield : MonoBehaviour
         canBeDamaged = true;
     }
 
-    void DestroyShield()
+    public void DestroyShield()
     {
         mat.SetColor(edgeColorProperty, edgeDeadColor);
         mat.DOFloat(0.62f, dissolvePropety, .5f).OnComplete(() =>

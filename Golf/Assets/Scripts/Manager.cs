@@ -491,6 +491,7 @@ namespace UnityEngine
             playGame = false;
             allyCount = 0;
             playerAnimator.SetBool("Swing", false);
+            shield.GetComponent<Shield>().DestroyShield();
             Enemy.ResetStatics();
             GameEvents.current.DeleteAnimation();
             GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");
