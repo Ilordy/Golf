@@ -7038,7 +7038,7 @@ MonoBehaviour:
   - {fileID: 1656931200}
   shield: {fileID: 2066364632}
   shieldHP: 3
-  powerBoxSpawnChance: 1
+  powerBoxSpawnChance: 0.5
   powerBoxSpawnInterval: 3
 --- !u!4 &981665294
 Transform:

@@ -317,7 +317,7 @@ namespace UnityEngine
 
         IEnumerator SpawnPowerBox()
         {
-            while (/* currentPowerBox == null &&  */playGame)
+            while (currentPowerBox == null && playGame)
             {
                 yield return new WaitForSeconds(powerBoxSpawnInterval);
                 if (powerBoxSpawnChance > Random.value)
@@ -333,7 +333,8 @@ namespace UnityEngine
                     powerBoxToSpawn = arrayToUse[Random.Range(0, arrayToUse.Length)];
                     Vector3 randPos = new Vector3(Random.Range(col.bounds.min.x, col.bounds.max.x - player.transform.position.x),
                      1.5f, Random.Range(col.bounds.min.z, col.bounds.max.z));
-                    Instantiate(powerBoxToSpawn, randPos, Quaternion.Euler(-90, 0, 0));
+                    currentPowerBox = Instantiate(powerBoxToSpawn, randPos, Quaternion.Euler(-90, 0, 0));
+                    currentPowerBox.GetComponent<PowerBox>().OnDestroyed.AddListener(() => StartCoroutine(SpawnPowerBox()));
                 }
             }
         }
@@ -491,7 +492,8 @@ namespace UnityEngine
             playGame = false;
             allyCount = 0;
             playerAnimator.SetBool("Swing", false);
-            shield.GetComponent<Shield>().DestroyShield();
+            if (shield.activeSelf)
+                shield.GetComponent<Shield>().DestroyShield();
             Enemy.ResetStatics();
             GameEvents.current.DeleteAnimation();
             GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");

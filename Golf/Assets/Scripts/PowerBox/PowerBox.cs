@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.Events;
 
 public class PowerBox : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class PowerBox : MonoBehaviour
     protected Collider runWayCollider;
     private bool reversed = false;
     private float x, y, z = 0;
+    public UnityEvent OnDestroyed;
+
     protected virtual void Start()
     {
         runWay = Manager.I.RunWay;
@@ -113,5 +116,11 @@ public class PowerBox : MonoBehaviour
             //play particle and sound.
             Destroy(gameObject);
         }
+    }
+
+    void OnDestroy()
+    {
+        OnDestroyed?.Invoke();
+        OnDestroyed.RemoveAllListeners();
     }
 }
