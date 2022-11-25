@@ -9,6 +9,9 @@ TagManager:
   - PowerUpProjectile
   - Dead
   - Ally
+  - Boss
+  - Missile
+  - FireBall
   layers:
   - Default
   - TransparentFX

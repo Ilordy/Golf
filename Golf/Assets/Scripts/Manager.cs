@@ -3,15 +3,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-
-
+using Cinemachine;
 namespace UnityEngine
 {
-
     public class Manager : Singleton<Manager>
     {
         [SerializeField] GameObject player;
         [SerializeField] GameObject enemy;
+        [SerializeField] GameObject bossEnemy;
         [SerializeField] GameObject cartEnemy;
         [SerializeField] GameObject shieldEnemy;
         [SerializeField] GameObject projectile;
@@ -22,10 +21,10 @@ namespace UnityEngine
         [SerializeField] Material defaultMat;
         [SerializeField] GameObject allyPrefab;
         [SerializeField] Transform[] allyPositions;
+        [SerializeField] Transform bossPosition;
         [SerializeField] GameObject shield;
-        [SerializeField] int shieldHP;//for testing.
-
-
+        [SerializeField] int shieldHP;
+        [SerializeField] GameObject fireBall;
         EnemyClass EnemyClass;
         Animator playerAnimator;
 
@@ -48,6 +47,7 @@ namespace UnityEngine
         int enemiesToSpawn = 0;
         float enemySpawnInterval = 1f;
         private int allyCount;
+        private bool isBossFight;
 
         //Upgrades
         [SerializeField, Range(0, 1)] private float powerBoxSpawnChance;
@@ -177,9 +177,15 @@ namespace UnityEngine
             else
             {
                 //HANDLE VICTORY
-                if (EnemyClass.TotalKilledCount == EnemyClass.AliveCount)
+                if (Input.GetKeyDown(KeyCode.X) || (EnemyClass.TotalKilledCount == EnemyClass.AliveCount && !isBossFight))
                 {
-                    HandleVictory();
+                    // HandleVictory();
+                    //put boss here and then handle victory.
+                    isBossFight = true;
+                    RemoveAllCharacters();
+                    StopCoroutine(StartedSpawning);
+                    GameObject boss = Instantiate(bossEnemy, bossPosition);
+                    boss.GetComponent<BossEnemy>().OnKnockedOut += BossKnockedOut;
                 }
             }
 
@@ -251,6 +257,14 @@ namespace UnityEngine
             }
         }
 
+        void BossKnockedOut(BossEnemy boss)
+        {
+            playerAnimator.SetBool("Swing", false);
+            CutSceneHelper.I.DoPlayerCutScene(() => boss.transform.position = bossPosition.position);
+            playGame = false;
+            boss.OnKnockedOut -= BossKnockedOut;
+        }
+
         // TESTING
         void OnApplicationFocus(bool hasFocus)
         {
@@ -311,7 +325,7 @@ namespace UnityEngine
                     selected = enemy;
                 }
                 GameObject enemyGO = Instantiate(selected, new Vector3(xPos, 2, zPos), Quaternion.identity);
-                yield return new WaitForSeconds(1);
+                yield return new WaitForSecondsRealtime(1);
             }
         }
 
@@ -391,6 +405,22 @@ namespace UnityEngine
             shieldData.Health = shieldHP;
             shield.SetActive(true);
             shieldData.InitShield();
+        }
+
+        public void DoFinalSwing(float sliderForce)
+        {
+            playerAnimator.SetBool("Swing", true);
+            StartCoroutine(WaitForFinalSwing(sliderForce));
+        }
+
+        IEnumerator WaitForFinalSwing(float forceAmount)
+        {
+            yield return new WaitUntil(() => playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.5f);
+            GameObject ballFire = Instantiate(fireBall, spawner.transform.position, Quaternion.Euler(0, -90, 0));
+            var fireRb = ballFire.GetComponent<Rigidbody>();
+            fireRb.AddForce((ballFire.transform.forward * 25f + ballFire.transform.up * 2), ForceMode.Impulse);
+            ballFire.GetComponent<FireBall>().SliderForce = forceAmount;
+            CutSceneHelper.I.SetBallCamFocus(ballFire.transform);
         }
 
         // EVENT FUNCTIONS
@@ -490,12 +520,18 @@ namespace UnityEngine
             StopCoroutine(StartedSpawning);
             StartedSpawning = null;
             playGame = false;
+            isBossFight = false;
             allyCount = 0;
             playerAnimator.SetBool("Swing", false);
-            if (shield.activeSelf)
-                shield.GetComponent<Shield>().DestroyShield();
             Enemy.ResetStatics();
             GameEvents.current.DeleteAnimation();
+            RemoveAllCharacters();
+        }
+
+        void RemoveAllCharacters()
+        {
+            if (shield.activeSelf)
+                shield.GetComponent<Shield>().DestroyShield();
             GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");
             e = e.Concat(GameObject.FindGameObjectsWithTag("Ally")).ToArray();
             foreach (GameObject i in e)
