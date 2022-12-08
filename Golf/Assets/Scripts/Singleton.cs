@@ -106,6 +106,5 @@ using UnityEngine.SceneManagement;
             _instance = null;
             _isInitialized = false;
         }
-
         protected abstract void InternalOnDestroy();
     }

@@ -16,13 +16,13 @@ public class TimeManager : Singleton<TimeManager>
         //Time.timeScale = Mathf.Clamp(Time.timeScale, 0f, 1f);
         // if (Time.timeScale == 1) isSlowedDown = false;
         if (Input.GetKeyDown(KeyCode.G))
-            DoSlowmotion(5);
+            FlipTime();
         //Debug.Log(Time.timeScale);
     }
 
     public void DoSlowmotion(int seconds)
     {
-        StartCoroutine(SlowTime(5));
+        StartCoroutine(SlowTime(seconds));
     }//make preatier.
     IEnumerator SlowTime(int seconds)
     {
@@ -32,6 +32,17 @@ public class TimeManager : Singleton<TimeManager>
         yield return new WaitForSecondsRealtime(seconds);
         Time.timeScale = 1;
         OnTimeUpdated?.Invoke();
+    }
+
+    void FlipTime()
+    {
+        if (Time.timeScale == 1)
+        {
+            Time.timeScale = slowdownFactor;
+            Time.fixedDeltaTime = Time.timeScale * .02f;
+        }
+        else
+            Time.timeScale = 1;
     }
 
     protected override void InternalInit()
