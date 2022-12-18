@@ -70,6 +70,8 @@ public class BossEnemy : MonoBehaviour
         foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
         {
             rb.AddForce((-transform.forward * finalForceZ + transform.up * defaultForceY), ForceMode.VelocityChange);
+            if (!rb.gameObject.name.StartsWith("spine"))
+                Destroy(rb.GetComponent<Collider>());
         }
     }
 

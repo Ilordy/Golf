@@ -14,12 +14,14 @@ public class CutSceneHelper : Singleton<CutSceneHelper>
     {
         blendHelper.onCameraBlendFinished += OnPlayerCamBlended;
         blendHelper.onCameraBlendStarted += OnPlayerCamBlendStarted;
+        WaterSplasher.OnBossTouchedWater += OnBossTouchedWater;
     }
 
     void OnDisable()
     {
         blendHelper.onCameraBlendFinished -= OnPlayerCamBlended;
         blendHelper.onCameraBlendStarted -= OnPlayerCamBlendStarted;
+        WaterSplasher.OnBossTouchedWater -= OnBossTouchedWater;
     }
 
     public void DoPlayerCutScene(System.Action onCameraBlended)
@@ -43,6 +45,13 @@ public class CutSceneHelper : Singleton<CutSceneHelper>
         bossCam.Follow = focus;
         bossCam.Priority = 4;
         SwtichFogs(0);
+    }
+
+    void OnBossTouchedWater()
+    {
+        bossCam.LookAt = null;
+        bossCam.Follow = null;
+        //put logic here for reward UI.
     }
 
     private void OnPlayerCamBlended(ICinemachineCamera cam)
