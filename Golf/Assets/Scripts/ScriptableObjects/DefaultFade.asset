@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: DefaultFade
   m_EditorClassIdentifier: 
   m_tweenTime: 2
+  easeType: 27
   m_fadeTweenTime: 1
-  m_fadeType: 1
+  m_fadeType: 0

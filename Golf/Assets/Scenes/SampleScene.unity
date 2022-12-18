@@ -8102,9 +8102,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _canvas: {fileID: 916942928}
-  _textPrefab: {fileID: 3458674761622708077, guid: 80753e17ad1b497469a99ed50b3a1360,
+  _textPrefab: {fileID: 28925775881449738, guid: 80753e17ad1b497469a99ed50b3a1360,
     type: 3}
-  _tweenerType: {fileID: 11400000, guid: 3a3c571e23a9afa45bce9ca31f26e279, type: 2}
+  _tweenerType: {fileID: 11400000, guid: e9cd51f4af634204aa964c97eb6a3ba5, type: 2}
   _startPosition: {x: 0, y: -415.62}
   _endPosition: {x: 0, y: 452.2}
   _collectionChecks: 0

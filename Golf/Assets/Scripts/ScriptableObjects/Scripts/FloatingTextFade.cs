@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 using TMPro;
+using UnityEngine.Pool;
 
 namespace MobileTools
 {
@@ -13,52 +14,52 @@ namespace MobileTools
         private enum FadeType { OnSpawn, OnExit, Both }
         [SerializeField] float m_fadeTweenTime = 1;
         [SerializeField] FadeType m_fadeType;
-        private TextMeshProUGUI m_currentText;
         private Vector2 m_destinationPoint;
+        ObjectPool<TextMeshProUGUI> m_pool;
         #endregion
 
         #region Methods
-        public override void TweenText(TextMeshProUGUI target, Vector2 endPos)
+        public override void TweenText(TextMeshProUGUI target, Vector2 endPos, ObjectPool<TextMeshProUGUI> pool)
         {
-            m_currentText = target;
             m_destinationPoint = endPos;
-            DOTween.Kill(m_currentText);
+            m_pool = pool;
+            target.color = new Color(target.color.r, target.color.g, target.color.b, 1);
             switch (m_fadeType)
             {
                 case FadeType.OnSpawn:
-                    FadeIn();
+                    FadeIn(target);
                     break;
                 case FadeType.OnExit:
                     FadeOut(target);
                     break;
                 case FadeType.Both:
-                    FadeInAndOut();
+                    FadeInAndOut(target);
                     break;
             }
         }
 
-        private void FadeIn()
+        private void FadeIn(TextMeshProUGUI target)
         {
-            m_currentText.color = new Color(m_currentText.color.r, m_currentText.color.g, m_currentText.color.b, 0);
-            m_currentText.DOFade(1, m_fadeTweenTime);
-            m_currentText.transform.DOLocalMove(m_destinationPoint, m_tweenTime);
+            target.color = new Color(target.color.r, target.color.g, target.color.b, 0);
+            target.DOFade(1, m_fadeTweenTime);
+            target.transform.DOLocalMove(m_destinationPoint, m_tweenTime).SetEase(easeType).OnComplete(() => m_pool.Release(target));
         }
 
-        private void FadeOut(TextMeshProUGUI text)
+        private void FadeOut(TextMeshProUGUI target)
         {
-            text.transform.DOLocalMove(m_destinationPoint, m_tweenTime).OnComplete(() =>
+            target.transform.DOLocalMove(m_destinationPoint, m_tweenTime).SetEase(easeType).OnComplete(() =>
             {
-                text.DOFade(0, m_fadeTweenTime).OnComplete(() => text.GetComponent<PooledText>().Release());
+                target.DOFade(0, m_fadeTweenTime).OnComplete(() => m_pool.Release(target));
             });
         }
 
-        private void FadeInAndOut()
+        private void FadeInAndOut(TextMeshProUGUI target)
         {
-            m_currentText.color = new Color(m_currentText.color.r, m_currentText.color.g, m_currentText.color.b, 0);
-            m_currentText.DOFade(1, m_fadeTweenTime);
-            m_currentText.transform.DOLocalMove(m_destinationPoint, m_tweenTime).OnComplete(() =>
+            target.color = new Color(target.color.r, target.color.g, target.color.b, 0);
+            target.DOFade(1, m_fadeTweenTime);
+            target.transform.DOLocalMove(m_destinationPoint, m_tweenTime).SetEase(easeType).OnComplete(() =>
             {
-                m_currentText.DOFade(0, m_fadeTweenTime)/* .OnComplete(() => m_pool.Release(m_currentText)) */;
+                target.DOFade(0, m_fadeTweenTime).OnComplete(() => m_pool.Release(target));
             });
         }
         #endregion

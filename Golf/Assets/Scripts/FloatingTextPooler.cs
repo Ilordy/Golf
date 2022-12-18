@@ -17,7 +17,7 @@ namespace MobileTools
     {
         #region Variables
         [SerializeField] Canvas _canvas;
-        [SerializeField] PooledText _textPrefab;
+        [SerializeField] TextMeshProUGUI _textPrefab;
         [SerializeField] FloatingTextTweener _tweenerType;
         [SerializeField] Vector2 _startPosition, _endPosition;//implement this with start and end pos.
 
@@ -31,13 +31,13 @@ namespace MobileTools
         [SerializeField,
          Tooltip("Max size the pool array can be. Set to 15 by default, check out the HelpURL for more info on this variable.")]
         int _maxPoolSize = 15;
-        private ObjectPool<PooledText> _pool;
+        private ObjectPool<TextMeshProUGUI> _pool;
         #endregion
 
         #region Life Cycle
         void Start()
         {
-            _pool = new ObjectPool<PooledText>
+            _pool = new ObjectPool<TextMeshProUGUI>
             (CreateText,
             OnTextGet,
             OnTextReleased,
@@ -82,23 +82,23 @@ namespace MobileTools
             return screenPos;
         }
 
-        PooledText CreateText()
+        TextMeshProUGUI CreateText()
         {
             return Instantiate(_textPrefab, _canvas.transform);
         }
 
-        void OnTextGet(PooledText text)
+        void OnTextGet(TextMeshProUGUI text)
         {
             text.gameObject.SetActive(true);
             text.transform.localPosition = _startPosition;
         }
 
-        void OnTextReleased(PooledText text)
+        void OnTextReleased(TextMeshProUGUI text)
         {
             text.gameObject.SetActive(false);
         }
 
-        void DestroyText(PooledText text)
+        void DestroyText(TextMeshProUGUI text)
         {
             Destroy(text.gameObject);
         }
@@ -109,10 +109,8 @@ namespace MobileTools
         {
             var pooledText = _pool.Get();
             var text = pooledText.GetComponent<TextMeshProUGUI>();
-            text.text = textValue;
-            pooledText.InitRelease(() => _pool.Release(pooledText), _endPosition, _pool);
-            //GetComponent<TestTweener>().TweenText(ref text, _endPosition, ref _pool);            
-            _tweenerType.TweenText(text, _endPosition);
+            text.text = textValue;      
+            _tweenerType.TweenText(text, _endPosition, _pool);
         }
         #endregion
     }
