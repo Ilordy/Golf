@@ -475,14 +475,14 @@ namespace UnityEngine
             PlayerPrefs.SetInt("Money", money);
         }
 
-        void HandleVictory()
+        public void HandleVictory(float multiplier)
         {
             themeSet = false;
             ResetGame();
             level++;
             PlayerPrefs.SetInt("Level", level);
             calculateDifficulty(level);
-            GameEvents.current.HandleVictory(level, earned);
+            GameEvents.current.HandleVictory(level, (int)(earned * multiplier));
         }
 
         void RewardVictory(int mult)

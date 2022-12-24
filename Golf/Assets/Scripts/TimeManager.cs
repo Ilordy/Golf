@@ -6,8 +6,14 @@ using System;
 public class TimeManager : Singleton<TimeManager>
 {
     [SerializeField] float slowdownFactor = 0.05f;
+    private float m_startFixedDeltaTime;
     private float slowdownLength = 5f;
     public event Action OnTimeUpdated;
+
+    private void Start()
+    {
+        m_startFixedDeltaTime = Time.fixedDeltaTime;
+    }
 
     void Update()
     {
@@ -17,7 +23,6 @@ public class TimeManager : Singleton<TimeManager>
         // if (Time.timeScale == 1) isSlowedDown = false;
         if (Input.GetKeyDown(KeyCode.G))
             FlipTime();
-        //Debug.Log(Time.timeScale);
     }
 
     public void DoSlowmotion(int seconds)
@@ -31,6 +36,7 @@ public class TimeManager : Singleton<TimeManager>
         OnTimeUpdated?.Invoke();
         yield return new WaitForSecondsRealtime(seconds);
         Time.timeScale = 1;
+        Time.fixedDeltaTime = m_startFixedDeltaTime;
         OnTimeUpdated?.Invoke();
     }
 
@@ -42,7 +48,10 @@ public class TimeManager : Singleton<TimeManager>
             Time.fixedDeltaTime = Time.timeScale * .02f;
         }
         else
+        {
             Time.timeScale = 1;
+            Time.fixedDeltaTime = m_startFixedDeltaTime;
+        }
     }
 
     protected override void InternalInit()

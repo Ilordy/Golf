@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9bf4b9d58bd0234884ae5ad49005837, type: 3}
   m_Name: DefaultFade
   m_EditorClassIdentifier: 
-  m_tweenTime: 2
-  easeType: 27
-  m_fadeTweenTime: 1
-  m_fadeType: 0
+  m_tweenTime: 0.6
+  easeType: 0
+  m_fadeTweenTime: 0.3
+  m_fadeType: 2

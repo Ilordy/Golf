@@ -21,9 +21,17 @@ public class WaterSplasher : MonoBehaviour
         if (other.transform.root.name.StartsWith("Boss"))
         {
             OnBossTouchedWater?.Invoke();
+            Debug.Log("BOSS LANDED");
             splash.transform.localScale = Vector3.one * 11.2f;
+            StartCoroutine(NotifyWorldManager());
         }
         ps.Play();
         //TODO: add splash sound next ONLY IF they are visible on screen.
+    }
+
+    IEnumerator NotifyWorldManager()
+    {
+        yield return new WaitForSeconds(2);
+        WorldManager.I.BossHitOcean();
     }
 }

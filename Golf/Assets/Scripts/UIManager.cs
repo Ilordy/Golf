@@ -91,7 +91,7 @@ public class UIManager : MonoBehaviour
 
         //Cache Victory/Defeat UI Components
         victoryDoubleButton = victoryUI.transform.GetChild(3).GetComponent<Button>();
-        victorySkipButton = victoryUI.transform.GetChild(4).GetComponent<Button>();
+        //victorySkipButton = victoryUI.transform.GetChild(4).GetComponent<Button>();
         victoryText = victoryUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
         victoryEarnedText = victoryUI.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
         defeatSkipLevelButton = defeatUI.transform.GetChild(2).GetComponent<Button>();

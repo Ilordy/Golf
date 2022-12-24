@@ -10,7 +10,10 @@ using UnityEditor;
 namespace MobileTools
 {
     /// <summary>
-    /// 
+    /// Simple class for pooling text and making it float. Works on both screen and world space canvas.
+    /// <br>
+    /// Make sure TextMeshPro and Dotween are installed before use!
+    /// </br>
     /// </summary>
     [HelpURL("https://www.youtube.com/watch?v=7EZ2F-TzHYw")]
     public class FloatingTextPooler : MonoBehaviour
@@ -19,7 +22,7 @@ namespace MobileTools
         [SerializeField] Canvas _canvas;
         [SerializeField] TextMeshProUGUI _textPrefab;
         [SerializeField] FloatingTextTweener _tweenerType;
-        [SerializeField] Vector2 _startPosition, _endPosition;//implement this with start and end pos.
+        [SerializeField] Vector2 _startPosition, _endPosition;
 
         [Header("POOL SETTINGS"), Space(5)]
         [SerializeField,
@@ -47,13 +50,6 @@ namespace MobileTools
             _maxPoolSize);
         }
 
-
-        void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.P))
-                CreateText("test Text");
-        }
-
         void OnValidate()
         {
             if (_poolCapacity < 1)
@@ -66,8 +62,17 @@ namespace MobileTools
         {
             if (!_canvas) return;
             //Make sure to have these icon names in your Assets/Gizmos folder or use a different icon name.
-            Gizmos.DrawIcon(WorldToScreenSpace(_startPosition), "FloatingTextSpawnPoint");
-            Gizmos.DrawIcon(WorldToScreenSpace(_endPosition), "FloatingTextEndPoint");
+            if (_canvas.renderMode == RenderMode.WorldSpace)
+            {
+                var ct = _canvas.transform;
+                Gizmos.DrawIcon(ct.TransformPoint(_startPosition), "FloatingTextSpawnPoint");
+                Gizmos.DrawIcon(ct.TransformPoint(_endPosition), "FloatingTextEndPoint");
+            }
+            else
+            {
+                Gizmos.DrawIcon(WorldToScreenSpace(_startPosition), "FloatingTextSpawnPoint");
+                Gizmos.DrawIcon(WorldToScreenSpace(_endPosition), "FloatingTextEndPoint");
+            }
         }
         #endregion
 
@@ -105,11 +110,15 @@ namespace MobileTools
         #endregion
 
         #region Public Methods
-        void CreateText(string textValue)
+        /// <summary>
+        /// Gets a text object from the pool (or creates a new one if the pool is empty) and tweens it using the specificed Tweener Type.
+        /// </summary>
+        /// <param name="textValue">The value to give to the text.</param>
+        public void CreateText(string textValue)
         {
             var pooledText = _pool.Get();
             var text = pooledText.GetComponent<TextMeshProUGUI>();
-            text.text = textValue;      
+            text.text = textValue;
             _tweenerType.TweenText(text, _endPosition, _pool);
         }
         #endregion
