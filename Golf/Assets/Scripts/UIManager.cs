@@ -3,12 +3,14 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 public class UIManager : MonoBehaviour
 {
-
+    [SerializeField] VictoryUI victoryUI;
+    [SerializeField] DefeatUI defeatUI;
     Manager GameManager;
-    GameObject mainMenu, settingsMenu, shopMenu, ingameUI, victoryUI, defeatUI, pauseUI;
+    GameObject mainMenu, settingsMenu, shopMenu, ingameUI, pauseUI;
     Button playButton, upgradeButton1, upgradeButton2, upgradeButton3, settingsButton, shopButton, soundsButton, hapticsButton, restoreButton, settingsBackButton;
     Button victoryDoubleButton, victorySkipButton, defeatSkipLevelButton, defeatTryAgainButton, pauseButton, resumeButton, mainMenuButton;
     TextMeshProUGUI levelText, moneyCounterText, upgradeLevelText1, upgradeLevelText2, upgradeLevelText3, upgradeCostText1, upgradeCostText2, upgradeCostText3;
@@ -18,16 +20,17 @@ public class UIManager : MonoBehaviour
     Image soundsButtonImage;
     Image hapticsButtonImage;
 
-    Color colorEnabled = new Color32(117,255,131,255);
-    Color colorDisabled = new Color32(255,117,131,255);
+    Color colorEnabled = new Color32(117, 255, 131, 255);
+    Color colorDisabled = new Color32(255, 117, 131, 255);
 
     Stack<Transform> menuStack = new Stack<Transform>();
 
     int currentMoney;
 
-    public Stack<Transform> MenuStack {get{return menuStack;}set{menuStack = value;}}
+    public Stack<Transform> MenuStack { get { return menuStack; } set { menuStack = value; } }
 
-    void Start() {
+    void Start()
+    {
         GameEvents.current.OnKillsChange += UpdatePowerUpSlider;
         GameEvents.current.OnUpgradesChange += UpdateUpgradeInfo;
         GameEvents.current.OnMoneyChange += UpdateMoney;
@@ -45,8 +48,6 @@ public class UIManager : MonoBehaviour
         settingsMenu = gameObject.transform.GetChild(1).gameObject;
         shopMenu = gameObject.transform.GetChild(2).gameObject;
         ingameUI = gameObject.transform.GetChild(6).gameObject;
-        victoryUI = gameObject.transform.GetChild(7).gameObject;
-        defeatUI = gameObject.transform.GetChild(8).gameObject;
         pauseUI = gameObject.transform.GetChild(9).gameObject;
 
         //Set default active UI elements
@@ -89,15 +90,6 @@ public class UIManager : MonoBehaviour
         progressText = ingameUI.transform.GetChild(1).transform.GetChild(2).GetComponent<TextMeshProUGUI>();
         pauseButton = ingameUI.transform.GetChild(2).GetComponent<Button>();
 
-        //Cache Victory/Defeat UI Components
-        victoryDoubleButton = victoryUI.transform.GetChild(3).GetComponent<Button>();
-        //victorySkipButton = victoryUI.transform.GetChild(4).GetComponent<Button>();
-        victoryText = victoryUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-        victoryEarnedText = victoryUI.transform.GetChild(2).GetComponent<TextMeshProUGUI>();
-        defeatSkipLevelButton = defeatUI.transform.GetChild(2).GetComponent<Button>();
-        defeatTryAgainButton = defeatUI.transform.GetChild(3).GetComponent<Button>();
-        defeatText = defeatUI.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-
         //Cache Pause UI Components
         resumeButton = pauseUI.transform.GetChild(3).GetComponent<Button>();
         mainMenuButton = pauseUI.transform.GetChild(4).GetComponent<Button>();
@@ -119,7 +111,7 @@ public class UIManager : MonoBehaviour
 
         //Add Listeners for Victory/Defeat UI Button
         victoryDoubleButton.onClick.AddListener(AwardDouble);
-        victorySkipButton.onClick.AddListener(AwardRegular);
+        victoryUI.claimButton.onClick.AddListener(AwardRegular);
         defeatSkipLevelButton.onClick.AddListener(SkipLevel);
         defeatTryAgainButton.onClick.AddListener(() => OpenMainMenu());
 
@@ -136,18 +128,21 @@ public class UIManager : MonoBehaviour
         //Update UI
         UpdateSettings();
 
-        for (int i = 1; i < transform.childCount; i++) {
+        for (int i = 1; i < transform.childCount; i++)
+        {
             transform.GetChild(i).gameObject.SetActive(true);
             transform.GetChild(i).gameObject.SetActive(false);
         }
     }
 
-    IEnumerator StartGame() {
+    IEnumerator StartGame()
+    {
         yield return new WaitForSeconds(0.1f);
         GameManager.PlayGame = true;
     }
 
-    public void OpenMainMenu() {
+    public void OpenMainMenu()
+    {
         mainMenu.SetActive(true);
         ingameUI.SetActive(false);
         victoryUI.SetActive(false);
@@ -155,159 +150,195 @@ public class UIManager : MonoBehaviour
         pauseUI.SetActive(false);
     }
 
-    void Play() {
+    void Play()
+    {
         mainMenu.SetActive(false);
         ingameUI.SetActive(true);
         StartCoroutine(StartGame());
     }
 
-    void OpenSettings() {
+    void OpenSettings()
+    {
         ToggleInteractable(false);
         settingsMenu.SetActive(true);
         menuStack.Push(settingsMenu.transform);
     }
 
-    void OpenShop() {
+    void OpenShop()
+    {
         menuStack.Push(shopMenu.transform);
         shopMenu.SetActive(true);
     }
 
-    void ToggleSound() {
+    void ToggleSound()
+    {
         GameManager.SoundEnabled = -GameManager.SoundEnabled;
         UpdateSettings();
     }
 
-    void ToggleHaptics() {
+    void ToggleHaptics()
+    {
         GameManager.HapticsEnabled = -GameManager.HapticsEnabled;
         UpdateSettings();
     }
 
-    void UpdateSettings() {
+    void UpdateSettings()
+    {
         soundsButtonImage.color = colorDisabled;
         hapticsButtonImage.color = colorDisabled;
 
-        if (GameManager.SoundEnabled > 0) {
+        if (GameManager.SoundEnabled > 0)
+        {
             soundsButtonImage.color = colorEnabled;
         }
-        if (GameManager.HapticsEnabled > 0) {
+        if (GameManager.HapticsEnabled > 0)
+        {
             hapticsButtonImage.color = colorEnabled;
         }
     }
 
-    void RestorePurchase() {
+    void RestorePurchase()
+    {
         //Restore Purchase for IOS
     }
 
-    void UpdateUpgradeInfo(int upgradeNumber, int upgradeLevel, int upgradeCost) {
-        if (upgradeNumber == 1) {
+    void UpdateUpgradeInfo(int upgradeNumber, int upgradeLevel, int upgradeCost)
+    {
+        if (upgradeNumber == 1)
+        {
             upgradeLevelText1.text = "Fire Rate " + upgradeLevel.ToString();
             upgradeCostText1.text = upgradeCost.ToString();
         }
-        if (upgradeNumber == 2) {
+        if (upgradeNumber == 2)
+        {
             upgradeLevelText2.text = "Ball Bounce " + upgradeLevel.ToString();
             upgradeCostText2.text = upgradeCost.ToString();
         }
-        if (upgradeNumber == 3) {
+        if (upgradeNumber == 3)
+        {
             upgradeLevelText3.text = "Income " + upgradeLevel.ToString();
             upgradeCostText3.text = upgradeCost.ToString();
         }
     }
 
-    void UpdateMoney() {
+    void UpdateMoney()
+    {
         int money = GameManager.Money;
-        if (money > 99999) {
+        if (money > 99999)
+        {
             moneyCounterText.text = "99999";
-        } else {
+        }
+        else
+        {
             moneyCounterText.text = money.ToString();
         }
         currentMoney = money;
     }
 
-    void CheckAfford(bool disable1, bool disable2, bool disable3) {
+    void CheckAfford(bool disable1, bool disable2, bool disable3)
+    {
         upgradeButton1.interactable = true;
         upgradeButton2.interactable = true;
         upgradeButton3.interactable = true;
-        if (disable1) {
+        if (disable1)
+        {
             upgradeButton1.interactable = false;
         }
-        if (disable2) {
+        if (disable2)
+        {
             upgradeButton2.interactable = false;
         }
-        if (disable3) {
+        if (disable3)
+        {
             upgradeButton3.interactable = false;
         }
     }
 
-    void UpdateLevel(int level) {
+    void UpdateLevel(int level)
+    {
         levelText.text = "Level: " + level.ToString();
     }
 
-    void UpdatePowerUpSlider(float value) {
+    void UpdatePowerUpSlider(float value)
+    {
         powerUpSlider.value = value;
     }
 
-    void UpdateProgressBar(int killed, int alive) {
-        float progress = (float)killed/(GameManager.EnemiesToSpawn - (GameManager.EnemiesToSpawn - alive));
+    void UpdateProgressBar(int killed, int alive)
+    {
+        float progress = (float)killed / (GameManager.EnemiesToSpawn - (GameManager.EnemiesToSpawn - alive));
         progressBar.value = progress;
-        progressText.text = (progress * 100).ToString("F2") + "%"; 
+        progressText.text = (progress * 100).ToString("F2") + "%";
     }
 
-    void ResetProgressBar() {
+    void ResetProgressBar()
+    {
         progressBar.value = 0;
         progressText.text = "0%";
     }
 
-    void HandleVictory(int level, int earned) {
+    void HandleVictory(int level, int earned)
+    {
         UpdateLevel(level);
         ResetProgressBar();
         victoryEarnedText.text = "You earned " + earned.ToString() + " coins";
-        victoryDoubleButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Claim 2x\n" + (earned*2).ToString();
+        victoryDoubleButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Claim 2x\n" + (earned * 2).ToString();
         victorySkipButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Get " + earned.ToString();
         ingameUI.SetActive(false);
         victoryUI.SetActive(true);
+        victoryUI.StartSequence(earned, level);
     }
 
-    void AwardRegular() {
+    void AwardRegular()
+    {
         GameEvents.current.RewardVictory(1);
         OpenMainMenu();
     }
 
-    void AwardDouble() {
+    void AwardDouble()
+    {
         GameEvents.current.RewardVictory(2);
         OpenMainMenu();
     }
 
-    void HandleDefeat() {
+    void HandleDefeat()
+    {
         ResetProgressBar();
         ingameUI.SetActive(false);
         defeatUI.SetActive(true);
+        defeatUI.TweenUp(123);
     }
 
-    void SkipLevel() {
+    void SkipLevel()
+    {
         GameEvents.current.SkipLevelPressed();
         OpenMainMenu();
     }
 
-    void OpenPauseMenu() {
+    void OpenPauseMenu()
+    {
         ingameUI.SetActive(false);
         pauseUI.SetActive(true);
         Time.timeScale = 0f;
     }
 
-    void Resume() {
+    void Resume()
+    {
         pauseUI.SetActive(false);
         ingameUI.SetActive(true);
         Time.timeScale = 1f;
     }
 
-    void ReturnToMainMenu() {
+    void ReturnToMainMenu()
+    {
         ResetProgressBar();
         GameEvents.current.ReturnMainMenu();
         OpenMainMenu();
         Time.timeScale = 1f;
     }
 
-    void ToggleInteractable(bool state) {
+    void ToggleInteractable(bool state)
+    {
         shopButton.interactable = !shopButton.interactable;
         settingsButton.interactable = !settingsButton.interactable;
         playButton.interactable = !playButton.interactable;
@@ -316,13 +347,65 @@ public class UIManager : MonoBehaviour
         upgradeButton3.interactable = state;
     }
 
-    void Back() {
+    void Back()
+    {
         menuStack.Peek().gameObject.SetActive(false);
         menuStack.Pop();
         menuStack.Peek().gameObject.SetActive(true);
-        if (menuStack.Peek().gameObject == mainMenu) {
+        if (menuStack.Peek().gameObject == mainMenu)
+        {
             ToggleInteractable(false);
             GameEvents.current.CheckAffordUI();
+        }
+    }
+
+    [System.Serializable]
+    private class VictoryUI
+    {
+        public Transform mainParent;
+        public Image crown;
+        public TextMeshProUGUI levelText, rewardsValue;
+        public CanvasGroup earnedAmountCG;
+        public Button claimButton;
+        public void StartSequence(int rewardAmount, int level)
+        {
+            int valueTween = 0;
+            mainParent.localScale = Vector3.zero;
+            rewardsValue.text = "0";
+            crown.transform.rotation = Quaternion.identity;
+            crown.color = new Color(1, 1, 1, 0);
+            earnedAmountCG.alpha = 0;
+            levelText.text = level.ToString();
+            Sequence sequence = DOTween.Sequence();
+            sequence.Append(mainParent.DOScale(Vector3.one, .3f).SetEase(Ease.OutBounce))
+            .Append(crown.transform.DOLocalRotate(new Vector3(0, 0, -20.775f), .3f))
+            .Join(crown.DOFade(1, .5f))
+            .Append(DOTween.To(() => valueTween, x => valueTween = x, rewardAmount, 1))
+            .Join(earnedAmountCG.DOFade(1, .3f));//finish this.
+            sequence.OnUpdate(() => rewardsValue.text = valueTween.ToString());
+        }
+
+        public void SetActive(bool val)
+        {
+            mainParent.gameObject.SetActive(val);
+        }
+    }
+
+    [System.Serializable]
+    private class DefeatUI
+    {
+        public RectTransform mainParent, skull;
+        public Button retryButton;
+        public void TweenUp(int yPos)
+        {
+            mainParent.anchoredPosition = new Vector2(0, -1300);
+            mainParent.DOAnchorPos(new Vector2(0, yPos), .3f);
+            skull.DOLocalRotate(new Vector3(0, 0, 5), .7f).SetLoops(-1, LoopType.Yoyo);
+        }
+
+        public void SetActive(bool val)
+        {
+            mainParent.gameObject.SetActive(val);
         }
     }
 }
