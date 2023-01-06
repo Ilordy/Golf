@@ -69,16 +69,6 @@ public class AudioManager : Singleton<AudioManager> {
         vfxSource.PlayOneShot(vfxClips[index]);
     }
 
-    protected override void InternalInit() {
-
-    }
-
-    protected override void InternalOnDestroy() {
-
-    }
-
-
-
 
 
     //     bool IsAndroid() {

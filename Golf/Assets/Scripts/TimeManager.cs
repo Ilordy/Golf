@@ -53,14 +53,4 @@ public class TimeManager : Singleton<TimeManager>
             Time.fixedDeltaTime = m_startFixedDeltaTime;
         }
     }
-
-    protected override void InternalInit()
-    {
-
-    }
-
-    protected override void InternalOnDestroy()
-    {
-
-    }
 }

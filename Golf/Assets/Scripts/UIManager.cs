@@ -110,10 +110,10 @@ public class UIManager : MonoBehaviour
         settingsBackButton.onClick.AddListener(Back);
 
         //Add Listeners for Victory/Defeat UI Button
-        victoryDoubleButton.onClick.AddListener(AwardDouble);
+        //victoryDoubleButton.onClick.AddListener(AwardDouble);
         victoryUI.claimButton.onClick.AddListener(AwardRegular);
-        defeatSkipLevelButton.onClick.AddListener(SkipLevel);
-        defeatTryAgainButton.onClick.AddListener(() => OpenMainMenu());
+        //defeatSkipLevelButton.onClick.AddListener(SkipLevel);
+        defeatUI.retryButton.onClick.AddListener(() => OpenMainMenu());
 
         //Add Listeners for ingame UI
         pauseButton.onClick.AddListener(OpenPauseMenu);
@@ -281,9 +281,9 @@ public class UIManager : MonoBehaviour
     {
         UpdateLevel(level);
         ResetProgressBar();
-        victoryEarnedText.text = "You earned " + earned.ToString() + " coins";
-        victoryDoubleButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Claim 2x\n" + (earned * 2).ToString();
-        victorySkipButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Get " + earned.ToString();
+        //victoryEarnedText.text = "You earned " + earned.ToString() + " coins";
+        // victoryDoubleButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Claim 2x\n" + (earned * 2).ToString();
+        //victorySkipButton.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Get " + earned.ToString();
         ingameUI.SetActive(false);
         victoryUI.SetActive(true);
         victoryUI.StartSequence(earned, level);
@@ -292,7 +292,9 @@ public class UIManager : MonoBehaviour
     void AwardRegular()
     {
         GameEvents.current.RewardVictory(1);
-        OpenMainMenu();
+        victoryUI.Exit();
+        CutSceneHelper.I.Reset(OpenMainMenu);
+        //OpenMainMenu();
     }
 
     void AwardDouble()
@@ -375,16 +377,19 @@ public class UIManager : MonoBehaviour
             crown.transform.rotation = Quaternion.identity;
             crown.color = new Color(1, 1, 1, 0);
             earnedAmountCG.alpha = 0;
-            levelText.text = level.ToString();
+            levelText.text = (level - 1).ToString();
             Sequence sequence = DOTween.Sequence();
-            sequence.Append(mainParent.DOScale(Vector3.one, .3f).SetEase(Ease.OutBounce))
+            sequence.Append(mainParent.DOScale(Vector3.one, 1f).SetEase(Ease.OutBounce))//was .8f before.
             .Append(crown.transform.DOLocalRotate(new Vector3(0, 0, -20.775f), .3f))
             .Join(crown.DOFade(1, .5f))
             .Append(DOTween.To(() => valueTween, x => valueTween = x, rewardAmount, 1))
             .Join(earnedAmountCG.DOFade(1, .3f));//finish this.
-            sequence.OnUpdate(() => rewardsValue.text = valueTween.ToString());
+            sequence.OnUpdate(() => rewardsValue.text = "+" + valueTween.ToString());
         }
-
+        public void Exit()
+        {
+            mainParent.DOScale(Vector3.zero, .4f).SetEase(Ease.InBack).OnComplete(() => SetActive(false));
+        }
         public void SetActive(bool val)
         {
             mainParent.gameObject.SetActive(val);
@@ -399,8 +404,10 @@ public class UIManager : MonoBehaviour
         public void TweenUp(int yPos)
         {
             mainParent.anchoredPosition = new Vector2(0, -1300);
-            mainParent.DOAnchorPos(new Vector2(0, yPos), .3f);
-            skull.DOLocalRotate(new Vector3(0, 0, 5), .7f).SetLoops(-1, LoopType.Yoyo);
+            mainParent.DOAnchorPos(new Vector2(0, yPos), .7f);
+            skull.localEulerAngles = new Vector3(0, 0, -5);
+            skull.DOKill();
+            skull.DOLocalRotate(new Vector3(0, 0, 5), 1.7f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.Linear);
         }
 
         public void SetActive(bool val)

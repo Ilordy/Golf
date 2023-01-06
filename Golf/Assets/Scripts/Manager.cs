@@ -610,15 +610,5 @@ namespace UnityEngine
                 GameEvents.current.SetTheme(n);
             }
         }
-
-        protected override void InternalInit()
-        {
-
-        }
-
-        protected override void InternalOnDestroy()
-        {
-
-        }
     }
 }

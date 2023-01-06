@@ -9,12 +9,13 @@ public class CutSceneHelper : Singleton<CutSceneHelper>
     [SerializeField] BossSliderInputHandler InputSwingUI;
     [SerializeField] CineMachineBlendHelper blendHelper;
     [SerializeField] GameObject[] fogs;
-    System.Action onPlayerCutsceneFinished;
+    System.Action onPlayerCutsceneFinished, onCamerasResetted;
     void OnEnable()
     {
         blendHelper.onCameraBlendFinished += OnPlayerCamBlended;
         blendHelper.onCameraBlendStarted += OnPlayerCamBlendStarted;
         WaterSplasher.OnBossTouchedWater += OnBossTouchedWater;
+        blendHelper.onCameraBlendFinished += OnCamsReset;
     }
 
     void OnDisable()
@@ -22,13 +23,13 @@ public class CutSceneHelper : Singleton<CutSceneHelper>
         blendHelper.onCameraBlendFinished -= OnPlayerCamBlended;
         blendHelper.onCameraBlendStarted -= OnPlayerCamBlendStarted;
         WaterSplasher.OnBossTouchedWater -= OnBossTouchedWater;
+        blendHelper.onCameraBlendFinished -= OnCamsReset;
     }
 
     public void DoPlayerCutScene(System.Action onCameraBlended)
     {
         playerCam.Priority = 2;
         onPlayerCutsceneFinished = onCameraBlended;
-
     }
 
     public void SetBallCamFocus(Transform focus)
@@ -47,11 +48,19 @@ public class CutSceneHelper : Singleton<CutSceneHelper>
         SwtichFogs(0);
     }
 
+    public void Reset(System.Action OnResetFinished)
+    {
+        onCamerasResetted = OnResetFinished;
+        playerCam.Priority = 0;
+        ballCam.Priority = 0;
+        bossCam.Priority = 0;
+        //OnResetFinished?.Invoke();
+    }
+
     void OnBossTouchedWater()
     {
         bossCam.LookAt = null;
         bossCam.Follow = null;
-        //put logic here for reward UI.
     }
 
     private void OnPlayerCamBlended(ICinemachineCamera cam)
@@ -66,6 +75,14 @@ public class CutSceneHelper : Singleton<CutSceneHelper>
     {
         if (cam.Name != playerCam.Name) return;
         StartCoroutine(EnablePlayerFog());
+    }
+
+    private void OnCamsReset(ICinemachineCamera cam)
+    {
+        if (cam.Name != mainCam.Name) return;
+        onCamerasResetted?.Invoke();
+        onCamerasResetted = null;
+        WorldManager.I.ResetBanners();
     }
 
     private void SwtichFogs(int fogIndex)
@@ -86,13 +103,4 @@ public class CutSceneHelper : Singleton<CutSceneHelper>
         SwtichFogs(1);
     }
 
-    protected override void InternalInit()
-    {
-
-    }
-
-    protected override void InternalOnDestroy()
-    {
-
-    }
 }

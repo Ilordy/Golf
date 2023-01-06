@@ -8,16 +8,12 @@ public class WorldManager : Singleton<WorldManager>
     [SerializeField] GameObject oceanPrefab;
     [SerializeField] float bannerStartPos;
     [SerializeField] float offsetBetweenBanners;
+    private List<GameObject> banners = new List<GameObject>();
     private FloatingTextPooler m_pooler;
     float totalMultAmnt = 1.0f, currentMultAmnt = 1.0f;
     void Start()
     {
         m_pooler = GetComponent<FloatingTextPooler>();
-    }
-
-    void Update()
-    {
-
     }
 
     public void SpawnOceans(Vector3 bossLandingPoint)
@@ -28,6 +24,7 @@ public class WorldManager : Singleton<WorldManager>
         for (float i = Mathf.Abs(bannerStartPos); i < finalPos + (finalPos * .50f); i += offsetBetweenBanners)
         {
             GameObject banner = Instantiate(oceanPrefab, new Vector3(i * -1, 0, 0), Quaternion.identity, transform);
+            banners.Add(banner);
             banner.GetComponentInChildren<TextMeshProUGUI>().text = "x" + totalMultAmnt.ToString("F1");
             totalMultAmnt += 0.2f;
         }
@@ -44,13 +41,13 @@ public class WorldManager : Singleton<WorldManager>
         Manager.I.HandleVictory(currentMultAmnt);
     }
 
-    protected override void InternalInit()
+    public void ResetBanners()
     {
-
-    }
-
-    protected override void InternalOnDestroy()
-    {
-
+        foreach (GameObject banner in banners){
+            Destroy(banner);
+        }
+        banners.Clear();
+        currentMultAmnt = 1;
+        totalMultAmnt = 1;
     }
 }

@@ -1,9 +1,7 @@
 #region Using
-
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 #endregion
     public abstract class Singleton<T> : MonoBehaviour where T : Singleton<T> {
         private static T _instance;
@@ -63,8 +61,6 @@ using UnityEngine.SceneManagement;
             }
 
             SceneManager.activeSceneChanged += SceneManagerOnActiveSceneChanged;
-
-            InternalInit();
             _isInitialized = true;
         }
 
@@ -86,9 +82,6 @@ using UnityEngine.SceneManagement;
             _instance = null;
         }
 
-
-        protected abstract void InternalInit();
-
         /// Make sure the instance isn't referenced anymore when the user quit, just in case.
         private void OnApplicationQuit() {
             _instance = null;
@@ -99,12 +92,10 @@ using UnityEngine.SceneManagement;
             SceneManager.activeSceneChanged -= SceneManagerOnActiveSceneChanged;
 
             StopAllCoroutines();
-            InternalOnDestroy();
             if (_instance != this) {
                 return;
             }
             _instance = null;
             _isInitialized = false;
         }
-        protected abstract void InternalOnDestroy();
     }
