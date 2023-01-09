@@ -23,11 +23,6 @@ public class ShieldEnemy : Enemy
         enemyAnimator = GetComponent<Animator>();
     }
 
-    protected override void Update()
-    {
-        base.Update();
-    }
-
     protected override void OnCollisionEnter(Collision collision) {
         base.OnCollisionEnter(collision);
 

@@ -80,30 +80,6 @@ public class PowerBox : MonoBehaviour
             InitMoving();
     }
 
-    private void OnDrawGizmos()
-    {
-        foreach (var point in EvaluateSlerpPoints(startPos, endPos, centorPoint, 15))
-        {
-            Gizmos.DrawSphere(point, 0.1f);
-        }
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(centorPoint, 0.2f);
-    }
-
-    IEnumerable<Vector3> EvaluateSlerpPoints(Vector3 start, Vector3 end, Vector3 center, int count = 10)
-    {
-        var startRelativeCenter = start - center;
-        var endRelativeCenter = end - center;
-
-        var f = 1f / count;
-
-        for (var i = 0f; i < 1 + f; i += f)
-        {
-            yield return Vector3.Slerp(startRelativeCenter, endRelativeCenter, i) + center;
-        }
-    }
-
     protected virtual void OnCollisionEnter(Collision other)
     {
         //play sound and destroy

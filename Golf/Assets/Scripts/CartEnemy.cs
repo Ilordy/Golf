@@ -31,13 +31,10 @@ public class CartEnemy : EnemyClass {
                     GameEvents.current.KillsChange(killedCount);
                 }
             }
-        } else {
+        } else if(!Manager.I.PlayerDead) {
             transform.LookAt(playerPos);
             transform.Translate(0,0,speed * Time.deltaTime);
         }
-    }
-
-    void FixedUpdate() {
     }
 
     protected override void OnCollisionEnter(Collision collision) {

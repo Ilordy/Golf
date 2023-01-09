@@ -148,6 +148,7 @@ public class UIManager : MonoBehaviour
         victoryUI.SetActive(false);
         defeatUI.SetActive(false);
         pauseUI.SetActive(false);
+        Manager.I.ResetGame();
     }
 
     void Play()

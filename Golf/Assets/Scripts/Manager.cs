@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
 using Cinemachine;
 namespace UnityEngine
 {
@@ -27,6 +28,7 @@ namespace UnityEngine
         [SerializeField] GameObject fireBall;
         EnemyClass EnemyClass;
         Animator playerAnimator;
+        private bool playerDead;
 
         //Settings
         int soundEnabled = 1;
@@ -78,6 +80,7 @@ namespace UnityEngine
         int level = 1;
 
         //Getters/Setters
+        public bool PlayerDead => playerDead;
         public bool PlayGame { set { playGame = value; } }
         public int SoundEnabled { get { return soundEnabled; } set { soundEnabled = value; } }
         public int HapticsEnabled { get { return hapticsEnabled; } set { hapticsEnabled = value; } }
@@ -497,8 +500,13 @@ namespace UnityEngine
 
         public void HandleDefeat()
         {
-            ResetGame();
-            GameEvents.current.HandleDefeat();
+            //ResetGame();
+            playerDead = true;
+            playerAnimator.SetTrigger("Hit");
+            player.transform.localEulerAngles = new Vector3(-90, 0, 0);
+            var playerLaunchDestination = new Vector3(1, 0, Random.Range(-1f, 0f)) * 10;
+            player.transform.DOMove(new Vector3(0, .8f) + player.transform.localPosition + playerLaunchDestination, 3).OnComplete(()
+            => GameEvents.current.HandleDefeat());
         }
 
         void SkipLevel()
@@ -517,6 +525,7 @@ namespace UnityEngine
 
         public void ResetGame()
         {
+            playerDead = false;
             StopCoroutine(StartedSpawning);
             StartedSpawning = null;
             playGame = false;
@@ -525,6 +534,8 @@ namespace UnityEngine
             playerAnimator.SetBool("Swing", false);
             Enemy.ResetStatics();
             GameEvents.current.DeleteAnimation();
+            player.transform.localPosition = new Vector3(16.02f, 1, -.22f);
+            player.transform.localEulerAngles = new Vector3(0, 90, 0);
             RemoveAllCharacters();
         }
 

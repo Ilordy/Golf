@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : EnemyClass {
+public class Enemy : EnemyClass
+{
+    [SerializeField] float tackleRange;
     bool isDead = false;
     CapsuleCollider col;
     Animator animator;
     ParticleSystem particles;
     private Rigidbody rb;
-    bool isAlly;
-    Transform allyTarget;
 
-    protected virtual void Start() {
+    protected virtual void Start()
+    {
         aliveCount++;
         health = 1;
         speed = 5f;
@@ -24,13 +25,17 @@ public class Enemy : EnemyClass {
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
     }
 
-    protected virtual void Update() {
-        if (health <= 0) {
+    void Update()
+    {
+        if (health <= 0)
+        {
             totalKilledCount++;
             GameEvents.current.ProgressChange(totalKilledCount, aliveCount);
-            if (increase) {
+            if (increase)
+            {
                 killedCount++;
-                if (killedCount <= 5) {
+                if (killedCount <= 5)
+                {
                     GameEvents.current.KillsChange(killedCount);
                 }
             }
@@ -40,31 +45,29 @@ public class Enemy : EnemyClass {
             GameEvents.current.Reward();
             col.enabled = false;
             particles.Stop(true, UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
-            if (isAlly) return;
             AddRagdollForce((new Vector3(0, 1.3f, 0) + -transform.forward) * 100);
             animator.enabled = false;
             Destroy(gameObject, 5);
         }
 
-        if (!isDead) {
-            transform.LookAt(playerPos);
-            transform.Translate(0, 0, speed * Time.deltaTime);
-        } else if (isAlly) {
-            transform.LookAt(allyTarget);
+        if (!isDead && !Manager.I.PlayerDead)
+        {
+            if (Vector3.Distance(transform.position, playerPos) < tackleRange)
+            {
+                animator.SetTrigger("Tackle");
+            }
+            else
+            {
+                transform.LookAt(playerPos);
+            }
             transform.Translate(0, 0, speed * Time.deltaTime);
         }
+        else
+            animator.SetTrigger("Victory");
     }
 
-    /// <summary>
-    /// Converts enemy to a possible ally
-    /// </summary>
-    public void MakeAlly(Transform allyTarget) {
-        GetComponent<Rigidbody>().isKinematic = true;
-        this.allyTarget = allyTarget;
-        isAlly = true;
-    }
-
-    protected override void OnCollisionEnter(Collision collision) {
+    protected override void OnCollisionEnter(Collision collision)
+    {
         base.OnCollisionEnter(collision);
     }
 }

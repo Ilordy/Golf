@@ -39,6 +39,7 @@ public class BossEnemy : MonoBehaviour
                 anim.SetTrigger("GotHit");
                 isStunned = true;
                 canBeHit = false;
+                GameEvents.current.EnemyHit();
                 StartCoroutine(HitStun());
             }
             else
