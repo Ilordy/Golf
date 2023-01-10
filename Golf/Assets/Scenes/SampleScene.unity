@@ -4103,10 +4103,10 @@ RectTransform:
   m_Father: {fileID: 211013613}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1.0438, y: 0.0050049}
-  m_SizeDelta: {x: 776.52, y: 1684.6}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &408310180
 MonoBehaviour:
@@ -8897,8 +8897,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -75.3}
-  m_SizeDelta: {x: 200, y: 50}
+  m_AnchoredPosition: {x: 0, y: -156}
+  m_SizeDelta: {x: 561.39, y: 132.71}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &997328915
 MonoBehaviour:
@@ -8948,12 +8948,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 42.6
+  m_fontSize: 84.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 84.7
   m_fontStyle: 1
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -17325,7 +17325,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1893567008}
-  m_LocalRotation: {x: 0.19935608, y: 0.3423975, z: -0.07458967, w: 0.91512704}
+  m_LocalRotation: {x: 0.1993561, y: 0.3423975, z: -0.07458966, w: 0.9151271}
   m_LocalPosition: {x: 9.12, y: 5.808, z: -8.15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -20165,8 +20165,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.000014305, y: 0}
-  m_SizeDelta: {x: 510.6494, y: 82.9188}
+  m_AnchoredPosition: {x: -0.000014305, y: 0.00036621}
+  m_SizeDelta: {x: 1035.9, y: 168.21}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2117979239
 MonoBehaviour:
@@ -20216,15 +20216,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
+  m_fontSize: 134
   m_fontSizeBase: 78.9
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_fontSizeMax: 134
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 1024
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -20461,7 +20461,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -6478536213147159724, guid: e0a5f49d4eef14a4b866f3c79f2ffc7b, type: 3}
+  - {fileID: 2100000, guid: e623f1ca4478fce4181a132a171649bb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -21144,7 +21144,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -6478536213147159724, guid: e0a5f49d4eef14a4b866f3c79f2ffc7b, type: 3}
+  - {fileID: 2100000, guid: e623f1ca4478fce4181a132a171649bb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -21212,9 +21212,9 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 64ec1bbe1fb4014488c470fa01e3d067, type: 2}
-  - {fileID: 2100000, guid: 3f3d716ece93c0c49b7fa6187e02095a, type: 2}
-  - {fileID: 2100000, guid: 64ec1bbe1fb4014488c470fa01e3d067, type: 2}
+  - {fileID: 2100000, guid: e623f1ca4478fce4181a132a171649bb, type: 2}
+  - {fileID: 2100000, guid: 81619490063e3a04da641329153acb9d, type: 2}
+  - {fileID: 2100000, guid: e623f1ca4478fce4181a132a171649bb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -21256,7 +21256,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -6478536213147159724, guid: e0a5f49d4eef14a4b866f3c79f2ffc7b, type: 3}
+  - {fileID: 2100000, guid: e623f1ca4478fce4181a132a171649bb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -21358,7 +21358,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 64ec1bbe1fb4014488c470fa01e3d067, type: 2}
+  - {fileID: 2100000, guid: e623f1ca4478fce4181a132a171649bb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -21631,7 +21631,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -6478536213147159724, guid: e0a5f49d4eef14a4b866f3c79f2ffc7b, type: 3}
+  - {fileID: 2100000, guid: e623f1ca4478fce4181a132a171649bb, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
