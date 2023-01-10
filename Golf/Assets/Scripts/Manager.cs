@@ -37,6 +37,7 @@ namespace UnityEngine
         //Power Up
         GameObject[] enemies;
         GameObject[] powerUpProjectiles;
+        private GameObject bossInstance;
 
         //Shooting
         float beganHolding = 0f;
@@ -188,6 +189,7 @@ namespace UnityEngine
                     RemoveAllCharacters();
                     StopCoroutine(StartedSpawning);
                     GameObject boss = Instantiate(bossEnemy, bossPosition);
+                    bossInstance = boss;
                     boss.GetComponent<BossEnemy>().OnKnockedOut += BossKnockedOut;
                 }
             }
@@ -543,6 +545,8 @@ namespace UnityEngine
         {
             if (shield.activeSelf)
                 shield.GetComponent<Shield>().DestroyShield();
+            if (bossInstance)
+                Destroy(bossInstance);
             GameObject[] e = GameObject.FindGameObjectsWithTag("Enemy");
             e = e.Concat(GameObject.FindGameObjectsWithTag("Ally")).ToArray();
             foreach (GameObject i in e)

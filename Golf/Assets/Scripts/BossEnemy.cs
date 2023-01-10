@@ -23,7 +23,8 @@ public class BossEnemy : MonoBehaviour
     void Update()
     {
         if (isStunned) return;
-        transform.LookAt(Manager.I.Player.transform.position);
+        if (!Manager.I.PlayerDead)
+            transform.LookAt(Manager.I.Player.transform.position);
         transform.Translate(0, 0, 10 * Time.deltaTime);
     }
 
@@ -48,6 +49,17 @@ public class BossEnemy : MonoBehaviour
                 OnKnockedOut?.Invoke(this);
             }
         }
+        else if (other.gameObject.tag.Equals("Player"))
+        {
+            DestroyAllColliders();
+            GameEvents.current.Defeat();
+        }
+    }
+
+    private void DestroyAllColliders()
+    {
+        foreach (Collider col in GetComponentsInChildren<Collider>())
+            Destroy(col);
     }
 
     IEnumerator HitStun()
