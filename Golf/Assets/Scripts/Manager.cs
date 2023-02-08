@@ -55,6 +55,7 @@ namespace UnityEngine
         //Upgrades
         [SerializeField, Range(0, 1)] private float powerBoxSpawnChance;
         [SerializeField] private int powerBoxSpawnInterval;
+        [SerializeField] Transform[] enemySpawnPositions;
         private GameObject currentPowerBox;
         float fireRate = 0.5f;
         int maxBounces = 4;
@@ -139,6 +140,7 @@ namespace UnityEngine
             //Update Upgrade Values
             UpdateUpgradeValues();
             CheckMoney();
+            SpawnInitialEnemies();
 
             //Equip current cosmetics
             for (int i = 0; i < cosmetics.GetLength(0); i++)
@@ -525,6 +527,14 @@ namespace UnityEngine
             earned += Random.Range(1, income + 5);
         }
 
+        void SpawnInitialEnemies()
+        {
+            for (int i = 0; i < enemySpawnPositions.Length; i++)
+            {
+                Instantiate(enemy, enemySpawnPositions[i].position,Quaternion.identity);//fix later
+            }
+        }
+
         public void ResetGame()
         {
             playerDead = false;
@@ -538,6 +548,7 @@ namespace UnityEngine
             GameEvents.current.DeleteAnimation();
             player.transform.localPosition = new Vector3(16.02f, 1, -.22f);
             player.transform.localEulerAngles = new Vector3(0, 90, 0);
+            SpawnInitialEnemies();
             RemoveAllCharacters();
         }
 

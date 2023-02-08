@@ -72,6 +72,7 @@ public class BossEnemy : MonoBehaviour
 
     public void AddRagDollForce(float force)
     {
+        GameEvents.current.EnemyHit();
         anim.enabled = false;
         CutSceneHelper.I.SetBossCamFocus(focusPoint);
         rb.constraints = RigidbodyConstraints.None;

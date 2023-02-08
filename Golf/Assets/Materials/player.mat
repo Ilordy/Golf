@@ -21,20 +21,15 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: player
-  m_Shader: {fileID: 4800000, guid: 6c046203321edf34fb092959a05e5b4a, type: 3}
+  m_Shader: {fileID: 4800000, guid: bee44b4a58655ee4cbff107302a3e131, type: 3}
   m_ValidKeywords:
-  - _MK_ARTISTIC_PROJECTION_SCREEN_SPACE
-  - _MK_DISSOLVE_BORDER_RAMP
-  - _MK_ENVIRONMENT_REFLECTIONS_AMBIENT
-  - _MK_LIGHT_BANDED
-  - _MK_SPECULAR_ISOTROPIC
-  - _MK_WRAPPED_DIFFUSE
+  - DR_ENABLE_LIGHTMAP_DIR
+  - DR_OUTLINE_ON
+  - _CELPRIMARYMODE_SINGLE
+  - _EMISSION
+  - _TEXTUREBLENDINGMODE_MULTIPLY
   m_InvalidKeywords:
-  - _FRESNELHIGHLIGHTS_ON
-  - _MK_DETAIL_BLEND_MIX
-  - _MK_FRESNEL_HIGHLIGHTS
-  - _MK_WORKFLOW_SPECULAR
-  - _WRAPPEDLIGHTING_ON
+  - _UNITYSHADOWMODE_NONE
   m_LightmapFlags: 6
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -55,6 +50,14 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CelCurveTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _CelStepTexture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -218,9 +221,13 @@ Material:
     - _BlendSrc: 1
     - _Brightness: 1
     - _BumpScale: 1
+    - _CameraDistanceImpact: 0
     - _CameraFadingEnabled: 0
     - _CameraFarFadeDistance: 2
     - _CameraNearFadeDistance: 1
+    - _CelExtraEnabled: 0
+    - _CelNumSteps: 5
+    - _CelPrimaryMode: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _ColorGrading: 0
@@ -249,6 +256,13 @@ Material:
     - _DrawnMapScale: 1
     - _DstBlend: 0
     - _EnvironmentReflections: 1
+    - _FlatRimEdgeSmoothness: 0.5
+    - _FlatRimLightAlign: 0.932
+    - _FlatRimSize: 0.5
+    - _FlatSpecularEdgeSmoothness: 0
+    - _FlatSpecularSize: 0.696
+    - _Flatness: 1
+    - _FlatnessExtra: 0.822
     - _FlipbookBlending: 0
     - _FlipbookMode: 0
     - _FresnelHighlights: 1
@@ -257,6 +271,11 @@ Material:
     - _GlossinessSource: 0
     - _GlossyReflections: 1
     - _GoochRampIntensity: 0.5
+    - _GradientAngle: 0
+    - _GradientCenterX: 0
+    - _GradientCenterY: 0
+    - _GradientEnabled: 0
+    - _GradientSize: 10
     - _HatchingMapScale: 1
     - _Initialized: 1
     - _InputTab: 1
@@ -267,12 +286,16 @@ Material:
     - _Light: 2
     - _LightBands: 4
     - _LightBandsScale: 0.5
+    - _LightContribution: 0
+    - _LightFalloffSize: 0
     - _LightThreshold: 0.352
     - _LightTransmission: 0
     - _LightTransmissionDistortion: 0.25
     - _LightTransmissionIntensity: 1
     - _LightTransmissionSmoothness: 0.5
     - _LightTransmissionThresholdOffset: 0.25
+    - _LightmapDirectionPitch: 50
+    - _LightmapDirectionYaw: 221
     - _Metallic: 0.606
     - _Mode: 0
     - _NormalMapIntensity: 1
@@ -281,22 +304,32 @@ Material:
     - _OptionsTab: 1
     - _Outline: 1
     - _OutlineData: 0
+    - _OutlineDepthOffset: 0
+    - _OutlineEnabled: 1
     - _OutlineFadeMax: 2
     - _OutlineFadeMin: 0.25
     - _OutlineNoise: 0
+    - _OutlineScale: 1
     - _OutlineSize: 60
     - _OutlineTab: 1
+    - _OutlineWidth: 1
+    - _OverrideLightmapDir: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
     - _ReceiveShadows: 0
     - _RenderFace: 2
     - _RenderPriority: 0
     - _Rim: 0
+    - _RimEnabled: 0
     - _RimSize: 2.32
     - _RimSmoothness: 0.5
     - _RimThresholdOffset: 0.25
     - _Roughness: 0.5
     - _Saturation: 1
+    - _SelfShadingSize: 0.593
+    - _SelfShadingSizeExtra: 0
+    - _ShadowEdgeSize: 0
+    - _ShadowEdgeSizeExtra: 0.269
     - _Shininess: 0
     - _SketchMapScale: 1
     - _Smoothness: 0
@@ -307,6 +340,7 @@ Material:
     - _SoftParticlesNearFadeDistance: 0
     - _SpecSource: 0
     - _Specular: 1
+    - _SpecularEnabled: 0
     - _SpecularHighlights: 1
     - _SpecularIntensity: 1
     - _SpecularSmoothness: 1
@@ -322,11 +356,18 @@ Material:
     - _StencilZFail: 0
     - _StylizeTab: 1
     - _Surface: 0
+    - _TextureBlendingMode: 0
+    - _TextureImpact: 1
     - _ThresholdMapScale: 1
     - _UVSec: 0
+    - _UnityShadowMode: 0
+    - _UnityShadowOcclusion: 0
+    - _UnityShadowPower: 0.2
+    - _UnityShadowSharpness: 1
     - _VertexAnimation: 0
     - _VertexAnimationIntensity: 0.031
     - _VertexAnimationStutter: 0
+    - _VertexColorsEnabled: 0
     - _Workflow: 1
     - _WorkflowMode: 1
     - _WrappedLighting: 1
@@ -334,17 +375,25 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _AlbedoColor: {r: 1, g: 1, b: 1, a: 1}
-    - _BaseColor: {r: 0.7169812, g: 0.64595944, b: 0.64595944, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseColorAddSubDiff: {r: 0, g: 0, b: 0, a: 0}
     - _CameraFadeParams: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 0.7169812, g: 0.64595944, b: 0.64595944, a: 1}
+    - _ColorDim: {r: 0, g: 0, b: 0, a: 1}
+    - _ColorDimCurve: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
+    - _ColorDimExtra: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorDimSteps: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorGradient: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
     - _DetailColor: {r: 1, g: 1, b: 1, a: 1}
     - _DissolveBorderColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FlatRimColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FlatSpecularColor: {r: 5.3403134, g: 0.10471203, b: 0, a: 1}
     - _GoochBrightColor: {r: 1, g: 1, b: 1, a: 1}
     - _GoochDarkColor: {r: 0, g: 0, b: 0, a: 1}
     - _IridescenceColor: {r: 1, g: 1, b: 1, a: 0.5}
     - _LightTransmissionColor: {r: 1, g: 0.65, b: 0, a: 1}
+    - _LightmapDirection: {r: -0.5025704, g: 0.64278764, b: -0.57814103, a: 0}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _RimBrightColor: {r: 1, g: 1, b: 1, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
@@ -352,5 +401,6 @@ Material:
     - _SoftParticleFadeParams: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
     - _SpecularColor: {r: 0.066037714, g: 0.066037714, b: 0.066037714, a: 1}
+    - _UnityShadowColor: {r: 0.85023, g: 0.85034, b: 0.85045, a: 0.85056}
     - _VertexAnimationFrequency: {r: 7.69, g: 2.5, b: 2.5, a: 0}
   m_BuildTextureStacks: []

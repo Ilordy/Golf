@@ -10,6 +10,7 @@ public class Enemy : EnemyClass
     Animator animator;
     ParticleSystem particles;
     private Rigidbody rb;
+    private static bool isPassive = true;
 
     protected virtual void Start()
     {
@@ -23,10 +24,13 @@ public class Enemy : EnemyClass
         particles = GetComponent<ParticleSystem>();
         rb = GetComponent<Rigidbody>();
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
+        animator.SetInteger("IdleID", Random.Range(0, 3));
     }
 
     void Update()
     {
+        if (isPassive) return;
+        animator.SetInteger("IdleID", -1);
         if (health <= 0)
         {
             totalKilledCount++;
@@ -68,6 +72,8 @@ public class Enemy : EnemyClass
 
     protected override void OnCollisionEnter(Collision collision)
     {
+        if (collision.gameObject.tag.Equals("Projectile"))
+            isPassive = false;
         base.OnCollisionEnter(collision);
     }
 }
