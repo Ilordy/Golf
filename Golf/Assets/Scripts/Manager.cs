@@ -246,7 +246,7 @@ namespace UnityEngine
                 }
                 else
                 {
-                    //playerAnimator.SetBool("Swing",false);
+                    if(calculateTarget() == Vector3.zero) return;
                     playerAnimator.SetBool("Swing", true);
                     pot = 0;
                     GameEvents.current.DeleteAnimation();
@@ -373,7 +373,6 @@ namespace UnityEngine
                 if (currTrail != null) p.GetComponent<TrailRenderer>().colorGradient = currTrail;
                 p.transform.LookAt(flatAimTarget);
                 p.GetComponent<Rigidbody>().useGravity = true;
-                //p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 500f, ForceMode.Impulse);
                 p.GetComponent<Projectile>().SetForce();
             }
         }
@@ -381,12 +380,12 @@ namespace UnityEngine
         Vector3 calculateTarget()
         {
             Ray cursorRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Physics.Raycast(Camera.main.transform.position, cursorRay.direction, out RaycastHit hit);
-            // return new Vector3(hit.point.x >= player.transform.position.x ? -1 * hit.point.x : hit.point.x, 0.63f, hit.point.z);
-             Vector3 dir = new Vector3(hit.point.x, 0.63f, hit.point.z < player.transform.position.z ? (hit.point.z - player.transform.position.z) : hit.point.z);
-             Debug.Log(dir);
-            return dir;//new Vector3(hit.point.x, 0.63f, hit.point.z < player.transform.position.z ? (hit.point.z + player.transform.position.z)*-1 : hit.point.z);
-           
+            LayerMask mask = 1 << 11; //11 is player's layer
+            mask = ~mask; // hit everything but the player's layer
+            Physics.Raycast(Camera.main.transform.position, cursorRay.direction, out RaycastHit hit, Mathf.Infinity, mask);
+            Vector3 dir = new Vector3(hit.point.x, 0.63f, hit.point.z);
+            Debug.Log(dir);
+            return dir.z >= player.transform.position.z ? dir : Vector3.zero;
         }
 
         void calculateDifficulty(int level)
