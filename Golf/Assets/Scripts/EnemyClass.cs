@@ -23,6 +23,18 @@ public class EnemyClass : MonoBehaviour
 
     ///////////////////////////////////////////////////////////////////////////////////
 
+
+    void Awake()
+    {
+        int layerMask = 1 << 15;
+        layerMask = ~layerMask;
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, -transform.up, out hit, Mathf.Infinity, layerMask))
+        {
+            transform.position = hit.point;
+        }
+    }
+
     public static void ResetStatics()
     {
         aliveCount = 0;
@@ -54,6 +66,7 @@ public class EnemyClass : MonoBehaviour
     {
         foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
         {
+            rb.constraints = RigidbodyConstraints.None;
             rb.AddForce(force, ForceMode.Impulse);
         }
     }

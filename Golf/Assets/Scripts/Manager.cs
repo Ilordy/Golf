@@ -56,6 +56,7 @@ namespace UnityEngine
         [SerializeField, Range(0, 1)] private float powerBoxSpawnChance;
         [SerializeField] private int powerBoxSpawnInterval;
         [SerializeField] Transform[] enemySpawnPositions;
+        [SerializeField] BoxCollider enemySpawnBounds;
         private GameObject currentPowerBox;
         float fireRate = 0.5f;
         int maxBounces = 4;
@@ -314,9 +315,10 @@ namespace UnityEngine
         {
             while (EnemyClass.AliveCount < enemiesToSpawn)
             {
+                Bounds bounds = enemySpawnBounds.bounds;
                 float chance = Random.Range(0f, 1f);
-                float xPos = Random.Range(-47f, -32f);
-                float zPos = Random.Range(-3.65f, 3.65f);
+                float xPos = Random.Range(-bounds.extents.x, bounds.extents.x);
+                float zPos = Random.Range(-bounds.extents.z, bounds.extents.z);
 
                 GameObject selected = null;
                 if (chance < 0.1f && level > 10)
@@ -331,7 +333,7 @@ namespace UnityEngine
                 {
                     selected = enemy;
                 }
-                GameObject enemyGO = Instantiate(selected, new Vector3(xPos, 2, zPos), Quaternion.identity);
+                GameObject enemyGO = Instantiate(selected, bounds.center + new Vector3(xPos, 30, zPos), Quaternion.identity);
                 yield return new WaitForSecondsRealtime(1);
             }
         }
@@ -380,7 +382,11 @@ namespace UnityEngine
         {
             Ray cursorRay = Camera.main.ScreenPointToRay(Input.mousePosition);
             Physics.Raycast(Camera.main.transform.position, cursorRay.direction, out RaycastHit hit);
-            return new Vector3(hit.point.x >= player.transform.position.x ? -1 * hit.point.x : hit.point.x, 0.63f, hit.point.z);
+            // return new Vector3(hit.point.x >= player.transform.position.x ? -1 * hit.point.x : hit.point.x, 0.63f, hit.point.z);
+             Vector3 dir = new Vector3(hit.point.x, 0.63f, hit.point.z < player.transform.position.z ? (hit.point.z - player.transform.position.z) : hit.point.z);
+             Debug.Log(dir);
+            return dir;//new Vector3(hit.point.x, 0.63f, hit.point.z < player.transform.position.z ? (hit.point.z + player.transform.position.z)*-1 : hit.point.z);
+           
         }
 
         void calculateDifficulty(int level)
@@ -531,7 +537,7 @@ namespace UnityEngine
         {
             for (int i = 0; i < enemySpawnPositions.Length; i++)
             {
-                Instantiate(enemy, enemySpawnPositions[i].position,Quaternion.identity);//fix later
+                Instantiate(enemy, enemySpawnPositions[i].position, Quaternion.identity);//fix later
             }
         }
 

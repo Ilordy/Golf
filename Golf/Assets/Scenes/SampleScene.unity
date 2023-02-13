@@ -18349,6 +18349,7 @@ MonoBehaviour:
   - {fileID: 1088937643}
   - {fileID: 20797622}
   - {fileID: 1010970966}
+  enemySpawnBounds: {fileID: 2034363186}
 --- !u!4 &981665294
 Transform:
   m_ObjectHideFlags: 0
@@ -23926,7 +23927,7 @@ TerrainCollider:
   m_Material: {fileID: 0}
   m_Enabled: 1
   m_TerrainData: {fileID: 15600000, guid: 62069d1d25c36e449a35fe5903a233fb, type: 2}
-  m_EnableTreeColliders: 1
+  m_EnableTreeColliders: 0
 --- !u!218 &1401193592
 Terrain:
   m_ObjectHideFlags: 0
@@ -23975,6 +23976,7 @@ Transform:
   m_Children:
   - {fileID: 993123836}
   - {fileID: 1769807741}
+  - {fileID: 2034363185}
   m_Father: {fileID: 0}
   m_RootOrder: 14
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -38674,6 +38676,51 @@ Transform:
   m_Father: {fileID: 1962908230}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2034363184
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2034363185}
+  - component: {fileID: 2034363186}
+  m_Layer: 0
+  m_Name: EnemySpawnBounds
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2034363185
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2034363184}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 382.3, y: 1.55, z: 459.1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1401193593}
+  m_RootOrder: 2
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2034363186
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2034363184}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 45.12, y: 1, z: 19.49}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2039031140 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 336947484066890028, guid: 46d8c0d29c28c7543b49941ae7c676dd,
