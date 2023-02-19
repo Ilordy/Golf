@@ -12,7 +12,7 @@ public class PowerBox : MonoBehaviour
     private float journeyTime = 1;
     [SerializeField] float speed;
     private float arc;
-    private Vector3 startPos, endPos, maxPos, minPos;
+    private Vector3 startPos, endPos, maxPos, minPos, finalPos;
     private float startTime;
     protected Collider runWayCollider;
     private bool reversed = false;
@@ -28,6 +28,7 @@ public class PowerBox : MonoBehaviour
         maxPos = runWayCollider.bounds.max - player.transform.position;
         minPos = runWayCollider.bounds.min;
         x = runWayCollider.bounds.max.x;
+        SetMinMax();
         InitMoving();
     }
 
@@ -41,17 +42,21 @@ public class PowerBox : MonoBehaviour
 
     void InitMoving()
     {
+        if (finalPos == null)
+            finalPos = Random.value > .5f ? minPos : maxPos;
+        else
+            finalPos = GetFinalPosition();
         startPos = transform.position;
-        y = 1.5f;
-        z = startPos.z > 0 ? minPos.z : maxPos.z;
-        if (startPos.x <= minPos.x + 15f && !reversed)
+        //reversed = false;
+        y = 1.995f;
+        z = finalPos.z;
+        x = startPos.x <= minPos.x ? maxPos.x : minPos.x;
+        if (startPos.z <= minPos.z + 1 && !reversed)
         {
-            x = maxPos.x;
             reversed = true;
         }
-        if (startPos.x >= maxPos.x - 1.5f)
+        if (startPos.z >= maxPos.z && reversed)
         {
-            x = minPos.x;
             reversed = false;
         }
         endPos = new Vector3(x, y, z);
@@ -64,22 +69,54 @@ public class PowerBox : MonoBehaviour
     void Update()
     {
         Move();
+        SetMinMax();
     }
 
+    void SetMinMax()
+    {
+        minPos = new Vector3(Camera.main.ViewportToWorldPoint(new Vector3(0.05f, 0,
+         Mathf.Abs(Camera.main.transform.position.z - transform.position.z))).x,
+         1.8f,
+         -76);
+        maxPos = new Vector3(Camera.main.ViewportToWorldPoint(new Vector3(0.95f, 0,
+        Mathf.Abs(Camera.main.transform.position.z - transform.position.z))).x,
+        1.8f,
+        -25);//hard coded values due to map being static.
+    }
     private void Move()
     {
         centorPoint = (startPos + endPos) * .5f;
-        centorPoint = startPos.z > 0 ? (centorPoint + Vector3.forward) + new Vector3(0, 0, arc) : centorPoint - Vector3.forward - new Vector3(0, 0, arc);
+        if (startPos.x >= minPos.x && finalPos.z == minPos.z)
+        {
+            centorPoint = (centorPoint - Vector3.forward) - new Vector3(arc, 0, 0);
+        }
+        else if (startPos.x <= maxPos.x && finalPos.z == minPos.z)
+        {
+            centorPoint = centorPoint - Vector3.forward - new Vector3(arc, 0, 0);
+        }
+        else if (startPos.x <= maxPos.x && finalPos.z == maxPos.z)//going back
+        {
+            centorPoint = centorPoint - Vector3.forward - new Vector3(arc, 0, 0);
+        }
+        else if (startPos.x >= minPos.x && finalPos.z == minPos.z)//going forward
+        {
+            centorPoint = (centorPoint - Vector3.forward) - new Vector3(arc, 0, 0);
+        }
         startRelCenter = startPos - centorPoint;
         endRelCenter = endPos - centorPoint;
         float fracComplete = (Time.time - startTime) / journeyTime * speed;
         transform.position = Vector3.Slerp(startRelCenter, endRelCenter, fracComplete * speed);
         transform.position += centorPoint;
         Debug.DrawLine(transform.position, endPos, Color.red, .1f);
-        if (Vector3.Distance(transform.position, endPos) <= 0.001f)
+        if (Vector3.Distance(transform.position, endPos) <= 0.001f || transform.position.x > maxPos.x || transform.position.x < minPos.x)
             InitMoving();
     }
 
+    private Vector3 GetFinalPosition()
+    {
+
+        return reversed == false ? minPos : maxPos;
+    }
     protected virtual void OnCollisionEnter(Collision other)
     {
         //play sound and destroy

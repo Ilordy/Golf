@@ -246,7 +246,7 @@ namespace UnityEngine
                 }
                 else
                 {
-                    if(calculateTarget() == Vector3.zero) return;
+                    if (calculateTarget() == Vector3.zero) return;
                     playerAnimator.SetBool("Swing", true);
                     pot = 0;
                     GameEvents.current.DeleteAnimation();
@@ -340,12 +340,16 @@ namespace UnityEngine
 
         IEnumerator SpawnPowerBox()
         {
+            int zPos = Random.Range(-76, -25);
+            float xPos = Random.Range(0.05f, 0.95f);
+            Vector3 worldPos = new Vector3(xPos, 0, Mathf.Abs(Camera.main.transform.position.z - zPos));
+            worldPos = Camera.main.ViewportToWorldPoint(worldPos);
             while (currentPowerBox == null && playGame)
             {
                 yield return new WaitForSeconds(powerBoxSpawnInterval);
                 if (powerBoxSpawnChance > Random.value)
                 {
-                    var col = runWay.GetComponent<Collider>();//change to 1.5 later
+                    var col = runWay.GetComponent<Collider>();
                     var arrayToUse = powerBoxes;
                     GameObject powerBoxToSpawn;
                     if (allyCount > 2)
@@ -354,8 +358,7 @@ namespace UnityEngine
                         arrayToUse = arr;
                     }
                     powerBoxToSpawn = arrayToUse[Random.Range(0, arrayToUse.Length)];
-                    Vector3 randPos = new Vector3(Random.Range(col.bounds.min.x, col.bounds.max.x - player.transform.position.x),
-                     1.5f, Random.Range(col.bounds.min.z, col.bounds.max.z));
+                    Vector3 randPos = new Vector3(worldPos.x, 1.8f, zPos);
                     currentPowerBox = Instantiate(powerBoxToSpawn, randPos, Quaternion.Euler(-90, 0, 0));
                     currentPowerBox.GetComponent<PowerBox>().OnDestroyed.AddListener(() => StartCoroutine(SpawnPowerBox()));
                 }
