@@ -25,6 +25,7 @@ public class Enemy : EnemyClass
         rb = GetComponent<Rigidbody>();
         GameManager = GameObject.Find("Manager").GetComponent<Manager>();
         animator.SetInteger("IdleID", Random.Range(0, 3));
+        rb.constraints = RigidbodyConstraints.FreezeRotation;
     }
 
     void Update()

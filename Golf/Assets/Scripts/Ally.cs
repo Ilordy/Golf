@@ -56,10 +56,10 @@ public class Ally : MonoBehaviour
     IEnumerator OnLanded()
     { //we wait till the animator is in transition from landed to idle.
         yield return new WaitUntil(() => animator.IsInTransition(0));
-        transform.position = new Vector3(transform.position.x, 1, transform.position.z);
+        transform.position = new Vector3(transform.position.x, 1.6f, transform.position.z);
         clubTransform.localPosition = clubPosition;
         clubTransform.localEulerAngles = clubRotation;
-        transform.eulerAngles = new Vector3(0, 90, 0);
+        //transform.eulerAngles = new Vector3(0, 90, 0);
         StartCoroutine(Shoot());
     }
 

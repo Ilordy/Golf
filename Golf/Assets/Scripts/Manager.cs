@@ -50,6 +50,7 @@ namespace UnityEngine
         int enemiesToSpawn = 0;
         float enemySpawnInterval = 1f;
         private int allyCount;
+        Shield shieldData;
         private bool isBossFight;
 
         //Upgrades
@@ -105,6 +106,7 @@ namespace UnityEngine
         void Start()
         {
             Handheld.Vibrate();
+            shieldData = shield.GetComponent<Shield>();
             //Subscribe to events
             GameEvents.current.OnUpgrade1Request += HandleUpgrade1;
             GameEvents.current.OnUpgrade2Request += HandleUpgrade2;
@@ -410,13 +412,11 @@ namespace UnityEngine
             allyCount++;
             Vector3 allyStartPos = allyCount == 1 ? allyPositions[0].position : allyPositions[1].position;
             allyStartPos += new Vector3(0, 20, 0);//putting offset to spawn midair
-            Instantiate(allyPrefab, allyStartPos, Quaternion.Euler(0, -90, 0));
+            Instantiate(allyPrefab, allyStartPos, Quaternion.Euler(0, 180, 0));
         }
 
         public void UpdateShield()
         {
-            var mat = shield.GetComponent<Renderer>().material;
-            Shield shieldData = shield.GetComponent<Shield>();
             shieldData.Health = shieldHP;
             shield.SetActive(true);
             shieldData.InitShield();
