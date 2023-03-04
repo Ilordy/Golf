@@ -5,19 +5,23 @@ using UnityEngine;
 public class Enemy : EnemyClass
 {
     [SerializeField] float tackleRange;
+    [SerializeField] ParticleSystem emojiPS;
+    [SerializeField] Texture2D[] emojiTextures;
     bool isDead = false;
     CapsuleCollider col;
     Animator animator;
     ParticleSystem particles;
     private Rigidbody rb;
+    private Material emojiMat;
     private static bool isPassive = true;
 
     protected virtual void Start()
     {
+        emojiMat = emojiPS.GetComponent<ParticleSystemRenderer>().material;
+        StartCoroutine(ShowEmoji());
         aliveCount++;
         health = 1;
         speed = 5f;
-
         playerPos = GameObject.Find("Player").transform.position;
         col = GetComponent<CapsuleCollider>();
         animator = GetComponent<Animator>();
@@ -76,5 +80,18 @@ public class Enemy : EnemyClass
         if (collision.gameObject.tag.Equals("Projectile"))
             isPassive = false;
         base.OnCollisionEnter(collision);
+    }
+
+    IEnumerator ShowEmoji()
+    {
+        yield return new WaitForSeconds(Random.Range(3, 6));
+        if (!isPassive)
+        {
+            StartCoroutine(ShowEmoji());
+            yield break;
+        }
+        emojiMat.SetTexture("_BaseMap", emojiTextures[Random.Range(0, emojiTextures.Length)]);
+        emojiPS.Play();
+        StartCoroutine(ShowEmoji());
     }
 }
