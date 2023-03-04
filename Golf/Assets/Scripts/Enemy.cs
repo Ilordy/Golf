@@ -85,7 +85,7 @@ public class Enemy : EnemyClass
     IEnumerator ShowEmoji()
     {
         yield return new WaitForSeconds(Random.Range(3, 6));
-        if (!isPassive)
+        if (isPassive)
         {
             StartCoroutine(ShowEmoji());
             yield break;
