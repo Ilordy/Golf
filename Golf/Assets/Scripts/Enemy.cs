@@ -82,6 +82,12 @@ public class Enemy : EnemyClass
         base.OnCollisionEnter(collision);
     }
 
+    private void SetPassive(){
+        if(!isPassive) return;
+        isPassive = false;
+        
+    }
+
     IEnumerator ShowEmoji()
     {
         yield return new WaitForSeconds(Random.Range(3, 6));
