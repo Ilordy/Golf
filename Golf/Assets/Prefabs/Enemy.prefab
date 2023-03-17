@@ -1249,12 +1249,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tackleRange: 8
-  emojiPS: {fileID: 3235244460466708618}
-  emojiTextures:
-  - {fileID: 2800000, guid: 827643247c5396045ab168f4d32a7e92, type: 3}
-  - {fileID: 2800000, guid: 0e7bd246c74d77944b9ff9cb3dfa9bb5, type: 3}
-  - {fileID: 2800000, guid: 6d52fe2e6f67dbd4c848cb2fcd19683f, type: 3}
-  - {fileID: 2800000, guid: c4ff81b7bfabff142bca997c0b82a2d7, type: 3}
+  emojiController: {fileID: 3034552756852961901}
 --- !u!136 &5631945564213548172
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -6868,7 +6863,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4108640906570232, guid: de89eb4d167e00b4fab157953b8d3894, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.326
+      value: -1.201
       objectReference: {fileID: 0}
     - target: {fileID: 4108640906570232, guid: de89eb4d167e00b4fab157953b8d3894, type: 3}
       propertyPath: m_LocalPosition.y
@@ -6876,7 +6871,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4108640906570232, guid: de89eb4d167e00b4fab157953b8d3894, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4108640906570232, guid: de89eb4d167e00b4fab157953b8d3894, type: 3}
       propertyPath: m_LocalRotation.w
@@ -6906,14 +6901,46 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 199194421889081694, guid: de89eb4d167e00b4fab157953b8d3894,
+        type: 3}
+      propertyPath: m_Flip.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 304149556501574235, guid: de89eb4d167e00b4fab157953b8d3894,
+        type: 3}
+      propertyPath: psRenderer
+      value: 
+      objectReference: {fileID: 2087911164055339031}
+    - target: {fileID: 3465629515866821001, guid: de89eb4d167e00b4fab157953b8d3894,
+        type: 3}
+      propertyPath: m_Name
+      value: MsgBubble
+      objectReference: {fileID: 0}
+    - target: {fileID: 3665274696174010401, guid: de89eb4d167e00b4fab157953b8d3894,
+        type: 3}
+      propertyPath: m_Flip.x
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: de89eb4d167e00b4fab157953b8d3894, type: 3}
---- !u!198 &3235244460466708618 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 198596524191670460, guid: de89eb4d167e00b4fab157953b8d3894,
+--- !u!199 &2087911164055339031 stripped
+ParticleSystemRenderer:
+  m_CorrespondingSourceObject: {fileID: 3665274696174010401, guid: de89eb4d167e00b4fab157953b8d3894,
     type: 3}
   m_PrefabInstance: {fileID: 3324900959925649462}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3034552756852961901 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 304149556501574235, guid: de89eb4d167e00b4fab157953b8d3894,
+    type: 3}
+  m_PrefabInstance: {fileID: 3324900959925649462}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32406af70bf0ce048a501ca905564b03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &3326738486492899790 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4108640906570232, guid: de89eb4d167e00b4fab157953b8d3894,

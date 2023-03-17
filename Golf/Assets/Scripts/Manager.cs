@@ -177,7 +177,7 @@ namespace UnityEngine
                 EnemyClass.KilledCount = 100;
             if (!playGame) return;
 
-            if (StartedSpawning == null)
+            if (StartedSpawning == null && !Enemy.isPassive)
             {
                 StartedSpawning = SpawnEnemy();
                 StartCoroutine(StartedSpawning);

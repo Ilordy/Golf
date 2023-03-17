@@ -2,38 +2,41 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-
+[RequireComponent(typeof(ParticleSystem))]
 public class EmojiController : MonoBehaviour
 {
     #region Variables
-    [SerializeField] ParticleSystem emojiPS;
-    [SerializeField] Material emojiMat;
+    ParticleSystem emojiPS;
+    [SerializeField] ParticleSystemRenderer psRenderer;
+    Material emojiMat;
     [SerializeField] Texture2D[] emojiTextures;
     #endregion
-    void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 
     #region Methods
-    public void Init()
+    void Start()
     {
-
+        emojiPS = GetComponent<ParticleSystem>();
+        emojiMat = GetComponent<ParticleSystemRenderer>().material;
+        Enemy.OnBecameHostile += Init;
     }
 
-    private IEnumerator ShowEmoji(){
-        
-        yield return new WaitForSeconds(Random.Range(3, 10));
-        emojiMat.SetTexture("_BaseMap", emojiTextures[Random.Range(0, emojiTextures.Length)]);
-        
-        emojiPS.Play();
+    void OnDestroy()
+    {
+        Enemy.OnBecameHostile -= Init;
+    }
 
+    public void Init() => StartCoroutine(ShowEmoji());
+
+    private IEnumerator ShowEmoji()
+    {
+        yield return new WaitForSeconds(Random.Range(3, 10));
+        if (Random.value >= 0.5f)
+            psRenderer.flip = Vector3.right;
+        else
+            psRenderer.flip = Vector3.zero;
+        transform.localPosition = new Vector3(psRenderer.flip.x < 1 ? -1.2f : 1.2f, transform.localPosition.y, 0);
+        emojiMat.SetTexture("_BaseMap", emojiTextures[Random.Range(0, emojiTextures.Length)]);
+        emojiPS.Play();
         StartCoroutine(ShowEmoji());
     }
     #endregion

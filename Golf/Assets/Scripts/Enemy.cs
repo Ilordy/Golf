@@ -5,20 +5,20 @@ using UnityEngine;
 public class Enemy : EnemyClass
 {
     [SerializeField] float tackleRange;
-    [SerializeField] ParticleSystem emojiPS;
-    [SerializeField] Texture2D[] emojiTextures;
+    [SerializeField] EmojiController emojiController;
     bool isDead = false;
     CapsuleCollider col;
     Animator animator;
     ParticleSystem particles;
     private Rigidbody rb;
     private Material emojiMat;
-    private static bool isPassive = true;
+    public static bool isPassive = true;
+    public static event System.Action OnBecameHostile;
 
     protected virtual void Start()
     {
-        emojiMat = emojiPS.GetComponent<ParticleSystemRenderer>().material;
-        StartCoroutine(ShowEmoji());
+         if (!isPassive)
+            emojiController.Init();
         aliveCount++;
         health = 1;
         speed = 5f;
@@ -78,26 +78,14 @@ public class Enemy : EnemyClass
     protected override void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag.Equals("Projectile"))
-            isPassive = false;
+            SetPassive();
         base.OnCollisionEnter(collision);
     }
 
-    private void SetPassive(){
-        if(!isPassive) return;
-        isPassive = false;
-        
-    }
-
-    IEnumerator ShowEmoji()
+    private void SetPassive()
     {
-        yield return new WaitForSeconds(Random.Range(3, 6));
-        if (isPassive)
-        {
-            StartCoroutine(ShowEmoji());
-            yield break;
-        }
-        emojiMat.SetTexture("_BaseMap", emojiTextures[Random.Range(0, emojiTextures.Length)]);
-        emojiPS.Play();
-        StartCoroutine(ShowEmoji());
+        if (!isPassive) return;
+        isPassive = false;
+        OnBecameHostile?.Invoke();
     }
 }

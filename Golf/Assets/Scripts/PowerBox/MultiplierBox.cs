@@ -7,6 +7,7 @@ public class MultiplierBox : PowerBox
     [SerializeField] Texture2D[] emissionMaps;
     private int multiplier;
     const string emissionProperty = "_EmissionMap";
+    private int m_xOffSet = 1;
 
     protected override void Start()
     {
@@ -22,12 +23,15 @@ public class MultiplierBox : PowerBox
         if (other.gameObject.CompareTag("Projectile"))
         {
             Vector3 ballPos = other.transform.position;
-            int zOffSet = ballPos.z > 0 ? -1 : 1;
-            Vector3 spawnPoint = new Vector3(ballPos.x, ballPos.y, ballPos.z += zOffSet);
+            Vector3 previousPosition = other.transform.position;
             for (int i = 0; i < multiplier; i++)
             {
-                GameObject p = Instantiate(other.gameObject, spawnPoint, other.gameObject.transform.rotation);
-                spawnPoint.z += zOffSet;
+                float xOffSet = Vector3.Distance(ballPos, previousPosition) + m_xOffSet;
+                if (previousPosition.x < ballPos.x)
+                    xOffSet = -xOffSet;
+                Vector3 spawnPoint = new Vector3(ballPos.x + xOffSet, ballPos.y, ballPos.z);
+                GameObject p = Instantiate(other.gameObject, spawnPoint, other.gameObject.transform.rotation);;
+                previousPosition = p.transform.position;
                 p.GetComponent<Projectile>().SetForce();
             }
         }
