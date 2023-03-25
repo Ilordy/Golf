@@ -431,7 +431,8 @@ namespace UnityEngine
         IEnumerator WaitForFinalSwing(float forceAmount)
         {
             yield return new WaitUntil(() => playerAnimator.GetCurrentAnimatorStateInfo(0).IsName("drive") && playerAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.5f);
-            GameObject ballFire = Instantiate(fireBall, spawner.transform.position, Quaternion.Euler(0, -90, 0));
+            GameObject ballFire = Instantiate(fireBall, spawner.transform.position, Quaternion.identity);
+            ballFire.transform.LookAt(bossInstance.transform);
             var fireRb = ballFire.GetComponent<Rigidbody>();
             fireRb.AddForce((ballFire.transform.forward * 25f + ballFire.transform.up * 2), ForceMode.Impulse);
             ballFire.GetComponent<FireBall>().SliderForce = forceAmount;

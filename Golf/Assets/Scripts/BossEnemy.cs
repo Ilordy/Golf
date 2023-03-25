@@ -80,7 +80,7 @@ public class BossEnemy : MonoBehaviour
         float finalForceZ = force + defaultForceZ;
         Vector3 finalForce = (-transform.forward * finalForceZ + transform.up * defaultForceY);
         Debug.DrawLine(focusPoint.position, FindLandingPoint(finalForce, focusPoint.position), Color.red, 10f);
-        WorldManager.I.SpawnOceans(FindLandingPoint(finalForce, focusPoint.position));
+        //WorldManager.I.SpawnOceans(FindLandingPoint(finalForce, focusPoint.position));
         foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
         {
             rb.AddForce((-transform.forward * finalForceZ + transform.up * defaultForceY), ForceMode.VelocityChange);
@@ -91,9 +91,12 @@ public class BossEnemy : MonoBehaviour
 
     private Vector3 FindLandingPoint(Vector3 initialVelocity, Vector3 startPos)
     {
+        Debug.Log(initialVelocity + "THIS INIT VELOCITY");
         float acceleration = Physics.gravity.magnitude;
-        float theta = Mathf.Atan(initialVelocity.y / initialVelocity.x);
+        float theta = Mathf.Atan(initialVelocity.y / -initialVelocity.z);
         float x = (Mathf.Pow(initialVelocity.magnitude, 2) * Mathf.Sin(2 * theta)) / acceleration;
-        return new Vector3(startPos.x + x, 0, 0);
+        float time = 2 * initialVelocity.magnitude * Mathf.Sin(theta) / acceleration;
+        Debug.Log("This the time!!! " + time);
+        return new Vector3(startPos.x, startPos.y, startPos.z - x);
     }
 }
