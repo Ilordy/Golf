@@ -548,7 +548,8 @@ namespace UnityEngine
         public void ResetGame()
         {
             playerDead = false;
-            StopCoroutine(StartedSpawning);
+            if (StartedSpawning != null)
+                StopCoroutine(StartedSpawning);
             StartedSpawning = null;
             playGame = false;
             isBossFight = false;

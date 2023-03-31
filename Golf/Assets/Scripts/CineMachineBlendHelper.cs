@@ -29,7 +29,5 @@ public class CineMachineBlendHelper : MonoBehaviour
             }
         }
     }
-
-    public void StopBlending() => CinemachineCore.UniformDeltaTimeOverride = 0;
 }
 

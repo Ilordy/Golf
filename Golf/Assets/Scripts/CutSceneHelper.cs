@@ -81,6 +81,7 @@ public class CutSceneHelper : Singleton<CutSceneHelper>
     private void OnCamsReset(ICinemachineCamera cam)
     {
         if (cam.Name != mainCam.Name) return;
+        Debug.Log("CAMS RESET");
         onCamerasResetted?.Invoke();
         onCamerasResetted = null;
         WorldManager.I.ResetBanners();
