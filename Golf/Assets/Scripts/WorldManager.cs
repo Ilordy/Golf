@@ -8,6 +8,10 @@ public class WorldManager : Singleton<WorldManager>
     [SerializeField] GameObject oceanPrefab;
     [SerializeField] float bannerStartPos;
     [SerializeField] float offsetBetweenBanners;
+    /// <summary>
+    /// Objects to hide when boss gets launched.
+    /// </summary>
+    [SerializeField] GameObject[] m_objectsToHide;
     private List<GameObject> banners = new List<GameObject>();
     private FloatingTextPooler m_pooler;
     float totalMultAmnt = 1.0f, currentMultAmnt = 1.0f;
@@ -20,10 +24,11 @@ public class WorldManager : Singleton<WorldManager>
     {
         //-x is our forward direction for this game.
         //gotta get the absolute value of x first and then add it by 50% of it's area for bigger room of error.
-        float finalPos = Mathf.Abs(bossLandingPoint.x);
+        float finalPos = Mathf.Abs(bossLandingPoint.z);
+        ToggleObstacles(false);
         for (float i = Mathf.Abs(bannerStartPos); i < finalPos + (finalPos * .50f); i += offsetBetweenBanners)
         {
-            GameObject banner = Instantiate(oceanPrefab, new Vector3(i * -1, 0, 0), Quaternion.identity, transform);
+            GameObject banner = Instantiate(oceanPrefab, new Vector3(bossLandingPoint.x - 30, 70, i), Quaternion.Euler(0, 180, 0), transform);
             banners.Add(banner);
             banner.GetComponentInChildren<TextMeshProUGUI>().text = "x" + totalMultAmnt.ToString("F1");
             totalMultAmnt += 0.2f;
@@ -32,7 +37,7 @@ public class WorldManager : Singleton<WorldManager>
 
     public void DisplayMultiplierText()
     {
-        m_pooler.CreateText("x" + currentMultAmnt.ToString("F1"));
+        m_pooler.CreateText("<sprite=0>x" + currentMultAmnt.ToString("F1"));
         currentMultAmnt += 0.2f;
     }
 
@@ -43,11 +48,19 @@ public class WorldManager : Singleton<WorldManager>
 
     public void ResetBanners()
     {
-        foreach (GameObject banner in banners){
+        foreach (GameObject banner in banners)
+        {
             Destroy(banner);
         }
+        ToggleObstacles(true);
         banners.Clear();
         currentMultAmnt = 1;
         totalMultAmnt = 1;
+    }
+
+    void ToggleObstacles(bool active)
+    {
+        foreach (GameObject obj in m_objectsToHide)
+            obj.SetActive(active);
     }
 }

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
+using DG.Tweening;
 
 public class CutSceneHelper : Singleton<CutSceneHelper>
 {
@@ -37,7 +38,7 @@ public class CutSceneHelper : Singleton<CutSceneHelper>
         ballCam.LookAt = focus;
         ballCam.Follow = focus;
         ballCam.Priority = 3;
-        SwtichFogs(2);
+        //SwtichFogs(2);
     }
 
     public void SetBossCamFocus(Transform focus)
@@ -45,7 +46,7 @@ public class CutSceneHelper : Singleton<CutSceneHelper>
         bossCam.LookAt = focus;
         bossCam.Follow = focus;
         bossCam.Priority = 4;
-        SwtichFogs(0);
+        //SwtichFogs(0);
     }
 
     public void Reset(System.Action OnResetFinished)
@@ -96,11 +97,29 @@ public class CutSceneHelper : Singleton<CutSceneHelper>
         }
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            Debug.Log(blendHelper.IsBlending);
+            CinemachineCore.UniformDeltaTimeOverride = 0;
+            Camera.main.transform.DOMoveY(30, 5f);
+        }
+        // if (blendHelper.IsBlending && blendHelper.CurrentActiveCamera.Name.Equals(mainCam.name))
+        // {
+        //     if (Physics.Raycast(Camera.main.transform.position, Vector3.back, 10))
+        //     {
+        //         bossCam.Priority = 1;
+        //         Camera.main.transform.DOMoveY(Camera.main.transform.position.y + 30, .4f);
+        //     }
+        // }
+    }
+
     private IEnumerator EnablePlayerFog()
     {
         float duration = Camera.main.GetComponent<CinemachineBrain>().ActiveBlend.Duration / 2;
         yield return new WaitForSeconds(duration);
-        SwtichFogs(1);
+        //SwtichFogs(1);
     }
 
 }

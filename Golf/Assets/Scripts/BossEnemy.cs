@@ -80,7 +80,7 @@ public class BossEnemy : MonoBehaviour
         float finalForceZ = force + defaultForceZ;
         Vector3 finalForce = (-transform.forward * finalForceZ + transform.up * defaultForceY);
         Debug.DrawLine(focusPoint.position, FindLandingPoint(finalForce, focusPoint.position), Color.red, 10f);
-        //WorldManager.I.SpawnOceans(FindLandingPoint(finalForce, focusPoint.position));
+        WorldManager.I.SpawnOceans(FindLandingPoint(finalForce, focusPoint.position));
         foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
         {
             rb.AddForce((-transform.forward * finalForceZ + transform.up * defaultForceY), ForceMode.VelocityChange);

@@ -102,6 +102,7 @@ namespace UnityEngine
         public int CurrTheme { get => currTheme; }
         public GameObject RunWay { get => runWay; set => runWay = value; }
         public GameObject Player => player;
+        public GameObject BossInstance => bossInstance;
 
         void Start()
         {
@@ -555,8 +556,7 @@ namespace UnityEngine
             playerAnimator.SetBool("Swing", false);
             Enemy.ResetStatics();
             GameEvents.current.DeleteAnimation();
-            player.transform.localPosition = new Vector3(16.02f, 1, -.22f);
-            player.transform.localEulerAngles = new Vector3(0, 90, 0);
+            player.transform.localPosition = new Vector3(125.4778f, 1.418f, -88.17085f);
             SpawnInitialEnemies();
             RemoveAllCharacters();
         }

@@ -117,9 +117,9 @@ namespace MobileTools
         public void CreateText(string textValue)
         {
             var pooledText = _pool.Get();
-            var text = pooledText.GetComponent<TextMeshProUGUI>();
-            text.text = textValue;
-            _tweenerType.TweenText(text, _endPosition, _pool);
+           // var text = pooledText.GetComponent<TextMeshProUGUI>();
+            pooledText.text = textValue;
+            _tweenerType.TweenText(pooledText, _endPosition, _pool);
         }
         #endregion
     }

@@ -54,7 +54,7 @@ public class Enemy : EnemyClass
             GameEvents.current.Reward();
             col.enabled = false;
             particles.Stop(true, UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
-            AddRagdollForce((new Vector3(0, 1.3f, 0) + -transform.forward) * 100);
+            AddRagdollForce((new Vector3(0, 1.3f, 0) + Vector3.forward) * 100);
             animator.enabled = false;
             Destroy(gameObject, 5);
         }

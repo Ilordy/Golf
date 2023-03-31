@@ -7,6 +7,8 @@ public class CineMachineBlendHelper : MonoBehaviour
     public event Action<ICinemachineCamera> onCameraBlendFinished;
     [SerializeField] CinemachineBrain cineMachineBrain;
     private bool wasBlendingLastFrame;
+    public ICinemachineCamera CurrentActiveCamera => cineMachineBrain.ActiveVirtualCamera;
+    public bool IsBlending => cineMachineBrain.IsBlending;
 
     void Update()
     {
@@ -27,5 +29,7 @@ public class CineMachineBlendHelper : MonoBehaviour
             }
         }
     }
+
+    public void StopBlending() => CinemachineCore.UniformDeltaTimeOverride = 0;
 }
 
