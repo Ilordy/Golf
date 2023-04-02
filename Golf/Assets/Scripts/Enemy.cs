@@ -17,7 +17,7 @@ public class Enemy : EnemyClass
 
     protected virtual void Start()
     {
-         if (!isPassive)
+        if (!isPassive)
             emojiController.Init();
         aliveCount++;
         health = 1;
@@ -36,6 +36,9 @@ public class Enemy : EnemyClass
     {
         if (isPassive) return;
         animator.SetInteger("IdleID", -1);
+        speed = Mathf.Min(Vector3.Distance(transform.position, Manager.I.Player.transform.position), 30);
+        speed = Mathf.Max(5, speed);//min value is 5.
+        Debug.Log(speed);
         if (health <= 0)
         {
             totalKilledCount++;

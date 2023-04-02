@@ -553,13 +553,14 @@ namespace UnityEngine
             StartedSpawning = null;
             playGame = false;
             isBossFight = false;
+            Enemy.isPassive = true;
             allyCount = 0;
             playerAnimator.SetBool("Swing", false);
             Enemy.ResetStatics();
             GameEvents.current.DeleteAnimation();
             player.transform.localPosition = new Vector3(125.4778f, 1.418f, -88.17085f);
-            SpawnInitialEnemies();
             RemoveAllCharacters();
+            SpawnInitialEnemies();
         }
 
         void RemoveAllCharacters()
