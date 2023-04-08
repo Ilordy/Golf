@@ -10,10 +10,7 @@ public class EnemyClass : MonoBehaviour
     protected int health = 1;
     protected float speed = 1;
     protected bool increase = false;
-    [SerializeField] float m_speedDuration = 5f;
-    private float m_elaspedTime;
-    private Vector3 m_startPos;
-    private float m_distToPlayer;
+    private Vector3 m_destinationPos;
 
     protected static int aliveCount = 0;
     protected static int totalKilledCount = 0;
@@ -30,6 +27,7 @@ public class EnemyClass : MonoBehaviour
 
     void Awake()
     {
+        playerPos = Manager.I.Player.transform.position;
         int layerMask = 1 << 15;
         layerMask = ~layerMask;
         RaycastHit hit;
@@ -37,8 +35,7 @@ public class EnemyClass : MonoBehaviour
         {
             transform.position = hit.point;
         }
-        m_startPos = transform.position;
-        m_distToPlayer = Vector3.Distance(m_startPos, playerPos + new Vector3(0, 0, 30));
+        m_destinationPos = playerPos + new Vector3(0, 0, 30);
     }
 
     public static void ResetStatics()
@@ -66,19 +63,10 @@ public class EnemyClass : MonoBehaviour
 
     protected float EvaluateSpeed(int minSpeed)
     {
-        if (speed < minSpeed) return minSpeed;
-        m_elaspedTime += Time.deltaTime;
-        float distance = Vector3.Distance(m_startPos, playerPos + new Vector3(0, 0, 30));
-        float speedDuration = m_distToPlayer / speed;
-        Debug.Log(speedDuration + "SPEED DURATION");
-        float t = m_elaspedTime / speedDuration;
-        Debug.Log(t + "TOTAL TIME");
-
-        // Debug.Log(Time.deltaTime);
-        // float speedDistance = Mathf.Min(Vector3.Distance(transform.position, Manager.I.Player.transform.position), 25);
-        float maxSpeed = Mathf.Min(m_distToPlayer, 30);
-        Debug.Log(Mathf.Lerp(maxSpeed, minSpeed, Mathf.SmoothStep(0, 1, t)) + "TOTAL LERP");
-        return Mathf.Lerp(maxSpeed, minSpeed, Mathf.SmoothStep(0, 1, t));
+        if (transform.position.z < m_destinationPos.z) return minSpeed;
+        float distance = Vector3.Distance(transform.position, m_destinationPos);
+        float maxSpeed = Mathf.Min(distance, 50);//will prob change max speed later.
+        return Mathf.Max(maxSpeed, minSpeed);
     }
 
     /// <summary>

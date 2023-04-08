@@ -22,7 +22,6 @@ public class Enemy : EnemyClass
         aliveCount++;
         health = 1;
         speed = 5f;
-        playerPos = GameObject.Find("Player").transform.position;
         col = GetComponent<CapsuleCollider>();
         animator = GetComponent<Animator>();
         particles = GetComponent<ParticleSystem>();
@@ -36,11 +35,7 @@ public class Enemy : EnemyClass
     {
         if (isPassive) return;
         animator.SetInteger("IdleID", -1);
-       // speed = Mathf.Min(Vector3.Distance(transform.position, Manager.I.Player.transform.position), 30);
-        //speed = Mathf.Max(5, speed);//min value is 5.
         speed = EvaluateSpeed(5);
-        //speed = 0;
-        //Debug.Log(speed);
         if (health <= 0)
         {
             totalKilledCount++;
