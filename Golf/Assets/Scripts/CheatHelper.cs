@@ -21,7 +21,12 @@ public class CheatHelper : MonoBehaviour
     #region Methods
     void SetLevel()
     {
-       //if(int.TryParse()
+        if (int.TryParse(m_levelInputField.text, out int result))
+        {
+            Manager.I.SetLevel(result);
+        }
+        else
+            Debug.LogError("Unable to parse Int from Cheat Level input field!");
     }
     #endregion
 }

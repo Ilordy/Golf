@@ -647,5 +647,14 @@ namespace UnityEngine
                 GameEvents.current.SetTheme(n);
             }
         }
+
+        #region Cheat Methods
+        public void SetLevel(int value)
+        {
+            level = value;
+            calculateDifficulty(value);
+            GameEvents.current.LevelChange(value);
+        }
+        #endregion
     }
 }
