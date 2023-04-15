@@ -1248,6 +1248,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96bc9967ef8dd4d438bb54be5a9612d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxSpeed: 50
+  minSpeed: 5
   tackleRange: 8
   emojiController: {fileID: 3034552756852961901}
 --- !u!136 &5631945564213548172

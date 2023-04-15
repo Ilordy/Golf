@@ -5,6 +5,7 @@ using UnityEngine;
 public class EnemyClass : MonoBehaviour
 {
     //FIELDS
+    [SerializeField] protected int maxSpeed, minSpeed;
     protected Vector3 playerPos;
     protected Manager GameManager;
     protected int health = 1;
@@ -61,11 +62,11 @@ public class EnemyClass : MonoBehaviour
         }
     }
 
-    protected float EvaluateSpeed(int minSpeed)
+    protected float EvaluateSpeed()
     {
         if (transform.position.z < m_destinationPos.z) return minSpeed;
         float distance = Vector3.Distance(transform.position, m_destinationPos);
-        float maxSpeed = Mathf.Min(distance, 50);//will prob change max speed later.
+        float maxSpeed = Mathf.Min(distance, this.maxSpeed);//will prob change max speed later.
         return Mathf.Max(maxSpeed, minSpeed);
     }
 

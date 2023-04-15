@@ -1058,6 +1058,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4394e3fc956cab4498633de883f6596d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  maxSpeed: 20
+  minSpeed: 2
   tackleRange: 8
   emojiController: {fileID: 2566561674512925172}
 --- !u!136 &835195716798131513
@@ -6801,7 +6803,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: cb1ebdca161141e4d861d7cf650a7709,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.578
+      value: 0.68
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: cb1ebdca161141e4d861d7cf650a7709,
         type: 3}

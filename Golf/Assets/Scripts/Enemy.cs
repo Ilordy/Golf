@@ -35,7 +35,7 @@ public class Enemy : EnemyClass
     {
         if (isPassive) return;
         animator.SetInteger("IdleID", -1);
-        speed = EvaluateSpeed(5);
+        speed = EvaluateSpeed();
         if (health <= 0)
         {
             totalKilledCount++;

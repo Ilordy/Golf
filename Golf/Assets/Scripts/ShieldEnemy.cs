@@ -33,7 +33,7 @@ public class ShieldEnemy : Enemy
             shieldRb.AddForce(transform.forward * Random.Range(5f,10f), ForceMode.Impulse);
             enemyRb.isKinematic = false;
             enemyAnimator.SetBool("run", true);
-            speed = 3f;
+            minSpeed = 5;
             shield = null;
         }
     }
