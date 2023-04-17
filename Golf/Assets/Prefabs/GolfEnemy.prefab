@@ -251,8 +251,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3fdb1af1588aee74d9afd312d8228339, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSpeed: 0
-  minSpeed: 0
+  maxSpeed: 10
+  minSpeed: 2
   frags:
   - {fileID: 8956181710207809596}
   - {fileID: 8093063751794489801}

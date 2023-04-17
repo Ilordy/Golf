@@ -15,8 +15,6 @@ public class CartEnemy : EnemyClass
         CollectFragRBs();
         health = 3;
         speed = 2f;
-        GameManager = GameObject.Find("Manager").GetComponent<Manager>();
-        playerPos = GameObject.Find("Player").transform.position;
     }
 
     void Update()
@@ -41,8 +39,9 @@ public class CartEnemy : EnemyClass
         }
         else if (!Manager.I.PlayerDead)
         {
-            transform.LookAt(playerPos);
+            transform.LookAt(Manager.I.Player.transform.position);
             transform.Translate(0, 0, speed * Time.deltaTime);
+            speed = EvaluateSpeed();
         }
     }
 
