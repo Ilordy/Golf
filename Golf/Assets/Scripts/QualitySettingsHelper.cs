@@ -52,6 +52,7 @@ namespace MobileTools
 
         void Update()
         {
+            Debug.Log(Application.targetFrameRate + " THIS THE FRAMERATE");
             if (m_fpsDisplayer == null) return;
             m_fpsDisplayer.text = "FPS: " + Mathf.Round(m_count).ToString();
             applicationFPS.text = QualitySettings.names[QualitySettings.GetQualityLevel()];

@@ -17968,7 +17968,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 32535
+    m_Bits: 32599
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -18294,12 +18294,12 @@ GameObject:
   m_Component:
   - component: {fileID: 981665294}
   - component: {fileID: 981665293}
-  - component: {fileID: 981665295}
   - component: {fileID: 981665297}
   - component: {fileID: 981665296}
   - component: {fileID: 981665299}
   - component: {fileID: 981665298}
   - component: {fileID: 981665300}
+  - component: {fileID: 981665301}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -18321,45 +18321,46 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _deactivateOnLoad: 0
   _dontDestroyOnLoad: 0
-  player: {fileID: 1100214020}
-  enemy: {fileID: 5631945564213548173, guid: 2169185bb9f593748a74510ac2755df8, type: 3}
-  bossEnemy: {fileID: 2387768296443202291, guid: 702320c04c3575b4881597aa6f9eece9,
+  m_player: {fileID: 1100214020}
+  m_enemy: {fileID: 5631945564213548173, guid: 2169185bb9f593748a74510ac2755df8, type: 3}
+  m_bossEnemy: {fileID: 2387768296443202291, guid: 702320c04c3575b4881597aa6f9eece9,
     type: 3}
-  cartEnemy: {fileID: 602819925841741181, guid: 88212c3d2d47c5840b2db2f44171e968,
+  m_cartEnemy: {fileID: 602819925841741181, guid: 88212c3d2d47c5840b2db2f44171e968,
     type: 3}
-  shieldEnemy: {fileID: 835195716798131512, guid: 1d8cbaec165aedf408d0abc6b81437e9,
+  m_shieldEnemy: {fileID: 835195716798131512, guid: 1d8cbaec165aedf408d0abc6b81437e9,
     type: 3}
-  projectile: {fileID: 1162225672377599536, guid: f71373e91a63c954c8efecfdd4913ce9,
+  m_projectile: {fileID: 1162225672377599536, guid: f71373e91a63c954c8efecfdd4913ce9,
     type: 3}
-  powerUpProjectile: {fileID: 8350444720997931790, guid: c6c058bb5c581ba4a949db5a7ad19e6b,
+  m_powerUpProjectile: {fileID: 8350444720997931790, guid: c6c058bb5c581ba4a949db5a7ad19e6b,
     type: 3}
-  spawner: {fileID: 706628349}
-  runWay: {fileID: 952553561}
-  powerBoxes:
+  m_spawner: {fileID: 706628349}
+  m_runWay: {fileID: 952553561}
+  m_powerBoxes:
   - {fileID: 1740226591187340, guid: d26b2c679e943854989969cf132a16d3, type: 3}
   - {fileID: 1740226591187340, guid: cf7081b319095ee4cac24c4b984bad18, type: 3}
   - {fileID: 1740226591187340, guid: 0117a89f604e4f74fb3ef30b3a586a7d, type: 3}
   - {fileID: 1740226591187340, guid: 6273213bec129f84b91be2cd7024c74f, type: 3}
-  defaultMat: {fileID: 2100000, guid: 3f3d716ece93c0c49b7fa6187e02095a, type: 2}
-  allyPrefab: {fileID: 7156176337492968973, guid: a9a5e76c30cbff64daafad2b24f0f1c0,
+  m_defaultMat: {fileID: 2100000, guid: 3f3d716ece93c0c49b7fa6187e02095a, type: 2}
+  m_allyPrefab: {fileID: 7156176337492968973, guid: a9a5e76c30cbff64daafad2b24f0f1c0,
     type: 3}
-  allyPositions:
+  m_allyPositions:
   - {fileID: 1232922956}
   - {fileID: 1656931200}
-  bossPosition: {fileID: 2032983112}
-  shield: {fileID: 63085215}
-  shieldHP: 3
-  fireBall: {fileID: 147436, guid: 3b671081e44be1c4aa4355e8ba6e8a5e, type: 3}
-  powerBoxSpawnChance: 0.5
-  powerBoxSpawnInterval: 3
-  enemySpawnPositions:
+  m_bossPosition: {fileID: 2032983112}
+  m_shield: {fileID: 63085215}
+  m_shieldHp: 3
+  m_fireBall: {fileID: 147436, guid: 3b671081e44be1c4aa4355e8ba6e8a5e, type: 3}
+  m_powerBoxSpawnChance: 0.5
+  m_powerBoxSpawnInterval: 3
+  m_enemySpawnPositions:
   - {fileID: 395415979}
   - {fileID: 2088932992}
   - {fileID: 1365757344}
   - {fileID: 1088937643}
   - {fileID: 20797622}
   - {fileID: 1010970966}
-  enemySpawnBounds: {fileID: 2034363186}
+  m_enemySpawnBounds: {fileID: 2034363186}
+  m_baseSpawnInterval: 0.3
 --- !u!4 &981665294
 Transform:
   m_ObjectHideFlags: 0
@@ -18375,18 +18376,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &981665295
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 981665292}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d71f503413788df44b66916e6aeec6a5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &981665296
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18471,6 +18460,31 @@ MonoBehaviour:
   m_fpsCheckInterval: 3
   applicationFPS: {fileID: 434634191}
   m_currentFPS: 0
+--- !u!114 &981665301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 981665292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad537330146160341af87611bc62486e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_enemiesToPool:
+  - enemyToPool: {fileID: 6192333562976508991, guid: 88212c3d2d47c5840b2db2f44171e968,
+      type: 3}
+    maxSize: 5
+    probability: 1
+  - enemyToPool: {fileID: 8466410024909282408, guid: 1d8cbaec165aedf408d0abc6b81437e9,
+      type: 3}
+    maxSize: 15
+    probability: 1
+  - enemyToPool: {fileID: 5631945564213548175, guid: 2169185bb9f593748a74510ac2755df8,
+      type: 3}
+    maxSize: 30
+    probability: 1
 --- !u!224 &985779038 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7714087393268722216, guid: 46d8c0d29c28c7543b49941ae7c676dd,
@@ -24166,7 +24180,7 @@ GameObject:
   - component: {fileID: 1401193591}
   - component: {fileID: 1401193595}
   - component: {fileID: 1401193594}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: World
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33248,6 +33262,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_levelInputField: {fileID: 1390345108}
   m_levelConfirmButton: {fileID: 1038402292}
+  m_curve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 1
+      outSlope: 1
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 1
+    m_PostInfinity: 0
+    m_RotationOrder: 4
+  m_testCurve: 0
 --- !u!114 &1619707234
 MonoBehaviour:
   m_ObjectHideFlags: 0

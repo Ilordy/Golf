@@ -32,7 +32,7 @@ public class MultiplierBox : PowerBox
                 Vector3 spawnPoint = new Vector3(ballPos.x + xOffSet, ballPos.y, ballPos.z);
                 GameObject p = Instantiate(other.gameObject, spawnPoint, other.gameObject.transform.rotation);;
                 previousPosition = p.transform.position;
-                p.GetComponent<Projectile>().SetForce();
+                //change this
             }
         }
         base.OnCollisionEnter(other);

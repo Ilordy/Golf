@@ -31,6 +31,8 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
+        //Subscribe to events
+
         GameEvents.current.OnKillsChange += UpdatePowerUpSlider;
         GameEvents.current.OnUpgradesChange += UpdateUpgradeInfo;
         GameEvents.current.OnMoneyChange += UpdateMoney;

@@ -77,7 +77,6 @@ public class Ally : MonoBehaviour
                 GameObject p = Instantiate(bullet, transform.position + new Vector3(0, .65f, 0), Quaternion.identity);
                 p.transform.LookAt(target);
                 p.GetComponent<Rigidbody>().useGravity = true;
-                p.GetComponent<Projectile>().SetForce();
                 //p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 25f, ForceMode.Impulse);
             }
         }
