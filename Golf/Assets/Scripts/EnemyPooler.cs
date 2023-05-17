@@ -6,7 +6,7 @@ public class EnemyPooler : MonoBehaviour
 {
     [SerializeField] EnemyPoolerData[] m_enemiesToPool;
     private LinkedPool<EnemyClass>[] m_enemyPoolers; //change to regular object pool later.
-    float netWeight;
+    float m_netWeight;
 
     public EnemyClass SpawnEnemy(int index) => m_enemiesToPool?[index].pooler.Get();
 
@@ -16,24 +16,36 @@ public class EnemyPooler : MonoBehaviour
     /// <returns>A random enemy from the array pool.</returns>
     public EnemyClass SpawnRandomEnemy()
     {
-        float random = Random.value * netWeight;
+        float random = Random.value * m_netWeight;
         for (int i = 0; i < m_enemiesToPool.Length; i++)
         {
             if (random <= m_enemiesToPool[i].Weight)
                 return m_enemiesToPool[i].pooler.Get();
         }
+
         return null;
+    }
+
+    public void AddSpawnProbability(float amount)
+    {
+        foreach (var t in m_enemiesToPool)
+        {
+            if (Mathf.Approximately(t.probability, 1)) continue;
+            t.probability += amount; //save this to a file later.
+            if (t.probability > 1)
+                t.probability = 1;
+        }
     }
 
 
     void Start()
     {
-        netWeight = 0; //prob have to reset this after every level.
+        m_netWeight = 0; //prob have to reset this after every level.
         foreach (var t in m_enemiesToPool)
         {
             t.CreatePooler();
-            netWeight += t.probability;
-            t.Weight = netWeight;
+            m_netWeight += t.probability;
+            t.Weight = m_netWeight;
         }
     }
 
@@ -46,14 +58,13 @@ public class EnemyPooler : MonoBehaviour
         public int maxSize;
         public LinkedPool<EnemyClass> pooler;
         [SerializeField, Range(0, 1)] public float probability;
-        float weight;
+        float m_weight;
 
         public float Weight
         {
-            get => weight;
-            set => weight = value;
+            get => m_weight;
+            set => m_weight = value;
         }
-
 
         public void CreatePooler()
         {

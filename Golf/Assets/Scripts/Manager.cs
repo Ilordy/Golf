@@ -239,6 +239,7 @@ public class Manager : Singleton<Manager>
 
     void Update()
     {
+        //Debug.Log(Mathf.InverseLerp(0, 100, m_level));
         //Gameplay
         if (Input.GetKeyDown(KeyCode.C)) UpdateShield();
         if (Input.GetKeyDown(KeyCode.V)) EnemyClass.KilledCount = 100;
@@ -564,6 +565,7 @@ public class Manager : Singleton<Manager>
     {
         m_themeSet = false;
         ResetGame();
+        m_enemyPooler.AddSpawnProbability(Mathf.InverseLerp(1,300, m_level)); //Not sure if we want to use 300 as max level...
         m_level++;
         PlayerPrefs.SetInt("Level", m_level);
         CalculateDifficulty(m_level);
@@ -708,13 +710,11 @@ public class Manager : Singleton<Manager>
     }
 
     #region Cheat Methods
-
     public void SetLevel(int value)
     {
         m_level = value;
         CalculateDifficulty(value);
         GameEvents.current.LevelChange(value);
     }
-
     #endregion
 }
