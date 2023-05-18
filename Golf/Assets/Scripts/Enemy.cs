@@ -56,7 +56,7 @@ public class Enemy : EnemyClass
             particles.Stop(true, UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
             AddRagdollForce((new Vector3(0, 1.3f, 0) + Vector3.forward) * 100);
             animator.enabled = false;
-            Destroy(gameObject, 5);
+            StartCoroutine(SequenceDeath());
         }
 
         if (!isDead && !Manager.I.PlayerDead)
@@ -80,6 +80,18 @@ public class Enemy : EnemyClass
         if (collision.gameObject.tag.Equals("Projectile"))
             SetPassive();
         base.OnCollisionEnter(collision);
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        health = 1;
+        isDead = false;
+        gameObject.tag = "Enemy";
+        col.enabled = true;
+        particles.Play(true);
+        animator.enabled = true;
+        animator.SetTrigger("Reset");
     }
 
     private void SetPassive()

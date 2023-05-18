@@ -80,7 +80,7 @@ public class Manager : Singleton<Manager>
 
     //Enemy Spawning
     IEnumerator m_startedSpawning;
-    int m_enemiesToSpawn = 0;
+    public int m_enemiesToSpawn = 0;
     float m_enemySpawnInterval = 1f;
     int m_allyCount;
     Shield m_shieldData;
@@ -236,9 +236,12 @@ public class Manager : Singleton<Manager>
     }
 
     Vector3 m_startPos, m_endPos;
-
+    public int killCount;
+    public int aliveCount;
     void Update()
     {
+        killCount = EnemyClass.TotalKilledCount;
+        aliveCount = EnemyClass.AliveCount;
         //Debug.Log(Mathf.InverseLerp(0, 100, m_level));
         //Gameplay
         if (Input.GetKeyDown(KeyCode.C)) UpdateShield();

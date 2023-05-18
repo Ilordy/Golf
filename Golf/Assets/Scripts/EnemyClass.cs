@@ -63,13 +63,13 @@ public abstract class EnemyClass : MonoBehaviour
     {
         string tag = collision.gameObject.tag;
 
-        if (tag == "Projectile" || tag == "PowerUpProjectile")
+        if (tag is "Projectile" or "PowerUpProjectile")
         {
             GameEvents.current.EnemyHit();
             Health--;
         }
 
-        increase = tag == "PowerUpProjectile" ? false : true;
+        increase = tag != "PowerUpProjectile";
 
         if (collision.gameObject.CompareTag("Player"))
         {
@@ -107,9 +107,14 @@ public abstract class EnemyClass : MonoBehaviour
         }
     }
 
+    protected IEnumerator SequenceDeath()
+    {
+        yield return new WaitForSeconds(3);
+        gameObject.SetActive(false);
+    }
+
     protected virtual void OnDisable()
     {
-        aliveCount--;
         totalKilledCount++;
         onDeath?.Invoke(this);
     }
