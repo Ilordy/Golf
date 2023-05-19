@@ -41,12 +41,12 @@ public abstract class EnemyClass : MonoBehaviour
         set { health = value; }
     }
 
-    public event System.Action<EnemyClass> onDeath;
+    public event System.Action<EnemyClass> OnDeath;
 
     ///////////////////////////////////////////////////////////////////////////////////
 
 
-    void Awake()
+    protected virtual void Awake()
     {
         playerPos = Manager.I.Player.transform.position;
         m_destinationPos = playerPos + new Vector3(0, 0, 30);
@@ -100,7 +100,7 @@ public abstract class EnemyClass : MonoBehaviour
 
     protected virtual void OnEnable()
     {
-        transform.position = Manager.I.GetSpawnPoint();
+        transform.position = Manager.I.GetEnemySpawnPoint();
         if (Physics.Raycast(transform.position, -transform.up, out var hit, Mathf.Infinity))
         {
             transform.position = hit.point;
@@ -116,6 +116,6 @@ public abstract class EnemyClass : MonoBehaviour
     protected virtual void OnDisable()
     {
         totalKilledCount++;
-        onDeath?.Invoke(this);
+        OnDeath?.Invoke(this);
     }
 }

@@ -265,7 +265,7 @@ public class Manager : Singleton<Manager>
                 StopCoroutine(m_startedSpawning);
                 var boss = Instantiate(m_bossEnemy, m_bossPosition);
                 m_bossInstance = boss;
-                boss.GetComponent<BossEnemy>().OnKnockedOut += BossKnockedOut;
+                 boss.GetComponent<BossEnemy>().OnKnockedOut += BossKnockedOut;
             }
         }
 
@@ -466,7 +466,7 @@ public class Manager : Singleton<Manager>
         m_income = m_incomeLevel;
     }
 
-    public Vector3 GetSpawnPoint() //For enemies
+    public Vector3 GetEnemySpawnPoint() //For enemies
     {
         var bounds = m_enemySpawnBounds.bounds;
         var chance = Random.Range(0f, 1f);

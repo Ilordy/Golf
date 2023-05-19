@@ -18350,6 +18350,7 @@ MonoBehaviour:
   m_shield: {fileID: 63085215}
   m_shieldHp: 3
   m_fireBall: {fileID: 147436, guid: 3b671081e44be1c4aa4355e8ba6e8a5e, type: 3}
+  m_enemiesToSpawn: 0
   m_powerBoxSpawnChance: 0.5
   m_powerBoxSpawnInterval: 3
   m_enemySpawnPositions:
@@ -18360,6 +18361,8 @@ MonoBehaviour:
   - {fileID: 20797622}
   - {fileID: 1010970966}
   m_enemySpawnBounds: {fileID: 2034363186}
+  killCount: 0
+  aliveCount: 0
   m_baseSpawnInterval: 0.3
 --- !u!4 &981665294
 Transform:
@@ -18476,11 +18479,11 @@ MonoBehaviour:
   - enemyToPool: {fileID: 6192333562976508991, guid: 88212c3d2d47c5840b2db2f44171e968,
       type: 3}
     maxSize: 5
-    probability: 0.05
+    probability: 0
   - enemyToPool: {fileID: 8466410024909282408, guid: 1d8cbaec165aedf408d0abc6b81437e9,
       type: 3}
     maxSize: 15
-    probability: 0.15
+    probability: 0
   - enemyToPool: {fileID: 5631945564213548175, guid: 2169185bb9f593748a74510ac2755df8,
       type: 3}
     maxSize: 30

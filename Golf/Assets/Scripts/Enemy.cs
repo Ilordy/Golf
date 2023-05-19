@@ -14,6 +14,16 @@ public class Enemy : EnemyClass
     private Material emojiMat;
     public static bool isPassive = true;
     public static event System.Action OnBecameHostile;
+    
+    protected override void Awake()
+    {
+        base.Awake();
+        col = GetComponent<CapsuleCollider>();
+        animator = GetComponent<Animator>();
+        particles = GetComponent<ParticleSystem>();
+        rb = GetComponent<Rigidbody>();
+        GameManager = GameObject.Find("Manager").GetComponent<Manager>();
+    }
 
     protected virtual void Start()
     {
@@ -22,11 +32,6 @@ public class Enemy : EnemyClass
         aliveCount++;
         health = 1;
         speed = 5f;
-        col = GetComponent<CapsuleCollider>();
-        animator = GetComponent<Animator>();
-        particles = GetComponent<ParticleSystem>();
-        rb = GetComponent<Rigidbody>();
-        GameManager = GameObject.Find("Manager").GetComponent<Manager>();
         animator.SetInteger("IdleID", Random.Range(0, 3));
         rb.constraints = RigidbodyConstraints.FreezeRotation;
     }

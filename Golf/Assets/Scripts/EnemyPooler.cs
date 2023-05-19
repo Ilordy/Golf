@@ -80,14 +80,14 @@ public class EnemyPooler : MonoBehaviour
         void OnGet(EnemyClass enemy)
         {
             enemy.gameObject.SetActive(true);
-            enemy.onDeath += Release;
+            enemy.OnDeath += Release;
             //gotta do some more stuff here...
         }
 
         void Release(EnemyClass enemy)
         {
             enemy.gameObject.SetActive(false);
-            enemy.onDeath -= Release;
+            enemy.OnDeath -= Release;
             //gotta do some more stuff here...
         }
 
