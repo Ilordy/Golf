@@ -18479,7 +18479,7 @@ MonoBehaviour:
   - enemyToPool: {fileID: 6192333562976508991, guid: 88212c3d2d47c5840b2db2f44171e968,
       type: 3}
     maxSize: 5
-    probability: 0
+    probability: 1
   - enemyToPool: {fileID: 8466410024909282408, guid: 1d8cbaec165aedf408d0abc6b81437e9,
       type: 3}
     maxSize: 15
@@ -18487,7 +18487,7 @@ MonoBehaviour:
   - enemyToPool: {fileID: 5631945564213548175, guid: 2169185bb9f593748a74510ac2755df8,
       type: 3}
     maxSize: 30
-    probability: 0.9
+    probability: 0
 --- !u!224 &985779038 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7714087393268722216, guid: 46d8c0d29c28c7543b49941ae7c676dd,

@@ -29,7 +29,7 @@ public class ShieldEnemy : Enemy
     protected override void OnCollisionEnter(Collision collision) {
         base.OnCollisionEnter(collision);
         if (shielded) {
-            shield.parent = null;
+            shield.SetParent(null);
             //shield.gameObject.layer = 12;
             shieldRb.useGravity = true;
             shieldRb.AddForce(transform.forward * Random.Range(5f,10f), ForceMode.Impulse);
@@ -37,7 +37,7 @@ public class ShieldEnemy : Enemy
             enemyAnimator.SetBool("run", true);
             minSpeed = 5;
             shielded = false;
-            StartCoroutine(SequenceShieldDisappear());
+            StartCoroutine(SequenceDisappear(shield.gameObject));
         }
     }
     protected override void OnEnable()
@@ -52,11 +52,5 @@ public class ShieldEnemy : Enemy
         enemyRb.isKinematic = true;
         enemyAnimator.SetBool("run", false);
         shielded = true;
-    }
-    
-    IEnumerator SequenceShieldDisappear()
-    {
-        yield return new WaitForSeconds(3f);
-        shield.gameObject.SetActive(false);
     }
 }

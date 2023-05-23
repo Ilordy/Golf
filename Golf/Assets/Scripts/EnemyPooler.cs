@@ -22,7 +22,6 @@ public class EnemyPooler : MonoBehaviour
             if (random <= m_enemiesToPool[i].Weight)
                 return m_enemiesToPool[i].pooler.Get();
         }
-
         return null;
     }
 

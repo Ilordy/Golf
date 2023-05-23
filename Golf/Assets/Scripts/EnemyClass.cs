@@ -107,12 +107,19 @@ public abstract class EnemyClass : MonoBehaviour
         }
     }
 
-    protected IEnumerator SequenceDeath()
-    {
+    /// <summary>
+    /// Sets the Game Objects to inactive after 3 seconds.
+    /// </summary>
+    /// <param name="objectsToDisable">objects to disable</param>
+    protected IEnumerator SequenceDisappear(params GameObject[] objectsToDisable)
+    {//TODO prob also want to do lil particle effects too...
         yield return new WaitForSeconds(3);
-        gameObject.SetActive(false);
+        foreach (GameObject obj in objectsToDisable)
+        {
+            obj.SetActive(false);
+        }
     }
-
+    
     protected virtual void OnDisable()
     {
         totalKilledCount++;

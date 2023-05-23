@@ -6,12 +6,14 @@ public class CartEnemy : EnemyClass
 {
     public GameObject[] frags;
     public GameObject regularEnemy;
-    private Rigidbody[] m_fragsRB;
+    private Rigidbody[] fragsRB;
+    Vector3[] fragPos;
 
     protected void Start()
     {
         aliveCount++;
-        m_fragsRB = new Rigidbody[frags.Length];
+        fragsRB = new Rigidbody[frags.Length];
+        fragPos = new Vector3[frags.Length];
         CollectFragRBs();
         health = 3;
         speed = 2f;
@@ -25,8 +27,6 @@ public class CartEnemy : EnemyClass
             {
                 Instantiate(regularEnemy, transform.position + new Vector3(Random.Range(0, 3), 0, Random.Range(0, 3)), Quaternion.identity);
             }
-            Destroy(gameObject);
-            totalKilledCount++;
             GameEvents.current.ProgressChange(totalKilledCount, aliveCount + 3);
             if (increase)
             {
@@ -36,6 +36,8 @@ public class CartEnemy : EnemyClass
                     GameEvents.current.KillsChange(killedCount);
                 }
             }
+            //TODO particles here maybe..
+            gameObject.SetActive(false);
         }
         else if (!Manager.I.PlayerDead)
         {
@@ -49,7 +51,8 @@ public class CartEnemy : EnemyClass
     {
         for (int i = 0; i < frags.Length; i++)
         {
-            m_fragsRB[i] = frags[i].GetComponent<Rigidbody>();
+            fragPos[i] = frags[i].transform.localPosition;
+            fragsRB[i] = frags[i].GetComponent<Rigidbody>();
         }
     }
 
@@ -60,20 +63,34 @@ public class CartEnemy : EnemyClass
 
         if (health == 2)
         {
-            m_fragsRB[0].transform.SetParent(null);
-            m_fragsRB[0].isKinematic = false;
-            m_fragsRB[0].useGravity = true;
-            m_fragsRB[0].AddForce(new Vector3(10, 0, 0), ForceMode.Impulse);
+            fragsRB[0].transform.SetParent(null);
+            fragsRB[0].isKinematic = false;
+            fragsRB[0].useGravity = true;
+            fragsRB[0].AddForce(new Vector3(10, 0, 0), ForceMode.Impulse);
         }
         if (health == 1)//update the forces pls.
         {
             for (int i = 1; i < frags.Length; i++)
             {
-                m_fragsRB[i].transform.SetParent(null);
-                m_fragsRB[i].isKinematic = false;
-                m_fragsRB[i].useGravity = true;
-                m_fragsRB[i].AddForce(new Vector3(Random.Range(-5, -1), 5, 0), ForceMode.Impulse);
+                fragsRB[i].transform.SetParent(null);
+                fragsRB[i].isKinematic = false;
+                fragsRB[i].useGravity = true;
+                fragsRB[i].AddForce(new Vector3(Random.Range(-5, -1), 5, 0), ForceMode.Impulse);
             }
+            StartCoroutine(SequenceDisappear(frags));
+        }
+    }
+
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        health = 3;
+        for (int i = 0; i < fragPos?.Length; i++)
+        {
+            frags[i].transform.SetParent(transform);
+            frags[i].transform.localPosition = fragPos[i];
+            fragsRB[i].isKinematic = true;
+            fragsRB[i].useGravity = false;
         }
     }
 }

@@ -43,7 +43,6 @@ public class Enemy : EnemyClass
         speed = EvaluateSpeed();
         if (health <= 0)
         {
-            totalKilledCount++;
             GameEvents.current.ProgressChange(totalKilledCount, aliveCount);
             if (increase)
             {
@@ -61,7 +60,7 @@ public class Enemy : EnemyClass
             particles.Stop(true, UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
             AddRagdollForce((new Vector3(0, 1.3f, 0) + Vector3.forward) * 100);
             animator.enabled = false;
-            StartCoroutine(SequenceDeath());
+            StartCoroutine(SequenceDisappear(gameObject));
         }
 
         if (!isDead && !Manager.I.PlayerDead)
