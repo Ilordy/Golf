@@ -25,7 +25,9 @@ public class CartEnemy : EnemyClass
         {
             for (int i = 0; i < 3; i++)
             {
-                Instantiate(regularEnemy, transform.position + new Vector3(Random.Range(0, 3), 0, Random.Range(0, 3)), Quaternion.identity);
+                //Instantiate(regularEnemy, transform.position + new Vector3(Random.Range(0, 3), 0, Random.Range(0, 3)), Quaternion.identity);
+                var enemy = EnemyPooler.I.SpawnEnemy(2);
+                enemy.transform.position = transform.position + new Vector3(Random.Range(0, 6), 0, Random.Range(0, 6));
             }
             GameEvents.current.ProgressChange(totalKilledCount, aliveCount + 3);
             if (increase)
@@ -60,7 +62,6 @@ public class CartEnemy : EnemyClass
     {
         base.OnCollisionEnter(collision);
         if (!collision.gameObject.CompareTag("Projectile")) return;
-
         if (health == 2)
         {
             fragsRB[0].transform.SetParent(null);
@@ -77,7 +78,7 @@ public class CartEnemy : EnemyClass
                 fragsRB[i].useGravity = true;
                 fragsRB[i].AddForce(new Vector3(Random.Range(-5, -1), 5, 0), ForceMode.Impulse);
             }
-            StartCoroutine(SequenceDisappear(frags));
+            SequenceDisappear(frags);
         }
     }
 

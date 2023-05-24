@@ -37,7 +37,7 @@ public class ShieldEnemy : Enemy
             enemyAnimator.SetBool("run", true);
             minSpeed = 5;
             shielded = false;
-            StartCoroutine(SequenceDisappear(shield.gameObject));
+            SequenceDisappear(shield.gameObject);
         }
     }
     protected override void OnEnable()

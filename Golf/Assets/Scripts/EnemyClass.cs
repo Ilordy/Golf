@@ -111,14 +111,8 @@ public abstract class EnemyClass : MonoBehaviour
     /// Sets the Game Objects to inactive after 3 seconds.
     /// </summary>
     /// <param name="objectsToDisable">objects to disable</param>
-    protected IEnumerator SequenceDisappear(params GameObject[] objectsToDisable)
-    {//TODO prob also want to do lil particle effects too...
-        yield return new WaitForSeconds(3);
-        foreach (GameObject obj in objectsToDisable)
-        {
-            obj.SetActive(false);
-        }
-    }
+    protected void SequenceDisappear(params GameObject[] objectsToDisable) => EnemyPooler.I.SequenceMobDisable(objectsToDisable);
+    //TODO prob also want to do lil particle effects too...
     
     protected virtual void OnDisable()
     {

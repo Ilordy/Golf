@@ -60,7 +60,7 @@ public class Enemy : EnemyClass
             particles.Stop(true, UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
             AddRagdollForce((new Vector3(0, 1.3f, 0) + Vector3.forward) * 100);
             animator.enabled = false;
-            StartCoroutine(SequenceDisappear(gameObject));
+            SequenceDisappear(gameObject);
         }
 
         if (!isDead && !Manager.I.PlayerDead)

@@ -1,14 +1,30 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Pool;
 using UnityEngine.Serialization;
 
-public class EnemyPooler : MonoBehaviour
+public class EnemyPooler : Singleton<EnemyPooler>
 {
+    #region Variables
+
     [SerializeField] EnemyPoolerData[] m_enemiesToPool;
     private LinkedPool<EnemyClass>[] m_enemyPoolers; //change to regular object pool later.
     float m_netWeight;
 
+    #endregion
+
+    #region Public Methods
+
     public EnemyClass SpawnEnemy(int index) => m_enemiesToPool?[index].pooler.Get();
+
+    /// <summary>
+    /// Sets mob objects inactive after a delay.
+    /// </summary>
+    /// <param name="objectsToDisable">The mob objects to disable.</param>
+    public void SequenceMobDisable(params GameObject[] objectsToDisable)
+    {
+        StartCoroutine(SequenceMobDisableInternal(objectsToDisable));
+    }
 
     /// <summary>
     /// Spawn a random enemy given their probabilities.
@@ -22,6 +38,7 @@ public class EnemyPooler : MonoBehaviour
             if (random <= m_enemiesToPool[i].Weight)
                 return m_enemiesToPool[i].pooler.Get();
         }
+
         return null;
     }
 
@@ -36,6 +53,8 @@ public class EnemyPooler : MonoBehaviour
         }
     }
 
+    #endregion
+
 
     void Start()
     {
@@ -47,6 +66,19 @@ public class EnemyPooler : MonoBehaviour
             t.Weight = m_netWeight;
         }
     }
+
+    #region Private Methods
+
+    IEnumerator SequenceMobDisableInternal(params GameObject[] objectsToDisable)
+    {
+        yield return new WaitForSeconds(3);
+        foreach (GameObject obj in objectsToDisable)
+        {
+            obj.SetActive(false);
+        }
+    }
+
+    #endregion
 
     [System.Serializable]
     private class EnemyPoolerData
