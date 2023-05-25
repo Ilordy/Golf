@@ -4546,15 +4546,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330272981}
-  m_LocalRotation: {x: 0.16504203, y: 0.0000000037252903, z: -0.0000000013969839,
-    w: 0.9862866}
+  m_LocalRotation: {x: 0.051850665, y: 0.385447, z: -0.01837367, w: 0.9210888}
   m_LocalPosition: {x: -2.02, y: 0.866, z: -2.501}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 63085219}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 18.999, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 6.297, y: 45.435, z: 0.353}
 --- !u!65 &330272983
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -12084,15 +12083,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 882712051}
-  m_LocalRotation: {x: 0.16504203, y: 0.0000000037252903, z: -0.0000000013969839,
-    w: 0.9862866}
-  m_LocalPosition: {x: 2.02, y: 0.866, z: -2.501}
+  m_LocalRotation: {x: 0.04947312, y: -0.385758, z: 0.024046073, w: 0.92095876}
+  m_LocalPosition: {x: 3.15, y: 0.88, z: -2.68}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 63085219}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 18.999, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 6.297, y: -45.435, z: 0.353}
 --- !u!65 &882712053
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -18475,10 +18473,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad537330146160341af87611bc62486e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _deactivateOnLoad: 0
+  _dontDestroyOnLoad: 0
   m_enemiesToPool:
   - enemyToPool: {fileID: 6192333562976508991, guid: 88212c3d2d47c5840b2db2f44171e968,
       type: 3}
-    maxSize: 5
+    maxSize: 7
     probability: 1
   - enemyToPool: {fileID: 8466410024909282408, guid: 1d8cbaec165aedf408d0abc6b81437e9,
       type: 3}

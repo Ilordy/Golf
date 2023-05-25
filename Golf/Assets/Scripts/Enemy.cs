@@ -38,6 +38,8 @@ public class Enemy : EnemyClass
 
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.M))
+            OnEnable();
         if (isPassive) return;
         animator.SetInteger("IdleID", -1);
         speed = EvaluateSpeed();
@@ -93,11 +95,11 @@ public class Enemy : EnemyClass
         isDead = false;
         gameObject.tag = "Enemy";
         col.enabled = true;
-        particles.Play(true);
+        particles.Play(false);
         animator.enabled = true;
-        animator.SetTrigger("Reset");
+        animator.Play("Running");
     }
-
+    
     private void SetPassive()
     {
         if (!isPassive) return;

@@ -71,6 +71,7 @@ public class Manager : Singleton<Manager>
     GameObject[] m_powerUpProjectiles;
     GameObject m_bossInstance;
     EnemyPooler m_enemyPooler;
+    GolfBallPooler projectilePooler;
 
     //Shooting
     float m_beganHolding = 0f;
@@ -179,6 +180,7 @@ public class Manager : Singleton<Manager>
     void Start()
     {
         m_enemyPooler = GetComponent<EnemyPooler>();
+        projectilePooler = GetComponent<GolfBallPooler>();
         Handheld.Vibrate();
         m_shieldData = m_shield.GetComponent<Shield>();
         //Subscribe to events
