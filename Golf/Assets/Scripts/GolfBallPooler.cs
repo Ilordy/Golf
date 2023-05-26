@@ -9,4 +9,16 @@ public class GolfBallPooler : BasePooler<Projectile>
     {
         InitPool(ballPrefab);
     }
+
+    protected override void GetSetup(Projectile obj)
+    {
+        base.GetSetup(obj);
+        obj.OnDeath += ReleaseSetup;
+    }
+    
+    protected override void ReleaseSetup(Projectile obj)
+    {
+        base.ReleaseSetup(obj);
+        obj.OnDeath -= ReleaseSetup;
+    }
 }

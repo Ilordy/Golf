@@ -1,29 +1,46 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Projectile : MonoBehaviour
 {
     Manager GameManager;
-    Rigidbody rb;
+    [SerializeField] Rigidbody rb;
     [SerializeField] float speed = 25f;
+    [SerializeField] TrailRenderer trail;
     int bounces = 0;
     Vector3 initialVelocity = Vector3.zero;
-    private Collider[] m_localEnemies = new Collider[5];//Max nearby enemies it can find.
+    private Collider[] m_localEnemies = new Collider[5]; //Max nearby enemies it can find.
     private Transform m_targettedEnemy;
+    public event Action<Projectile> OnDeath;
 
-    void Awake()
+    public TrailRenderer Trail
     {
-        rb = GetComponent<Rigidbody>();
+        get => trail;
+        set => trail = value;
     }
+
     void Start()
     {
         GameManager = Manager.I;
-        //rb = GetComponent<Rigidbody>();
-        rb.useGravity = false;
         GameEvents.current.BallHit();
-        Destroy(gameObject, 5f);
     }
+
+    void OnEnable()
+    {
+        GameEvents.current.BallHit();
+        bounces = 0;
+        StartCoroutine(Disable());
+    }
+
+    IEnumerator Disable()
+    {
+        yield return new WaitForSecondsRealtime(5f);
+        gameObject.SetActive(false);
+    }
+
 
     void Update()
     {
@@ -31,6 +48,7 @@ public class Projectile : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
         if (m_targettedEnemy != null)
         {
             transform.LookAt(m_targettedEnemy);
@@ -48,7 +66,7 @@ public class Projectile : MonoBehaviour
         {
             bounces++;
             m_targettedEnemy = null;
-            collision.gameObject.layer = 7; //TargettedEnemy Layer
+            collision.gameObject.layer = 7; //Targeted Enemy Layer
             GetNearbyEnemy();
         }
     }
@@ -56,17 +74,22 @@ public class Projectile : MonoBehaviour
     void GetNearbyEnemy()
     {
         //these are all layers to avoid.
-        int layermask = 1 << 6 | 1 << 8 | 1 << 7 | 1 << 12 | 1 << 14 | 1 << 11; 
-        int numFound = Physics.OverlapSphereNonAlloc(transform.position, 10, m_localEnemies, ~layermask);
+        int layerMask = 1 << 6 | 1 << 8 | 1 << 7 | 1 << 12 | 1 << 14 | 1 << 11;
+        int numFound = Physics.OverlapSphereNonAlloc(transform.position, 10, m_localEnemies, ~layerMask);
         if (numFound == 0)
         {
-            Destroy(gameObject);
+            gameObject.SetActive(false);
             return;
         }
+
         var localEnemy = m_localEnemies[Random.Range(0, numFound)];
         m_targettedEnemy = localEnemy.transform;
-        //Mathf.log
-        //SetForce();
+    }
+
+    void OnDisable()
+    {
+        m_targettedEnemy = null;
+        OnDeath?.Invoke(this);
     }
 
     void OnDrawGizmos()

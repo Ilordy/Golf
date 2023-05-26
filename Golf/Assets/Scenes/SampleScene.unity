@@ -18298,6 +18298,7 @@ GameObject:
   - component: {fileID: 981665298}
   - component: {fileID: 981665300}
   - component: {fileID: 981665301}
+  - component: {fileID: 981665302}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -18488,6 +18489,20 @@ MonoBehaviour:
       type: 3}
     maxSize: 30
     probability: 0
+--- !u!114 &981665302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 981665292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72c50091677c1a446b4fd7fa8cee3f5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ballPrefab: {fileID: 4944425052107227038, guid: f71373e91a63c954c8efecfdd4913ce9,
+    type: 3}
 --- !u!224 &985779038 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7714087393268722216, guid: 46d8c0d29c28c7543b49941ae7c676dd,

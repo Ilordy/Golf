@@ -113,6 +113,7 @@ public class Manager : Singleton<Manager>
     int m_upgradeMaxLevel = 20;
     int m_money = 0;
     int m_earned = 0;
+    Camera mainCam;
 
     //Cosmetics
     int[,,] m_cosmetics = new int[3, 7, 2];
@@ -179,6 +180,7 @@ public class Manager : Singleton<Manager>
 
     void Start()
     {
+        mainCam = Camera.main;
         m_enemyPooler = GetComponent<EnemyPooler>();
         projectilePooler = GetComponent<GolfBallPooler>();
         Handheld.Vibrate();
@@ -276,7 +278,7 @@ public class Manager : Singleton<Manager>
         {
             m_beganHolding = Time.unscaledTime;
             var mousepos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10);
-            m_startPos = Camera.main.ScreenToWorldPoint(mousepos);
+            m_startPos = mainCam.ScreenToWorldPoint(mousepos);
         }
 
         if (Input.GetMouseButton(0))
@@ -291,7 +293,7 @@ public class Manager : Singleton<Manager>
             }
 
             var mousepos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10);
-            m_endPos = Camera.main.ScreenToWorldPoint(mousepos);
+            m_endPos = mainCam.ScreenToWorldPoint(mousepos);
             //if (endPos != startPos)
         }
 
@@ -404,8 +406,8 @@ public class Manager : Singleton<Manager>
     {
         var zPos = Random.Range(-76, -25);
         var xPos = Random.Range(0.05f, 0.95f);
-        var worldPos = new Vector3(xPos, 0, Mathf.Abs(Camera.main.transform.position.z - zPos));
-        worldPos = Camera.main.ViewportToWorldPoint(worldPos);
+        var worldPos = new Vector3(xPos, 0, Mathf.Abs(mainCam.transform.position.z - zPos));
+        worldPos = mainCam.ViewportToWorldPoint(worldPos);
         while (m_currentPowerBox == null && m_playGame)
         {
             yield return new WaitForSeconds(m_powerBoxSpawnInterval);
@@ -436,21 +438,22 @@ public class Manager : Singleton<Manager>
         {
             fireRateCounter = Time.unscaledTime + nextFire;
             var flatAimTarget = CalculateTarget();
-            var p = Instantiate(m_projectile, m_spawner.transform.position, Quaternion.identity);
-            if (m_currTrail != null) p.GetComponent<TrailRenderer>().colorGradient = m_currTrail;
+            var p = projectilePooler.Get();
+            p.transform.position = m_spawner.transform.position;
             p.transform.LookAt(flatAimTarget);
-            p.GetComponent<Rigidbody>().useGravity = true;
+            if (m_currTrail != null)
+                p.Trail.colorGradient = m_currTrail;
+            p.transform.LookAt(flatAimTarget);
         }
     }
-
+    
     Vector3 CalculateTarget()
     {
-        var cursorRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        var cursorRay = mainCam.ScreenPointToRay(Input.mousePosition);
         LayerMask mask = 1 << 11; //11 is player's layer
         mask = ~mask; // hit everything but the player's layer
-        Physics.Raycast(Camera.main.transform.position, cursorRay.direction, out var hit, Mathf.Infinity, mask);
+        Physics.Raycast(mainCam.transform.position, cursorRay.direction, out var hit, Mathf.Infinity, mask);
         var dir = new Vector3(hit.point.x, 0.63f, hit.point.z);
-        Debug.Log(dir);
         return dir.z >= m_player.transform.position.z ? dir : Vector3.zero;
     }
 
