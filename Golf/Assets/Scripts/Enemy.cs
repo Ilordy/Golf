@@ -91,6 +91,7 @@ public class Enemy : EnemyClass
     protected override void OnEnable()
     {
         base.OnEnable();
+        rb.velocity = Vector3.zero;
         health = 1;
         isDead = false;
         gameObject.tag = "Enemy";

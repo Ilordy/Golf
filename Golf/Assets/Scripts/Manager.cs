@@ -178,6 +178,8 @@ public class Manager : Singleton<Manager>
     public GameObject Player => m_player;
     public GameObject BossInstance => m_bossInstance;
 
+    public GolfBallPooler ProjectilePooler => projectilePooler;
+
     void Start()
     {
         mainCam = Camera.main;
@@ -390,7 +392,7 @@ public class Manager : Singleton<Manager>
 
     IEnumerator SpawnEnemy()
     {
-        while (EnemyClass.AliveCount < m_enemiesToSpawn)
+        while (EnemyClass.AliveCount < m_enemiesToSpawn + 50)
         {
             var spawnInterval = Mathf.Log(EnemyClass.AliveCount - m_enemySpawnPositions.Length + 1, 2) *
                                 m_baseSpawnInterval;
@@ -438,12 +440,11 @@ public class Manager : Singleton<Manager>
         {
             fireRateCounter = Time.unscaledTime + nextFire;
             var flatAimTarget = CalculateTarget();
-            var p = projectilePooler.Get();
+            var p = ProjectilePooler.Get();
             p.transform.position = m_spawner.transform.position;
             p.transform.LookAt(flatAimTarget);
             if (m_currTrail != null)
                 p.Trail.colorGradient = m_currTrail;
-            p.transform.LookAt(flatAimTarget);
         }
     }
     
@@ -619,7 +620,7 @@ public class Manager : Singleton<Manager>
     {
         foreach (var t in m_enemySpawnPositions)
         {
-            var enemy = Instantiate(m_enemy);
+            var enemy = m_enemyPooler.SpawnEnemy(2);
             enemy.transform.rotation = Quaternion.identity;
             enemy.transform.position = t.position;
         }

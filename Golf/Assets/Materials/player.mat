@@ -312,7 +312,7 @@ Material:
     - _OutlineScale: 1
     - _OutlineSize: 60
     - _OutlineTab: 1
-    - _OutlineWidth: 1
+    - _OutlineWidth: 1.47
     - _OverrideLightmapDir: 1
     - _Parallax: 0.02
     - _QueueOffset: 0

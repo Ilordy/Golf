@@ -40,12 +40,9 @@ public abstract class EnemyClass : MonoBehaviour
         get { return health; }
         set { health = value; }
     }
-
     public event System.Action<EnemyClass> OnDeath;
-
     ///////////////////////////////////////////////////////////////////////////////////
-
-
+    
     protected virtual void Awake()
     {
         playerPos = Manager.I.Player.transform.position;
@@ -96,7 +93,7 @@ public abstract class EnemyClass : MonoBehaviour
             rb.constraints = RigidbodyConstraints.None;
             rb.AddForce(force, ForceMode.Impulse);
         }
-    }
+    }//might need to make one for resetting...
 
     protected virtual void OnEnable()
     {
@@ -113,7 +110,6 @@ public abstract class EnemyClass : MonoBehaviour
     /// <param name="objectsToDisable">objects to disable</param>
     protected void SequenceDisappear(params GameObject[] objectsToDisable) => EnemyPooler.I.SequenceMobDisable(objectsToDisable);
     //TODO prob also want to do lil particle effects too...
-    
     protected virtual void OnDisable()
     {
         totalKilledCount++;

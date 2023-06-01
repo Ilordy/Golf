@@ -27,8 +27,7 @@ public class CartEnemy : EnemyClass
             {
                 var enemy = EnemyPooler.I.SpawnEnemy(2);
                 enemy.transform.position = transform.position +
-                                           new Vector3(
-                                               Random.value >= 0.5f ? i * Random.Range(1, 3) : -i * Random.Range(1, 3),
+                                           new Vector3(Random.value >= 0.5f ? i * Random.Range(1, 3) : -i * Random.Range(1, 3),
                                                0, 0);
             }
 
@@ -43,7 +42,7 @@ public class CartEnemy : EnemyClass
             }
 
             //TODO particles here maybe..
-            gameObject.SetActive(false);
+            SequenceDisappear(gameObject);
         }
         else if (!Manager.I.PlayerDead)
         {
@@ -83,9 +82,9 @@ public class CartEnemy : EnemyClass
                 fragsRB[i].useGravity = true;
                 fragsRB[i].AddForce(new Vector3(Random.Range(-5, -1), 5, 0), ForceMode.Impulse);
             }
-
             SequenceDisappear(frags);
         }
+        
     }
 
     protected override void OnEnable()

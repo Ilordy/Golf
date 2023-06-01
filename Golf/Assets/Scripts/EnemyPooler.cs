@@ -6,15 +6,12 @@ using UnityEngine.Serialization;
 public class EnemyPooler : Singleton<EnemyPooler>
 {
     #region Variables
-
     [SerializeField] EnemyPoolerData[] m_enemiesToPool;
     private LinkedPool<EnemyClass>[] m_enemyPoolers; //change to regular object pool later.
     float m_netWeight;
-
     #endregion
 
     #region Public Methods
-
     public EnemyClass SpawnEnemy(int index) => m_enemiesToPool?[index].pooler.Get();
 
     /// <summary>
@@ -52,12 +49,12 @@ public class EnemyPooler : Singleton<EnemyPooler>
                 t.probability = 1;
         }
     }
-
     #endregion
 
 
-    void Start()
+    protected override void Awake()
     {
+        base.Awake();
         m_netWeight = 0; //prob have to reset this after every level.
         foreach (var t in m_enemiesToPool)
         {
@@ -68,16 +65,14 @@ public class EnemyPooler : Singleton<EnemyPooler>
     }
 
     #region Private Methods
-
     IEnumerator SequenceMobDisableInternal(params GameObject[] objectsToDisable)
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1f);
         foreach (GameObject obj in objectsToDisable)
         {
             obj.SetActive(false);
         }
     }
-
     #endregion
 
     [System.Serializable]
@@ -99,7 +94,7 @@ public class EnemyPooler : Singleton<EnemyPooler>
 
         public void CreatePooler()
         {
-            pooler = new LinkedPool<EnemyClass>(Create, OnGet, Release, Destroy,
+            pooler = new LinkedPool<EnemyClass>(Create, OnGet, OnRelease, Destroy,
                 maxSize: maxSize); //might need to change over time.
         }
 
@@ -112,16 +107,15 @@ public class EnemyPooler : Singleton<EnemyPooler>
         {
             enemy.gameObject.SetActive(true);
             enemy.OnDeath += Release;
-            //gotta do some more stuff here...
         }
 
-        void Release(EnemyClass enemy)
+        void OnRelease(EnemyClass enemy)
         {
             enemy.gameObject.SetActive(false);
             enemy.OnDeath -= Release;
-            //gotta do some more stuff here...
         }
 
+        public void Release(EnemyClass enemy) => pooler.Release(enemy);
         private void Destroy(EnemyClass enemy) => Object.Destroy(enemy.gameObject);
     }
 }

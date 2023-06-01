@@ -11,7 +11,6 @@ public class Projectile : MonoBehaviour
     [SerializeField] float speed = 25f;
     [SerializeField] TrailRenderer trail;
     int bounces = 0;
-    Vector3 initialVelocity = Vector3.zero;
     private Collider[] m_localEnemies = new Collider[5]; //Max nearby enemies it can find.
     private Transform m_targettedEnemy;
     public event Action<Projectile> OnDeath;
@@ -46,7 +45,8 @@ public class Projectile : MonoBehaviour
     {
         if (bounces > GameManager.MaxBounces)
         {
-            Destroy(gameObject);
+            StopAllCoroutines();
+            gameObject.SetActive(false);
         }
 
         if (m_targettedEnemy != null)

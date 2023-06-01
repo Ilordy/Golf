@@ -13,12 +13,12 @@ public class GolfBallPooler : BasePooler<Projectile>
     protected override void GetSetup(Projectile obj)
     {
         base.GetSetup(obj);
-        obj.OnDeath += ReleaseSetup;
+        obj.OnDeath += Release;
     }
     
     protected override void ReleaseSetup(Projectile obj)
     {
         base.ReleaseSetup(obj);
-        obj.OnDeath -= ReleaseSetup;
+        obj.OnDeath -= Release;
     }
 }
