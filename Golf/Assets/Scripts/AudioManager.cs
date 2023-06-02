@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using MoreMountains.NiceVibrations;
+using Lofelt.NiceVibrations;
 
 public class AudioManager : Singleton<AudioManager> {
 
@@ -40,7 +40,7 @@ public class AudioManager : Singleton<AudioManager> {
         if (GameManager.SoundEnabled < 0) return;
         enemyHitSource.PlayOneShot(enemyHit);
         if (GameManager.HapticsEnabled < 0) return;
-        MMVibrationManager.Haptic(HapticTypes.HeavyImpact);
+        HapticPatterns.PlayPreset(HapticPatterns.PresetType.HeavyImpact);
     }
     public void PlayBallHit() {
         if (GameManager.SoundEnabled < 0) return;
