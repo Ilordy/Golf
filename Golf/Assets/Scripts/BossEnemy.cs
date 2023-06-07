@@ -32,7 +32,6 @@ public class BossEnemy : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Projectile"))
         {
-            Destroy(other.gameObject);
             if (!canBeHit) return;
             health--;
             if (health > 0)

@@ -240,14 +240,9 @@ public class Manager : Singleton<Manager>
         GameEvents.current.UpgradesChange(2, m_ballBounceLevel, m_ballBounceCost);
         GameEvents.current.UpgradesChange(3, m_incomeLevel, m_incomeCost);
     }
-
-    Vector3 m_startPos, m_endPos;
-    public int killCount;
-    public int aliveCount;
+    
     void Update()
     {
-        killCount = EnemyClass.TotalKilledCount;
-        aliveCount = EnemyClass.AliveCount;
         //Debug.Log(Mathf.InverseLerp(0, 100, m_level));
         //Gameplay
         if (Input.GetKeyDown(KeyCode.C)) UpdateShield();
@@ -280,7 +275,6 @@ public class Manager : Singleton<Manager>
         {
             m_beganHolding = Time.unscaledTime;
             var mousepos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10);
-            m_startPos = mainCam.ScreenToWorldPoint(mousepos);
         }
 
         if (Input.GetMouseButton(0))
@@ -295,7 +289,6 @@ public class Manager : Singleton<Manager>
             }
 
             var mousepos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10);
-            m_endPos = mainCam.ScreenToWorldPoint(mousepos);
             //if (endPos != startPos)
         }
 
@@ -392,7 +385,7 @@ public class Manager : Singleton<Manager>
 
     IEnumerator SpawnEnemy()
     {
-        while (EnemyClass.AliveCount < m_enemiesToSpawn + 50)
+        while (EnemyClass.AliveCount < m_enemiesToSpawn)
         {
             var spawnInterval = Mathf.Log(EnemyClass.AliveCount - m_enemySpawnPositions.Length + 1, 2) *
                                 m_baseSpawnInterval;

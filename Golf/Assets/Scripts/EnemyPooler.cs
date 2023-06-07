@@ -84,12 +84,12 @@ public class EnemyPooler : Singleton<EnemyPooler>
         public int maxSize;
         public LinkedPool<EnemyClass> pooler;
         [SerializeField, Range(0, 1)] public float probability;
-        float m_weight;
+        float weight;
 
         public float Weight
         {
-            get => m_weight;
-            set => m_weight = value;
+            get => weight;
+            set => weight = value;
         }
 
         public void CreatePooler()

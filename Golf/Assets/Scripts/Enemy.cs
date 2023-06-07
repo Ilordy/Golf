@@ -29,7 +29,6 @@ public class Enemy : EnemyClass
     {
         if (!isPassive)
             emojiController.Init();
-        aliveCount++;
         health = 1;
         speed = 5f;
         animator.SetInteger("IdleID", Random.Range(0, 3));
@@ -91,7 +90,7 @@ public class Enemy : EnemyClass
     protected override void OnEnable()
     {
         base.OnEnable();
-        rb.velocity = Vector3.zero;
+        ResetVelocities();
         health = 1;
         isDead = false;
         gameObject.tag = "Enemy";

@@ -13,6 +13,7 @@ public abstract class EnemyClass : MonoBehaviour
     protected float speed = 1;
     protected bool increase = false;
     private Vector3 m_destinationPos;
+    private Rigidbody[] cachedBodies;
     protected static int aliveCount = 0;
     protected static int totalKilledCount = 0;
     protected static int killedCount = 0;
@@ -40,13 +41,15 @@ public abstract class EnemyClass : MonoBehaviour
         get { return health; }
         set { health = value; }
     }
+
     public event System.Action<EnemyClass> OnDeath;
     ///////////////////////////////////////////////////////////////////////////////////
-    
+
     protected virtual void Awake()
     {
         playerPos = Manager.I.Player.transform.position;
         m_destinationPos = playerPos + new Vector3(0, 0, 30);
+        cachedBodies = GetComponentsInChildren<Rigidbody>();
     }
 
     public static void ResetStatics()
@@ -88,15 +91,31 @@ public abstract class EnemyClass : MonoBehaviour
     /// <param name="force">The magnitude and dir to apply</param>
     protected void AddRagdollForce(Vector3 force)
     {
-        foreach (Rigidbody rb in GetComponentsInChildren<Rigidbody>())
+        foreach (Rigidbody rb in cachedBodies)
         {
             rb.constraints = RigidbodyConstraints.None;
             rb.AddForce(force, ForceMode.Impulse);
         }
-    }//might need to make one for resetting...
+    } 
+
+    /// <summary>
+    /// Resets the velocity and angular velocity of each rigidbody inside the game object.
+    /// </summary>
+    protected void ResetVelocities()
+    {
+        foreach (Rigidbody rb in cachedBodies)
+        {
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.constraints = RigidbodyConstraints.FreezeRotation 
+                             | RigidbodyConstraints.FreezePositionX 
+                             | RigidbodyConstraints.FreezePositionZ;
+        }
+    }
 
     protected virtual void OnEnable()
     {
+        aliveCount++;
         transform.position = Manager.I.GetEnemySpawnPoint();
         if (Physics.Raycast(transform.position, -transform.up, out var hit, Mathf.Infinity))
         {
@@ -109,6 +128,7 @@ public abstract class EnemyClass : MonoBehaviour
     /// </summary>
     /// <param name="objectsToDisable">objects to disable</param>
     protected void SequenceDisappear(params GameObject[] objectsToDisable) => EnemyPooler.I.SequenceMobDisable(objectsToDisable);
+
     //TODO prob also want to do lil particle effects too...
     protected virtual void OnDisable()
     {

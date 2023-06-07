@@ -69,6 +69,10 @@ public class Projectile : MonoBehaviour
             collision.gameObject.layer = 7; //Targeted Enemy Layer
             GetNearbyEnemy();
         }
+        else
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     void GetNearbyEnemy()
