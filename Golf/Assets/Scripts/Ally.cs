@@ -13,6 +13,8 @@ public class Ally : MonoBehaviour
     private bool isGrounded;
     private GameObject floor;
     private const string shootTrigger = "Shoot";
+    readonly int shootHash = Animator.StringToHash(shootTrigger);
+    readonly int landedHash = Animator.StringToHash("Landed");
 
     void Start()
     {
@@ -23,19 +25,19 @@ public class Ally : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!isGrounded && Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, float.MaxValue, LayerMask.GetMask("Default")))
+        if (!isGrounded && Physics.Raycast(transform.position, -transform.up, out RaycastHit hit, float.MaxValue, LayerMask.GetMask("Terrain")))
         {
             if (Vector3.Distance(transform.position, hit.point) < 5f)
             {//offset for starting the animation.
                 isGrounded = true;
-                animator.SetTrigger("Landed");
+                animator.SetTrigger(landedHash);
                 //gotta play some sound here for falling and landing.
             }
         }
 
         if (animator.GetCurrentAnimatorStateInfo(0).IsName(shootTrigger) && animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1.0f)
         {
-            animator.SetBool(shootTrigger, false);
+            animator.SetBool(shootHash, false);
         }
         if (animator.GetCurrentAnimatorStateInfo(0).IsName(shootTrigger) && animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.5f)
         {
@@ -56,10 +58,9 @@ public class Ally : MonoBehaviour
     IEnumerator OnLanded()
     { //we wait till the animator is in transition from landed to idle.
         yield return new WaitUntil(() => animator.IsInTransition(0));
-        transform.position = new Vector3(transform.position.x, 1.6f, transform.position.z);
+        transform.position = new Vector3(transform.position.x, 1.57f, transform.position.z);
         clubTransform.localPosition = clubPosition;
         clubTransform.localEulerAngles = clubRotation;
-        //transform.eulerAngles = new Vector3(0, 90, 0);
         StartCoroutine(Shoot());
     }
 
@@ -69,7 +70,7 @@ public class Ally : MonoBehaviour
         {
             yield return new WaitForSecondsRealtime(fireRate);//gotta change this later on to work with slowing down time.
             var enemies = FindObjectsOfType<EnemyClass>().Where(e => e.CompareTag("Enemy"));//find all enemies still alive.
-            Transform target = enemies?.OrderBy(e => Vector3.Distance(transform.position, e.transform.position)).FirstOrDefault().transform;//shoot at the closest one.
+            Transform target = enemies?.OrderBy(e => Vector3.Distance(transform.position, e.transform.position)).FirstOrDefault()?.transform;//shoot at the closest one.
             if (target)
             {
                 animator.SetBool(shootTrigger, true);

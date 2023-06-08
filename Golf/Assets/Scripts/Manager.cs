@@ -114,6 +114,7 @@ public class Manager : Singleton<Manager>
     int m_money = 0;
     int m_earned = 0;
     Camera mainCam;
+    [SerializeField] float m_baseSpawnInterval;
 
     //Cosmetics
     int[,,] m_cosmetics = new int[3, 7, 2];
@@ -240,12 +241,12 @@ public class Manager : Singleton<Manager>
         GameEvents.current.UpgradesChange(2, m_ballBounceLevel, m_ballBounceCost);
         GameEvents.current.UpgradesChange(3, m_incomeLevel, m_incomeCost);
     }
-    
+
     void Update()
     {
         //Debug.Log(Mathf.InverseLerp(0, 100, m_level));
         //Gameplay
-        if (Input.GetKeyDown(KeyCode.C)) UpdateShield();
+        if (Input.GetKeyDown(KeyCode.C)) SpawnAlly();
         if (Input.GetKeyDown(KeyCode.V)) EnemyClass.KilledCount = 100;
         if (!m_playGame) return;
         if (m_startedSpawning == null && !Enemy.isPassive)
@@ -266,7 +267,7 @@ public class Manager : Singleton<Manager>
                 StopCoroutine(m_startedSpawning);
                 var boss = Instantiate(m_bossEnemy, m_bossPosition);
                 m_bossInstance = boss;
-                 boss.GetComponent<BossEnemy>().OnKnockedOut += BossKnockedOut;
+                boss.GetComponent<BossEnemy>().OnKnockedOut += BossKnockedOut;
             }
         }
 
@@ -381,17 +382,14 @@ public class Manager : Singleton<Manager>
         m_currTheme = data.currTheme;
     }
 
-    [SerializeField] float m_baseSpawnInterval;
 
     IEnumerator SpawnEnemy()
     {
         while (EnemyClass.AliveCount < m_enemiesToSpawn)
         {
-            var spawnInterval = Mathf.Log(EnemyClass.AliveCount - m_enemySpawnPositions.Length + 1, 2) *
-                                m_baseSpawnInterval;
+            //var spawnInterval = Mathf.Log(EnemyClass.AliveCount - m_enemySpawnPositions.Length + 1, 2) * m_baseSpawnInterval;
+            var spawnInterval = Mathf.Log10(EnemyClass.AliveCount - m_enemySpawnPositions.Length + 1) * m_baseSpawnInterval;
             m_enemyPooler.SpawnRandomEnemy();
-            //TODO Refactor this code to be more readable and maintainable
-            //TODO make algorithm for spawning enemies with probability! 
             //spawn enemies with probability based on level
             yield return new WaitForSecondsRealtime(spawnInterval);
         }
@@ -440,7 +438,7 @@ public class Manager : Singleton<Manager>
                 p.Trail.colorGradient = m_currTrail;
         }
     }
-    
+
     Vector3 CalculateTarget()
     {
         var cursorRay = mainCam.ScreenPointToRay(Input.mousePosition);
@@ -567,7 +565,7 @@ public class Manager : Singleton<Manager>
     {
         m_themeSet = false;
         ResetGame();
-        m_enemyPooler.AddSpawnProbability(Mathf.InverseLerp(1,300, m_level)); //Not sure if we want to use 300 as max level...
+        m_enemyPooler.AddSpawnProbability(Mathf.InverseLerp(1, 300, m_level)); //Not sure if we want to use 300 as max level...
         m_level++;
         PlayerPrefs.SetInt("Level", m_level);
         CalculateDifficulty(m_level);
