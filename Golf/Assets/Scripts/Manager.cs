@@ -636,11 +636,12 @@ public class Manager : Singleton<Manager>
 
     void RemoveAllCharacters()
     {
+        //Refactor this to use a cached list.
         if (m_shield.activeSelf) m_shield.GetComponent<Shield>().DestroyShield();
         if (m_bossInstance) Destroy(m_bossInstance);
-        var e = GameObject.FindGameObjectsWithTag("Enemy");
-        e = e.Concat(GameObject.FindGameObjectsWithTag("Ally")).ToArray();
-        foreach (var i in e) Destroy(i);
+        GameObject.FindGameObjectsWithTag("Enemy").ToList().ForEach(e => e.SetActive(false));
+       // e = e.Concat(GameObject.FindGameObjectsWithTag("Ally")).ToArray();
+       // foreach (var i in e) Destroy(i);
     }
 
     void HandleCosmetic(int type, int i, int cost)

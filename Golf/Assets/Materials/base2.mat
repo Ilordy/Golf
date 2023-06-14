@@ -79,9 +79,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - Vector1_41a5e961c1de4b0db732ac227a939410: 6.9
+    - Vector1_41a5e961c1de4b0db732ac227a939410: 6.7
     - Vector1_787b73bebca44d6b8e0c1f21d61203fc: 0.33
-    - Vector1_e0b1044da9fb4fc09754d0e5b753a0f2: 29
+    - Vector1_e0b1044da9fb4fc09754d0e5b753a0f2: 17.6
     - _AlphaClip: 0
     - _Blend: 0
     - _BumpScale: 1
@@ -103,6 +103,7 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
+    - _Scale_Factor: 0.02
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
@@ -119,6 +120,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+    - _Tiling: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &1789526093176227714
 MonoBehaviour:

@@ -20,7 +20,7 @@ public class BossSliderInputHandler : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0) && timeActivated < Time.time)
         {
-            Manager.I.DoFinalSwing(sliderImage.fillAmount * 25);
+            Manager.I.DoFinalSwing(sliderImage.fillAmount * 100);
             gameObject.SetActive(false);
         }
     }

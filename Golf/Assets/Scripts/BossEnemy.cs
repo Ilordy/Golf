@@ -13,6 +13,7 @@ public class BossEnemy : MonoBehaviour
 
     void Start()
     {
+        //TODO save the boss, dont actually destroy and inatiantiate.   
         focusPoint = transform.Find("metarig/spine");
         anim = GetComponent<Animator>();
         transform.parent = null;
@@ -94,8 +95,8 @@ public class BossEnemy : MonoBehaviour
         float acceleration = Physics.gravity.magnitude;
         float theta = Mathf.Atan(initialVelocity.y / -initialVelocity.z);
         float x = (Mathf.Pow(initialVelocity.magnitude, 2) * Mathf.Sin(2 * theta)) / acceleration;
-        float time = 2 * initialVelocity.magnitude * Mathf.Sin(theta) / acceleration;
-        Debug.Log("This the time!!! " + time);
+        // float time = 2 * initialVelocity.magnitude * Mathf.Sin(theta) / acceleration;
+        // Debug.Log("This the time!!! " + time);
         return new Vector3(startPos.x, startPos.y, startPos.z - x);
     }
 }
