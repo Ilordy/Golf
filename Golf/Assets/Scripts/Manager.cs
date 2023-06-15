@@ -246,7 +246,7 @@ public class Manager : Singleton<Manager>
     {
         //Debug.Log(Mathf.InverseLerp(0, 100, m_level));
         //Gameplay
-        if (Input.GetKeyDown(KeyCode.C)) SpawnAlly();
+        if (Input.GetKeyDown(KeyCode.C)) UpdateShield();
         if (Input.GetKeyDown(KeyCode.V)) EnemyClass.KilledCount = 100;
         if (!m_playGame) return;
         if (m_startedSpawning == null && !Enemy.isPassive)
@@ -258,13 +258,14 @@ public class Manager : Singleton<Manager>
         else
         {
             //HANDLE VICTORY
-            if (Input.GetKeyDown(KeyCode.X) || (EnemyClass.TotalKilledCount == EnemyClass.AliveCount && !m_isBossFight))
+            if (Input.GetKeyDown(KeyCode.X) || (EnemyClass.TotalKilledCount == EnemyClass.AliveCount && !m_isBossFight && m_startedSpawning != null))
             {
                 // HandleVictory();
                 //put boss here and then handle victory.
                 m_isBossFight = true;
                 RemoveAllCharacters();
-                StopCoroutine(m_startedSpawning);
+                if(m_startedSpawning != null)
+                    StopCoroutine(m_startedSpawning);
                 var boss = Instantiate(m_bossEnemy, m_bossPosition);
                 m_bossInstance = boss;
                 boss.GetComponent<BossEnemy>().OnKnockedOut += BossKnockedOut;
@@ -623,13 +624,14 @@ public class Manager : Singleton<Manager>
         if (m_startedSpawning != null) StopCoroutine(m_startedSpawning);
         m_startedSpawning = null;
         m_playGame = false;
-        m_isBossFight = false;
         Enemy.isPassive = true;
         m_allyCount = 0;
         m_playerAnimator.SetBool("Swing", false);
         EnemyClass.ResetStatics();
         GameEvents.current.DeleteAnimation();
-        m_player.transform.localPosition = new Vector3(125.4778f, 1.418f, -88.17085f);
+        m_isBossFight = false;
+        m_player.transform.position = new Vector3(125.4778f, 1.418f, -88.17085f);
+        m_player.transform.eulerAngles = new Vector3(0, 180, 0);
         RemoveAllCharacters();
         SpawnInitialEnemies();
     }

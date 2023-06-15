@@ -19,6 +19,8 @@ public abstract class EnemyClass : MonoBehaviour
     protected static int killedCount = 0;
     int m_layerMask = 1 << 15;
 
+    public bool CanMove { get; set; } = true;
+
     //PROPERTIES
     public static int AliveCount
     {
@@ -79,6 +81,7 @@ public abstract class EnemyClass : MonoBehaviour
 
     protected float EvaluateSpeed()
     {
+        if(!CanMove) return 0;
         if (transform.position.z < m_destinationPos.z) return minSpeed;
         float distance = Vector3.Distance(transform.position, m_destinationPos);
         float maxSpeed = Mathf.Min(distance, this.maxSpeed); //will prob change max speed later.

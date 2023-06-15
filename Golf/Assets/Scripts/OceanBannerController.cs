@@ -18,6 +18,7 @@ public class OceanBannerController : MonoBehaviour
         {
             m_triggered = true;
             WorldManager.I.DisplayMultiplierText();
+            
         }
     }
 }

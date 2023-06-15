@@ -1,9 +1,11 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+
 public class Shield : MonoBehaviour
 {
     private int _health;
@@ -13,37 +15,50 @@ public class Shield : MonoBehaviour
     [SerializeField] TextMeshProUGUI healthText;
     [SerializeField] Color startColor, damagedColor, edgeStartColor, edgeDeadColor;
     [SerializeField] int damageCooldown;
-    public int Health { get => _health; set => _health = value; }
+
+    public int Health
+    {
+        get => _health;
+        set => _health = value;
+    }
+
+    HashSet<EnemyClass> touchedEnemies = new HashSet<EnemyClass>();
+
     void Awake()
     {
         mat = GetComponent<Renderer>().material;
     }
+
     public void InitShield()
     {
         mat.SetColor(fresnelProperty, startColor);
         mat.SetColor(edgeColorProperty, edgeStartColor);
         healthText.text = _health.ToString();
         mat.DOFloat(0, dissolvePropety, 2f)
-        .OnComplete(() => healthText.transform.parent.DOScale(0.001288829f, 1f)
-        .SetEase(Ease.OutElastic));
+            .OnComplete(() => healthText.transform.parent.DOScale(0.001288829f, 1f)
+                .SetEase(Ease.OutElastic));
     }
-
+    
     void OnCollisionStay(Collision other)
     {
-        if (other.gameObject.CompareTag("Enemy") && canBeDamaged)
+        if (other.gameObject.TryGetComponent<EnemyClass>(out var enemy))
         {
-            canBeDamaged = false;//also play audio here.
-            _health--;
-            healthText.text = _health.ToString();
-            if (_health <= 0)
-                mat.DOColor(damagedColor, fresnelProperty, .2f).OnComplete(() =>
-
-                    healthText.transform.parent.DOScale(0, .2f).OnComplete(() => DestroyShield())
-                );
-            else
+            enemy.CanMove = false;
+            touchedEnemies.Add(enemy);
+            if (canBeDamaged)
             {
-                mat.DOColor(damagedColor, fresnelProperty, .2f).SetLoops(2, LoopType.Yoyo);
-                StartCoroutine(DamageCoolDown());
+                canBeDamaged = false; //also play audio here.
+                _health--;
+                healthText.text = _health.ToString();
+                if (_health <= 0)
+                    mat.DOColor(damagedColor, fresnelProperty, .2f).OnComplete(() =>
+                        healthText.transform.parent.DOScale(0, .2f).OnComplete(() => DestroyShield())
+                    );
+                else
+                {
+                    mat.DOColor(damagedColor, fresnelProperty, .2f).SetLoops(2, LoopType.Yoyo);
+                    StartCoroutine(DamageCoolDown());
+                }
             }
         }
     }
@@ -62,6 +77,9 @@ public class Shield : MonoBehaviour
             StopAllCoroutines();
             canBeDamaged = true;
             gameObject.SetActive(false);
+            foreach (var enemy in touchedEnemies)
+                enemy.CanMove = true;
+            touchedEnemies.Clear();
             //resetting everything
         });
     }

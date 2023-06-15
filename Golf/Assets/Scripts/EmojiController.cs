@@ -1,7 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using Random = UnityEngine.Random;
+
 [RequireComponent(typeof(ParticleSystem))]
 public class EmojiController : MonoBehaviour
 {
@@ -17,12 +20,17 @@ public class EmojiController : MonoBehaviour
     {
         emojiPS = GetComponent<ParticleSystem>();
         emojiMat = GetComponent<ParticleSystemRenderer>().material;
+    }
+
+    void OnEnable()
+    {
         Enemy.OnBecameHostile += Init;
     }
 
-    void OnDestroy()
+    void OnDisable()
     {
         Enemy.OnBecameHostile -= Init;
+        StopAllCoroutines();
     }
 
     public void Init() => StartCoroutine(ShowEmoji());
