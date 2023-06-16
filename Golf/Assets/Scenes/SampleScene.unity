@@ -3728,8 +3728,8 @@ MonoBehaviour:
   m_StreamingVersion: 20170927
   m_Priority: 1
   m_StandbyUpdate: 2
-  m_LookAt: {fileID: 1100214021}
-  m_Follow: {fileID: 1100214021}
+  m_LookAt: {fileID: 0}
+  m_Follow: {fileID: 0}
   m_Lens:
     FieldOfView: 45
     OrthographicSize: 5
@@ -18361,6 +18361,8 @@ MonoBehaviour:
   - {fileID: 1010970966}
   m_enemySpawnBounds: {fileID: 2034363186}
   m_baseSpawnInterval: 0.3
+  TotalKilledCount: 0
+  AliveCount: 0
 --- !u!4 &981665294
 Transform:
   m_ObjectHideFlags: 0

@@ -242,8 +242,12 @@ public class Manager : Singleton<Manager>
         GameEvents.current.UpgradesChange(3, m_incomeLevel, m_incomeCost);
     }
 
+    public float TotalKilledCount;
+    public float AliveCount;
     void Update()
     {
+        TotalKilledCount = EnemyClass.TotalKilledCount;
+        AliveCount = EnemyClass.AliveCount;
         //Debug.Log(Mathf.InverseLerp(0, 100, m_level));
         //Gameplay
         if (Input.GetKeyDown(KeyCode.C)) UpdateShield();
@@ -258,8 +262,8 @@ public class Manager : Singleton<Manager>
         else
         {
             //HANDLE VICTORY
-            if (Input.GetKeyDown(KeyCode.X) || (EnemyClass.TotalKilledCount == EnemyClass.AliveCount && !m_isBossFight && m_startedSpawning != null))
-            {
+            if (Input.GetKeyDown(KeyCode.X) || (EnemyClass.TotalKilledCount >= EnemyClass.AliveCount && !m_isBossFight && m_startedSpawning != null))
+            {//TODO this is a hotfix EnemyClass.TotalKilledCount >= EnemyClass.AliveCount, please change back to == and fix bug.
                 // HandleVictory();
                 //put boss here and then handle victory.
                 m_isBossFight = true;
@@ -565,7 +569,8 @@ public class Manager : Singleton<Manager>
     public void HandleVictory(float multiplier)
     {
         m_themeSet = false;
-        ResetGame();
+        RemoveAllCharacters();
+        SpawnInitialEnemies();
         m_enemyPooler.AddSpawnProbability(Mathf.InverseLerp(1, 300, m_level)); //Not sure if we want to use 300 as max level...
         m_level++;
         PlayerPrefs.SetInt("Level", m_level);
@@ -585,13 +590,14 @@ public class Manager : Singleton<Manager>
 
     public void HandleDefeat()
     {
-        //ResetGame();
         m_playerDead = true;
         m_playerAnimator.SetTrigger("Hit");
         m_player.transform.localEulerAngles = new Vector3(-90, 0, 0);
         var playerLaunchDestination = new Vector3(1, 0, Random.Range(-1f, 0f)) * 10;
         m_player.transform.DOMove(new Vector3(0, .8f) + m_player.transform.localPosition + playerLaunchDestination, 3)
             .OnComplete(() => GameEvents.current.HandleDefeat());
+        RemoveAllCharacters();
+        SpawnInitialEnemies();
     }
 
     void SkipLevel()
@@ -610,6 +616,7 @@ public class Manager : Singleton<Manager>
 
     void SpawnInitialEnemies()
     {
+        Enemy.isPassive = true;
         foreach (var t in m_enemySpawnPositions)
         {
             var enemy = m_enemyPooler.SpawnEnemy(2);
@@ -620,11 +627,11 @@ public class Manager : Singleton<Manager>
 
     public void ResetGame()
     {
+        Debug.Log("RESET CALLED");
         m_playerDead = false;
         if (m_startedSpawning != null) StopCoroutine(m_startedSpawning);
         m_startedSpawning = null;
         m_playGame = false;
-        Enemy.isPassive = true;
         m_allyCount = 0;
         m_playerAnimator.SetBool("Swing", false);
         EnemyClass.ResetStatics();
@@ -632,12 +639,11 @@ public class Manager : Singleton<Manager>
         m_isBossFight = false;
         m_player.transform.position = new Vector3(125.4778f, 1.418f, -88.17085f);
         m_player.transform.eulerAngles = new Vector3(0, 180, 0);
-        RemoveAllCharacters();
-        SpawnInitialEnemies();
     }
 
     void RemoveAllCharacters()
     {
+        Debug.Log("CALLED");
         //Refactor this to use a cached list.
         if (m_shield.activeSelf) m_shield.GetComponent<Shield>().DestroyShield();
         if (m_bossInstance) Destroy(m_bossInstance);

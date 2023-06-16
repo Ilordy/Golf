@@ -299,7 +299,7 @@ public class UIManager : MonoBehaviour
         CutSceneHelper.I.Reset(OpenMainMenu);
         //OpenMainMenu();
     }
-
+//Add plss
     void AwardDouble()
     {
         GameEvents.current.RewardVictory(2);
