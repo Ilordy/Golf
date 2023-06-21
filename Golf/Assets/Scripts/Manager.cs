@@ -250,7 +250,7 @@ public class Manager : Singleton<Manager>
         AliveCount = EnemyClass.AliveCount;
         //Debug.Log(Mathf.InverseLerp(0, 100, m_level));
         //Gameplay
-        if (Input.GetKeyDown(KeyCode.C)) UpdateShield();
+        if (Input.GetKeyDown(KeyCode.C)) SpawnAlly();
         if (Input.GetKeyDown(KeyCode.V)) EnemyClass.KilledCount = 100;
         if (!m_playGame) return;
         if (m_startedSpawning == null && !Enemy.isPassive)
@@ -262,8 +262,8 @@ public class Manager : Singleton<Manager>
         else
         {
             //HANDLE VICTORY
-            if (Input.GetKeyDown(KeyCode.X) || (EnemyClass.TotalKilledCount >= EnemyClass.AliveCount && !m_isBossFight && m_startedSpawning != null))
-            {//TODO this is a hotfix EnemyClass.TotalKilledCount >= EnemyClass.AliveCount, please change back to == and fix bug.
+            if (Input.GetKeyDown(KeyCode.X) || (EnemyClass.TotalKilledCount == EnemyClass.AliveCount && !m_isBossFight && m_startedSpawning != null))
+            {
                 // HandleVictory();
                 //put boss here and then handle victory.
                 m_isBossFight = true;
@@ -471,7 +471,6 @@ public class Manager : Singleton<Manager>
     public Vector3 GetEnemySpawnPoint() //For enemies
     {
         var bounds = m_enemySpawnBounds.bounds;
-        var chance = Random.Range(0f, 1f);
         var xPos = Random.Range(-bounds.extents.x, bounds.extents.x);
         var zPos = Random.Range(-bounds.extents.z, bounds.extents.z);
         return bounds.center + new Vector3(xPos, 30, zPos);
@@ -634,7 +633,6 @@ public class Manager : Singleton<Manager>
         m_playGame = false;
         m_allyCount = 0;
         m_playerAnimator.SetBool("Swing", false);
-        EnemyClass.ResetStatics();
         GameEvents.current.DeleteAnimation();
         m_isBossFight = false;
         m_player.transform.position = new Vector3(125.4778f, 1.418f, -88.17085f);
@@ -643,7 +641,7 @@ public class Manager : Singleton<Manager>
 
     void RemoveAllCharacters()
     {
-        Debug.Log("CALLED");
+        EnemyClass.ResetStatics();
         //Refactor this to use a cached list.
         if (m_shield.activeSelf) m_shield.GetComponent<Shield>().DestroyShield();
         if (m_bossInstance) Destroy(m_bossInstance);
