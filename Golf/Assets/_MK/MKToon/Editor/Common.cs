@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #if UNITY_EDITOR
@@ -18,7 +18,8 @@ namespace MK.Toon.Editor
     internal enum RenderPipelineUpgrade
     {
         //Lightweight,
-        Universal
+        Universal,
+        Noise
     }
     internal enum ShaderTemplate
     {

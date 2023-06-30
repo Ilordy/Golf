@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #if UNITY_EDITOR
@@ -27,7 +27,7 @@ namespace MK.Toon.Editor
 		/////////////////////////////////////////////////////////////////////////////////////////////
         //Unity source based particle properties
         private static ReorderableList vertexStreamList;
-        List<ParticleSystemRenderer> m_RenderersUsingThisMaterial = new List<ParticleSystemRenderer>();
+        List<ParticleSystemRenderer> _renderersUsingThisMaterial = new List<ParticleSystemRenderer>();
 
         /////////////////
         // Particles   //
@@ -111,17 +111,21 @@ namespace MK.Toon.Editor
         //Cache function based on unity source
         private void CacheRenderersUsingThisMaterial(MaterialEditor materialEditor)
         {
-            m_RenderersUsingThisMaterial.Clear();
+            _renderersUsingThisMaterial.Clear();
 
             Material material = materialEditor.target as Material;
 
             foreach (var obj in  materialEditor.targets)
             {
+                #if UNITY_2023_1_OR_NEWER
+                ParticleSystemRenderer[] renderers = UnityEngine.Object.FindObjectsByType<ParticleSystemRenderer>(FindObjectsSortMode.InstanceID);
+                #else
                 ParticleSystemRenderer[] renderers = UnityEngine.Object.FindObjectsOfType(typeof(ParticleSystemRenderer)) as ParticleSystemRenderer[];
+                #endif
                 foreach (ParticleSystemRenderer renderer in renderers)
                 {
                     if (renderer.sharedMaterial == material)
-                        m_RenderersUsingThisMaterial.Add(renderer);
+                        _renderersUsingThisMaterial.Add(renderer);
                 }
             }
         }
@@ -148,12 +152,7 @@ namespace MK.Toon.Editor
         /////////////////
         internal void DrawColorBlend(MaterialEditor materialEditor)
         {
-            EditorGUI.BeginChangeCheck();
             materialEditor.ShaderProperty(_colorBlend, UI.colorBlend);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsColorBlend();
-            }
         }
 
         /////////////////
@@ -249,17 +248,11 @@ namespace MK.Toon.Editor
 
         internal void DrawFlipbookMode(MaterialEditor materialEditor)
         {
-            EditorGUI.BeginChangeCheck();
             materialEditor.ShaderProperty(_flipbook, UI.flipbook);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsFlipbook();
-            }
         }
 
         internal void DrawSoftFadeMode(MaterialEditor materialEditor, Surface surface)
         {
-            EditorGUI.BeginChangeCheck();
             if(surface == Surface.Transparent)
             {
                 materialEditor.ShaderProperty(_softFade, UI.softFade);
@@ -269,15 +262,10 @@ namespace MK.Toon.Editor
                     materialEditor.ShaderProperty(_softFadeFarDistance, UI.softFadeFarDistance);
                 }
             }
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsSoftFade();
-            }
         }        
 
         internal void DrawCameraFadeMode(MaterialEditor materialEditor, Surface surface)
         {
-            EditorGUI.BeginChangeCheck();
             if(surface == Surface.Transparent)
             {
                 materialEditor.ShaderProperty(_cameraFade, UI.cameraFade);
@@ -286,10 +274,6 @@ namespace MK.Toon.Editor
                     materialEditor.ShaderProperty(_cameraFadeNearDistance, UI.cameraFadeNearDistance);
                     materialEditor.ShaderProperty(_cameraFadeFarDistance, UI.cameraFadeFarDistance);
                 }
-            }
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsCameraFade();
             }
         }   
 
@@ -300,7 +284,7 @@ namespace MK.Toon.Editor
             {
                 foreach (Material mat in _colorBlend.targets)
                 {
-                    VertexStreamsArea(mat, m_RenderersUsingThisMaterial, shaderTemplate);
+                    VertexStreamsArea(mat, _renderersUsingThisMaterial, shaderTemplate);
                 }
             }
             EditorGUI.EndChangeCheck();
@@ -309,68 +293,56 @@ namespace MK.Toon.Editor
         /////////////////////////////////////////////////////////////////////////////////////////////
 		// Variants Setup                                                                          //
 		/////////////////////////////////////////////////////////////////////////////////////////////
-        internal void ManageKeywordsColorBlend()
+        internal void ManageKeywordsColorBlend(Material material)
         {
             if(_particlesBehavior != null)
             {
                 //Color Mode
-                foreach (Material mat in _colorBlend.targets)
-                {
-                    ColorBlend cm = Properties.colorBlend.GetValue(mat);
-                    EditorHelper.SetKeyword(Properties.surface.GetValue(mat) == Surface.Transparent && Properties.colorBlend.GetValue(mat) == ColorBlend.Additive, Keywords.colorBlend[1], mat);
-                    EditorHelper.SetKeyword(Properties.surface.GetValue(mat) == Surface.Transparent && Properties.colorBlend.GetValue(mat) == ColorBlend.Subtractive, Keywords.colorBlend[2], mat);
-                    EditorHelper.SetKeyword(Properties.surface.GetValue(mat) == Surface.Transparent && Properties.colorBlend.GetValue(mat) == ColorBlend.Overlay, Keywords.colorBlend[3], mat);
-                    EditorHelper.SetKeyword(Properties.surface.GetValue(mat) == Surface.Transparent && Properties.colorBlend.GetValue(mat) == ColorBlend.Color, Keywords.colorBlend[4], mat);
-                    EditorHelper.SetKeyword(Properties.surface.GetValue(mat) == Surface.Transparent && Properties.colorBlend.GetValue(mat) == ColorBlend.Difference, Keywords.colorBlend[5], mat);
-                    //No Keyword == Multiply
+                ColorBlend cm = Properties.colorBlend.GetValue(material);
+                EditorHelper.SetKeyword(Properties.surface.GetValue(material) == Surface.Transparent && Properties.colorBlend.GetValue(material) == ColorBlend.Additive, Keywords.colorBlend[1], material);
+                EditorHelper.SetKeyword(Properties.surface.GetValue(material) == Surface.Transparent && Properties.colorBlend.GetValue(material) == ColorBlend.Subtractive, Keywords.colorBlend[2], material);
+                EditorHelper.SetKeyword(Properties.surface.GetValue(material) == Surface.Transparent && Properties.colorBlend.GetValue(material) == ColorBlend.Overlay, Keywords.colorBlend[3], material);
+                EditorHelper.SetKeyword(Properties.surface.GetValue(material) == Surface.Transparent && Properties.colorBlend.GetValue(material) == ColorBlend.Color, Keywords.colorBlend[4], material);
+                EditorHelper.SetKeyword(Properties.surface.GetValue(material) == Surface.Transparent && Properties.colorBlend.GetValue(material) == ColorBlend.Difference, Keywords.colorBlend[5], material);
+                //No Keyword == Multiply
 
-                    Properties.colorBlend.SetValue(mat, cm);
-                }
+                Properties.colorBlend.SetValue(material, cm);
             }
         }
 
-        internal void ManageKeywordsFlipbook()
+        internal void ManageKeywordsFlipbook(Material material)
         {
             if(_particlesBehavior != null)
             {
                 //Flipbook Mode
-                foreach (Material mat in _flipbook.targets)
-                {
-                    EditorHelper.SetKeyword(Properties.flipbook.GetValue(mat), Keywords.flipbook, mat);
-                }
+                EditorHelper.SetKeyword(Properties.flipbook.GetValue(material), Keywords.flipbook, material);
             }
         }
 
-        internal void ManageKeywordsSoftFade()
+        internal void ManageKeywordsSoftFade(Material material)
         {
             if(_particlesBehavior != null)
             {
                 //Soft Fade Mode
-                foreach (Material mat in _softFade.targets)
-                {
-                    EditorHelper.SetKeyword(Properties.surface.GetValue(mat) == Surface.Transparent && Properties.softFade.GetValue(mat), Keywords.softFade, mat);
-                }
+                EditorHelper.SetKeyword(Properties.surface.GetValue(material) == Surface.Transparent && Properties.softFade.GetValue(material), Keywords.softFade, material);
             }
         }
 
-        internal void ManageKeywordsCameraFade()
+        internal void ManageKeywordsCameraFade(Material material)
         {
             if(_particlesBehavior != null)
             {
                 //Camera Fade Mode
-                foreach (Material mat in _cameraFade.targets)
-                {
-                    EditorHelper.SetKeyword(Properties.surface.GetValue(mat) == Surface.Transparent && Properties.cameraFade.GetValue(mat), Keywords.cameraFade, mat);
-                }
+                EditorHelper.SetKeyword(Properties.surface.GetValue(material) == Surface.Transparent && Properties.cameraFade.GetValue(material), Keywords.cameraFade, material);
             }
         }
 
-       internal void UpdateKeywords()
+       internal void UpdateKeywords(Material material)
         {
-            ManageKeywordsColorBlend();
-            ManageKeywordsFlipbook();
-            ManageKeywordsSoftFade();
-            ManageKeywordsCameraFade();
+            ManageKeywordsColorBlend(material);
+            ManageKeywordsFlipbook(material);
+            ManageKeywordsSoftFade(material);
+            ManageKeywordsCameraFade(material);
         }
     }
 }

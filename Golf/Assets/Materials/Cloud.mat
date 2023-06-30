@@ -17,7 +17,7 @@ Material:
   m_InvalidKeywords:
   - _UNITYSHADOWMODE_NONE
   m_LightmapFlags: 6
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 2000
   stringTagMap:
@@ -162,6 +162,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _AdvancedTab: 0
+    - _AllowAlphaOverflow: 0
     - _AlphaClip: 0
     - _AlphaClipping: 0
     - _AlphaCutoff: 0.5
@@ -173,7 +174,9 @@ Material:
     - _BlendSrc: 1
     - _Brightness: 1
     - _BumpScale: 1
-    - _CameraDistanceImpact: 0
+    - _CameraDistanceFadeClose: -8.34
+    - _CameraDistanceFadeFar: 8.6
+    - _CameraDistanceImpact: 0.418
     - _CelExtraEnabled: 0
     - _CelNumSteps: 4
     - _CelPrimaryMode: 1
@@ -183,6 +186,7 @@ Material:
     - _Contrast: 1
     - _Cull: 2
     - _Cutoff: 0.5
+    - _Depth: 119
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DiffuseSmoothness: 0
@@ -201,7 +205,7 @@ Material:
     - _FlatRimSize: 0.5
     - _FlatSpecularEdgeSmoothness: 0
     - _FlatSpecularSize: 0.455
-    - _Flatness: 0.124
+    - _Flatness: 0.644
     - _FlatnessExtra: 1
     - _GlossMapScale: 0
     - _Glossiness: 0
@@ -233,7 +237,7 @@ Material:
     - _OptionsTab: 1
     - _Outline: 3
     - _OutlineData: 0
-    - _OutlineDepthOffset: 1
+    - _OutlineDepthOffset: 0
     - _OutlineEnabled: 1
     - _OutlineFadeMax: 2
     - _OutlineFadeMin: 0.25
@@ -241,7 +245,7 @@ Material:
     - _OutlineScale: 1
     - _OutlineSize: 0
     - _OutlineTab: 1
-    - _OutlineWidth: 0.56
+    - _OutlineWidth: 0.38
     - _OverrideLightmapDir: 0
     - _Parallax: 0.005
     - _QueueOffset: 0
@@ -254,7 +258,7 @@ Material:
     - _RimSmoothness: 0.5
     - _RimThresholdOffset: 0.25
     - _Saturation: 1
-    - _SelfShadingSize: 0.207
+    - _SelfShadingSize: 0
     - _SelfShadingSizeExtra: 0
     - _ShadowEdgeSize: 0.333
     - _ShadowEdgeSizeExtra: 0.05
@@ -279,12 +283,14 @@ Material:
     - _StylizeTab: 1
     - _Surface: 0
     - _TextureBlendingMode: 0
-    - _TextureImpact: 1
+    - _TextureImpact: 0
     - _ThresholdMapScale: 1
     - _UnityShadowMode: 0
     - _UnityShadowOcclusion: 0
     - _UnityShadowPower: 0.2
     - _UnityShadowSharpness: 1
+    - _UvFadeX: 0
+    - _UvFadeY: 0
     - _VertexAnimation: 1
     - _VertexAnimationIntensity: 0.191
     - _VertexAnimationStutter: 0
@@ -295,7 +301,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _AlbedoColor: {r: 1, g: 1, b: 1, a: 1}
-    - _BaseColor: {r: 0.8396226, g: 0.8396226, b: 0.8396226, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _ColorDim: {r: 0.24528301, g: 0.24528301, b: 0.24528301, a: 1}
     - _ColorDimCurve: {r: 1, g: 1, b: 1, a: 1}

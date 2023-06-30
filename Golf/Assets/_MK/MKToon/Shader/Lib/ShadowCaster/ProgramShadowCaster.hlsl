@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_SHADOWCASTER
@@ -45,7 +45,7 @@
 			VERTEX_INPUT.vertex.xyz = VertexAnimation(PASS_VERTEX_ANIMATION_ARG(_VertexAnimationMap, PASS_VERTEX_ANIMATION_UV(VERTEX_INPUT.texcoord0.xy), _VertexAnimationIntensity, _VertexAnimationFrequency.xyz, VERTEX_INPUT.vertex.xyz, VERTEX_INPUT.normal));
 		#endif
 
-		#if defined(MK_VERTCLR) || defined(MK_POLYBRUSH)
+		#ifdef MK_VERTEX_COLOR_REQUIRED
 			vertexOutput.color = VERTEX_INPUT.color;
 		#endif
 
@@ -57,14 +57,14 @@
 			half3 normalWorld = ComputeNormalWorld(VERTEX_INPUT.normal);
 		#endif
 		#ifdef MK_PARALLAX
-			vertexOutput.viewTangent = ComputeViewTangent(ComputeViewObject(VERTEX_INPUT.vertex.xyz), VERTEX_INPUT.normal, VERTEX_INPUT.tangent, cross(VERTEX_INPUT.normal, VERTEX_INPUT.tangent.xyz) * VERTEX_INPUT.tangent.w * unity_WorldTransformParams.w);
+			vertexOutput.viewTangent = ComputeViewTangent(ComputeViewObject(VERTEX_INPUT.vertex.xyz), VERTEX_INPUT.normal, VERTEX_INPUT.tangent.xyz, cross(VERTEX_INPUT.normal, VERTEX_INPUT.tangent.xyz) * VERTEX_INPUT.tangent.w * unity_WorldTransformParams.w);
 		#endif
 
 		#if defined(MK_URP)
 			float3 positionWorld = mul(MATRIX_M, float4(VERTEX_INPUT.vertex.xyz, 1.0)).xyz;
 			half3 lightDirection;
 			#if defined(_CASTING_PUNCTUAL_LIGHT_SHADOW) && defined(MK_URP_2020_2_Or_Newer)
-				lightDirection = SafeNormalize(_LightPosition - positionWorld);
+				lightDirection = MKSafeNormalize(_LightPosition - positionWorld);
 			#else
 				lightDirection = _LightDirection;
 			#endif
@@ -90,6 +90,13 @@
 		#else
 			TRANSFER_SHADOW_CASTER_NOPOS(vertexOutput, svPositionClip)
 		#endif
+
+		#ifdef MK_BARYCENTRIC_POS_CLIP
+			vertexOutput.positionClip = svPositionClip;
+		#endif
+		#ifdef MK_POS_NULL_CLIP
+			vertexOutput.nullClip = ComputeObjectToClipSpace(0);
+		#endif
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,21 +104,20 @@
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	half4 ShadowCasterFrag 
 		(
-			VertexOutputShadowCaster vertexOutput
-			#ifdef MK_LEGACY_RP
-				#if UNITY_VERSION >= 20171
-					,UNITY_POSITION(vpos)
-				#else
-					,UNITY_VPOS_TYPE vpos : VPOS
-				#endif
-			#endif
+			VertexOutputShadowCaster vertexOutput,
+			float4 svPositionClip : SV_POSITION
 		) : SV_Target
 	{	
 		UNITY_SETUP_INSTANCE_ID(vertexOutput);
 		UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(vertexOutput);
+
+		#ifdef MK_LOD_FADE_CROSSFADE
+			LODFadeCrossFade(vertexOutput.positionClip);
+		#endif
 		
 		MKSurfaceData surfaceData = ComputeSurfaceData
 		(
+			svPositionClip,
 			PASS_POSITION_WORLD_ARG(0)
 			PASS_FOG_FACTOR_WORLD_ARG(0)
 			PASS_BASE_UV_ARG(float4(vertexOutput.uv.xy, 0, 0))
@@ -122,8 +128,8 @@
 			PASS_TANGENT_WORLD_ARG(1)
 			PASS_VIEW_TANGENT_ARG(vertexOutput.viewTangent)
 			PASS_BITANGENT_WORLD_ARG(1)
-			PASS_POSITION_CLIP_ARG(0)
-			PASS_NULL_CLIP_ARG(0)
+			PASS_BARYCENTRIC_POSITION_CLIP_ARG(vertexOutput.positionClip)
+			PASS_NULL_CLIP_ARG(vertexOutput.nullClip)
 			PASS_FLIPBOOK_UV_ARG(0)
 		);
 		Surface surface = InitSurface(surfaceData, PASS_SAMPLER_2D(_AlbedoMap), _AlbedoColor, float4(0,0,0,1));
@@ -141,10 +147,10 @@
 					*/
 					
 					// dither mask alpha blending
-					half alphaRef = tex3D(_DitherMaskLOD, float3(vpos.xy*0.25,surface.alpha*0.9375)).a;
-					Clip0(alphaRef);
+					half alphaRef = tex3D(_DitherMaskLOD, float3(svPositionClip.xy*0.25,surface.alpha*0.9375)).a;
+					clip(alphaRef - 0.01);
 				#else
-					Clip0(surface.alpha - 0.5);
+					clip(surface.alpha - 0.5);
 				#endif
 
 				/*

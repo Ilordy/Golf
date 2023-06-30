@@ -18,12 +18,6 @@ public class CheatHelper : MonoBehaviour
     {
         m_levelConfirmButton.onClick.AddListener(SetLevel);
     }
-
-    void Update()
-    {
-        Debug.Log(m_curve.Evaluate(m_testCurve));
-        Debug.Log(Mathf.Log(10000,10));
-    }
     #endregion
 
     #region Methods

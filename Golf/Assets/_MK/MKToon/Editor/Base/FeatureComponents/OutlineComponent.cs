@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #if UNITY_EDITOR
@@ -30,7 +30,7 @@ namespace MK.Toon.Editor
         private MaterialProperty _outlineColor;
         private MaterialProperty _outlineNoise;
 
-        #if MK_TOON_OUTLINE_FADE
+        #if MK_TOON_OUTLINE_FADING_LINEAR  || MK_TOON_OUTLINE_FADING_EXPONENTIAL || MK_TOON_OUTLINE_FADING_INVERSE_EXPONENTIAL
             private MaterialProperty _outlineFadeMin;
             private MaterialProperty _outlineFadeMax;
         #endif
@@ -47,7 +47,7 @@ namespace MK.Toon.Editor
             _outlineColor = FindProperty(Properties.outlineColor.uniform.name, props, false);
             _outlineNoise = FindProperty(Properties.outlineNoise.uniform.name, props, false);
 
-            #if MK_TOON_OUTLINE_FADE
+            #if MK_TOON_OUTLINE_FADING_LINEAR  || MK_TOON_OUTLINE_FADING_EXPONENTIAL || MK_TOON_OUTLINE_FADING_INVERSE_EXPONENTIAL
                 _outlineFadeMin = FindProperty(Properties.outlineFadeMin.uniform.name, props, false);
                 _outlineFadeMax = FindProperty(Properties.outlineFadeMax.uniform.name, props, false);
             #endif
@@ -66,82 +66,60 @@ namespace MK.Toon.Editor
             {
                 if(EditorHelper.HandleBehavior(UI.outlineTab.text, "", _outlineBehavior, null, materialEditor, false))
                 {
+                    #if MK_URP
+                    MK.Toon.Editor.InstallWizard.Configuration.ShowURPOutlineWarning();
+                    MK.Toon.Editor.EditorHelper.VerticalSpace();
+                    #endif
+
                     FindProperties(properties);
-                    EditorGUI.BeginChangeCheck();
                     materialEditor.ShaderProperty(_outline, UI.outline);
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        ManageKeywordsOutline();
-                    }
                     if((Outline) _outline.floatValue != Outline.HullOrigin)
                     {
-                        EditorGUI.BeginChangeCheck();
                         materialEditor.ShaderProperty(_outlineData, UI.outlineData);
-                        if (EditorGUI.EndChangeCheck())
-                        {
-                            ManageKeywordsOutlineData();
-                        }
                     }
 
                     materialEditor.ShaderProperty(_outlineColor, UI.outlineColor);
-                    EditorGUI.BeginChangeCheck();
                     materialEditor.TexturePropertySingleLine(UI.outlineMap, _outlineMap, _outlineSize);
-                    if(EditorGUI.EndChangeCheck())
-                        ManageKeywordsOutlineMap();
-                    #if MK_TOON_OUTLINE_FADE
+
+                    #if MK_TOON_OUTLINE_FADING_LINEAR  || MK_TOON_OUTLINE_FADING_EXPONENTIAL || MK_TOON_OUTLINE_FADING_INVERSE_EXPONENTIAL
                         materialEditor.ShaderProperty(_outlineFadeMin, UI.outlineFadeMin);
                         materialEditor.ShaderProperty(_outlineFadeMax, UI.outlineFadeMax);
                     #endif
-                    EditorGUI.BeginChangeCheck();
                     materialEditor.ShaderProperty(_outlineNoise, UI.outlineNoise);
-                    if(EditorGUI.EndChangeCheck())
-                        ManageKeywordsOutlineNoise();
                 }
 
                 EditorHelper.DrawSplitter();
             }
         }
 
-        internal void ManageKeywordsOutline()
+        internal void ManageKeywordsOutline(Material material)
         {
             if(_outlineBehavior != null)
             {
-                foreach (Material mat in _outline.targets)
-                {
-                    mat.SetShaderPassEnabled("Always", true);
-                    EditorHelper.SetKeyword(Properties.outline.GetValue(mat) == Outline.HullClip, Keywords.outline[2], mat);
-                    EditorHelper.SetKeyword(Properties.outline.GetValue(mat) == Outline.HullOrigin, Keywords.outline[1], mat);
-                }
+                material.SetShaderPassEnabled("Always", true);
+                EditorHelper.SetKeyword(Properties.outline.GetValue(material) == Outline.HullClip, Keywords.outline[2], material);
+                EditorHelper.SetKeyword(Properties.outline.GetValue(material) == Outline.HullOrigin, Keywords.outline[1], material);
             }
         }
-        internal void ManageKeywordsOutlineData()
+        internal void ManageKeywordsOutlineData(Material material)
         {
             if(_outlineBehavior != null)
             {
-                foreach (Material mat in _outlineData.targets)
-                {
-                    EditorHelper.SetKeyword(Properties.outlineData.GetValue(mat) == OutlineData.Baked, Keywords.outlineData, mat);
-                }
+                EditorHelper.SetKeyword(Properties.outlineData.GetValue(material) == OutlineData.Baked, Keywords.outlineData, material);
             }
         }
-        internal void ManageKeywordsOutlineNoise()
+        internal void ManageKeywordsOutlineNoise(Material material)
         {
             if(_outlineBehavior != null)
             {
-                foreach (Material mat in _outlineNoise.targets)
-                {
-                    EditorHelper.SetKeyword(Properties.outlineNoise.GetValue(mat) != 0, Keywords.outlineNoise, mat);
-                }
+                EditorHelper.SetKeyword(Properties.outlineNoise.GetValue(material) != 0, Keywords.outlineNoise, material);
             }
         }
-        internal void ManageKeywordsOutlineMap()
+        internal void ManageKeywordsOutlineMap(Material material)
         {
             if(_outlineBehavior != null)
             {
-                foreach (Material mat in _outlineMap.targets)
-                {
-                    EditorHelper.SetKeyword(Properties.outlineMap.GetValue(mat) != null, Keywords.outlineMap, mat);
-                }
+                EditorHelper.SetKeyword(Properties.outlineMap.GetValue(material) != null, Keywords.outlineMap, material);
             }
         }
     }

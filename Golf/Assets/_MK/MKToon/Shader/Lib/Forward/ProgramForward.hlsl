@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_FORWARD
@@ -68,7 +68,7 @@
 			vertexOutput.bitangentWorld.w = viewTangent.z;
 		#endif
 
-		#if defined(MK_VERTCLR) || defined(MK_PARTICLES) || defined(MK_POLYBRUSH)
+		#ifdef MK_VERTEX_COLOR_REQUIRED
 			vertexOutput.color = VERTEX_INPUT.color;
 		#endif
 
@@ -84,6 +84,8 @@
 					#if defined(MK_URP) || defined(MK_LWRP)
 						#if defined(LIGHTMAP_ON)
 							vertexOutputLight.lightmapUV.xy = ComputeStaticLightmapUV(VERTEX_INPUT.staticLightmapUV.xy);
+						#else
+							vertexOutputLight.lightmapUV.rgb = ComputeSHVertex(vertexOutput.positionWorld.xyz, vertexOutput.normalWorld.xyz, ComputeViewWorld(vertexOutput.positionWorld.xyz));
 						#endif
 					#else
 						//lightmaps and ambient
@@ -92,7 +94,7 @@
 							vertexOutputLight.lightmapUV.xy = ComputeStaticLightmapUV(VERTEX_INPUT.staticLightmapUV.xy);
 						//If no lightmaps used, do vertex lit if enabled
 						#elif defined(UNITY_SHOULD_SAMPLE_SH)
-							vertexOutputLight.lightmapUV.rgb = ComputeSHVertex(vertexOutput.normalWorld.xyz);
+							vertexOutputLight.lightmapUV.rgb = ComputeSHVertex(vertexOutput.positionWorld.xyz, vertexOutput.normalWorld.xyz, ComputeViewWorld(vertexOutput.positionWorld.xyz));
 						#endif
 					#endif
 
@@ -106,7 +108,7 @@
 			TRANSFORM_WORLD_TO_SHADOW_COORDS(vertexOutput, VERTEX_INPUT, vertexOutputLight)
 		#endif
 
-		#ifdef MK_POS_CLIP
+		#ifdef MK_BARYCENTRIC_POS_CLIP
 			vertexOutput.positionClip = vertexOutputLight.SV_CLIP_POS;
 		#endif
 		#ifdef MK_POS_NULL_CLIP
@@ -127,13 +129,21 @@
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// FRAGMENT SHADER
 	/////////////////////////////////////////////////////////////////////////////////////////////
-	half4 ForwardFrag(in VertexOutputForward vertexOutput, in VertexOutputLight vertexOutputLight) : SV_Target
+	MKFragmentOutput ForwardFrag(in VertexOutputForward vertexOutput, in VertexOutputLight vertexOutputLight)
 	{
 		UNITY_SETUP_INSTANCE_ID(vertexOutput);
 		UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(vertexOutput);
 
+		MKFragmentOutput mkFragmentOutput;
+		INITIALIZE_STRUCT(MKFragmentOutput, mkFragmentOutput);
+
+		#ifdef MK_LOD_FADE_CROSSFADE
+			LODFadeCrossFade(vertexOutputLight.SV_CLIP_POS);
+		#endif
+
 		MKSurfaceData surfaceData = ComputeSurfaceData
 		(
+			vertexOutputLight.SV_CLIP_POS,
 			PASS_POSITION_WORLD_ARG(vertexOutput.positionWorld.xyz)
 			PASS_FOG_FACTOR_WORLD_ARG(vertexOutput.positionWorld.w)
 			PASS_BASE_UV_ARG(vertexOutput.uv)
@@ -144,7 +154,7 @@
 			PASS_TANGENT_WORLD_ARG(vertexOutput.tangentWorld.xyz)
 			PASS_VIEW_TANGENT_ARG(half3(vertexOutput.normalWorld.w, vertexOutput.tangentWorld.w, vertexOutput.bitangentWorld.w))
 			PASS_BITANGENT_WORLD_ARG(vertexOutput.bitangentWorld.xyz)
-			PASS_POSITION_CLIP_ARG(vertexOutput.positionClip)
+			PASS_BARYCENTRIC_POSITION_CLIP_ARG(vertexOutput.positionClip)
 			PASS_NULL_CLIP_ARG(vertexOutput.nullClip)
 			PASS_FLIPBOOK_UV_ARG(vertexOutput.flipbookUV)
 		);
@@ -152,33 +162,87 @@
 		MKPBSData pbsData = ComputePBSData(surface, surfaceData);
 
 		#ifdef MK_LIT
-			//Init per light data
-			MKLight light = ComputeMainLight(surfaceData, vertexOutputLight);
+			//Init per mainLight
+			MKLight mainLight = ComputeMainLight(surfaceData, vertexOutputLight);
 
-			//return light.attenuation;
-			MKLightData lightData = ComputeLightData(light, surfaceData);
+			//Init mainLight data
+			MKLightData lightData = ComputeLightData(mainLight, surfaceData);
 
 			//Do per pass light
-			LightingIndirect(surface, surfaceData, pbsData, light, lightData);
+			LightingIndirect(surface, surfaceData, pbsData, mainLight, lightData);
 
 			#if defined(MK_URP) || defined(MK_LWRP)
-				#if UNITY_VERSION >= 202120
-					uint meshRenderingLayers = GetMeshRenderingLightLayer();
-					if (IsMatchingLightLayer(light.layerMask, meshRenderingLayers))
+				#if UNITY_VERSION >= 202220
+					uint meshRenderingLayers = GetMeshRenderingLayer();
+					#ifdef _LIGHT_LAYERS
+						if (IsMatchingLightLayer(mainLight.layerMask, meshRenderingLayers))
+					#endif
 					{
-						LightingDirect(surface, surfaceData, pbsData, light, lightData, surface.direct);
+						LightingDirect(surface, surfaceData, pbsData, mainLight, lightData, surface.direct);
+					}
+
+					#if defined(_ADDITIONAL_LIGHTS)
+						half4 gD = surface.goochDark;
+						surface.goochDark = 0;
+						uint additionalLightCount = GetAdditionalLightsCount();
+						half4 additionalDirect = 0;
+
+						MKLight additionalLight;
+						MKLightData additionalLightData;
+						#if USE_FORWARD_PLUS
+							MKInputDataWrapper inputData;
+							INITIALIZE_STRUCT(MKInputDataWrapper, inputData);
+							inputData.normalizedScreenSpaceUV = surfaceData.screenUV.xy;
+							inputData.positionWS = surfaceData.positionWorld;
+							for (uint lightIndex = 0; lightIndex < min(URP_FP_DIRECTIONAL_LIGHTS_COUNT, MAX_VISIBLE_LIGHTS); lightIndex++)
+							{
+								FORWARD_PLUS_SUBTRACTIVE_LIGHT_CHECK
+								additionalLight = ComputeAdditionalLight(lightIndex, surfaceData, vertexOutputLight);
+								additionalLightData = ComputeLightData(additionalLight, surfaceData);
+								#ifdef _LIGHT_LAYERS
+									if (IsMatchingLightLayer(additionalLight.layerMask, meshRenderingLayers))
+								#endif
+								{
+									LightingDirectAdditional(surface, surfaceData, pbsData, additionalLight, additionalLightData, additionalDirect);
+									surface.direct += additionalDirect;
+								}
+							}
+						#endif
+						LIGHT_LOOP_BEGIN(additionalLightCount)
+							additionalLight = ComputeAdditionalLight(lightIndex, surfaceData, vertexOutputLight);
+							additionalLightData = ComputeLightData(additionalLight, surfaceData);
+
+							#ifdef _LIGHT_LAYERS
+								if (IsMatchingLightLayer(additionalLight.layerMask, meshRenderingLayers))
+							#endif
+							{
+								LightingDirectAdditional(surface, surfaceData, pbsData, additionalLight, additionalLightData, additionalDirect);
+								surface.direct += additionalDirect;
+							}
+						LIGHT_LOOP_END
+						surface.goochDark = gD;
+					#endif
+				#elif UNITY_VERSION >= 202120
+					uint meshRenderingLayers = GetMeshRenderingLightLayer();
+					if (IsMatchingLightLayer(mainLight.layerMask, meshRenderingLayers))
+					{
+						LightingDirect(surface, surfaceData, pbsData, mainLight, lightData, surface.direct);
 					}
 
 					#ifdef _ADDITIONAL_LIGHTS
 						half4 gD = surface.goochDark;
 						surface.goochDark = 0;
-						uint lightCount = GetAdditionalLightsCount();
+						uint additionalLightCount = GetAdditionalLightsCount();
 						half4 additionalDirect = 0;
 
 						MKLight additionalLight;
 						MKLightData additionalLightData;
 						#if USE_CLUSTERED_LIGHTING
-							for (uint lightIndex = 0; lightIndex < min(_AdditionalLightsDirectionalCount, MAX_VISIBLE_LIGHTS); lightIndex++)
+							MKInputDataWrapper inputData;
+							INITIALIZE_STRUCT(MKInputDataWrapper, inputData);
+							inputData.normalizedScreenSpaceUV = surfaceData.screenUV.xy;
+							inputData.positionWS = surfaceData.positionWorld;
+							for (uint lightIndex = 0; lightIndex < min(_AdditionalLightsDirectionalCount, MAX_VISIBLE_LIGHTS); ++lightIndex)
 							{
 								additionalLight = ComputeAdditionalLight(lightIndex, surfaceData, vertexOutputLight);
 								additionalLightData = ComputeLightData(additionalLight, surfaceData);
@@ -186,10 +250,11 @@
 								if (IsMatchingLightLayer(additionalLight.layerMask, meshRenderingLayers))
 								{
 									LightingDirectAdditional(surface, surfaceData, pbsData, additionalLight, additionalLightData, additionalDirect);
+									surface.direct += additionalDirect;
 								}
 							}
 						#endif
-						LIGHT_LOOP_BEGIN(lightCount)
+						LIGHT_LOOP_BEGIN(additionalLightCount)
 							additionalLight = ComputeAdditionalLight(lightIndex, surfaceData, vertexOutputLight);
 							additionalLightData = ComputeLightData(additionalLight, surfaceData);
 
@@ -202,14 +267,14 @@
 						surface.goochDark = gD;
 					#endif
 				#else
-					LightingDirect(surface, surfaceData, pbsData, light, lightData, surface.direct);
+					LightingDirect(surface, surfaceData, pbsData, mainLight, lightData, surface.direct);
 					#ifdef _ADDITIONAL_LIGHTS
 						half4 gD = surface.goochDark;
 						surface.goochDark = 0;
-						uint lightCount = GetAdditionalLightsCount();
+						uint additionalLightCount = GetAdditionalLightsCount();
 						half4 additionalDirect = 0;
 						
-						for (uint lightIndex = 0u; lightIndex < lightCount; lightIndex++)
+						for (uint lightIndex = 0u; lightIndex < additionalLightCount; ++lightIndex)
 						{
 							MKLight additionalLight = ComputeAdditionalLight(lightIndex, surfaceData, vertexOutputLight);
 							MKLightData additionalLightData = ComputeLightData(additionalLight, surfaceData);
@@ -220,13 +285,19 @@
 					#endif
 				#endif
 			#else
-				LightingDirect(surface, surfaceData, pbsData, light, lightData, surface.direct);
+				LightingDirect(surface, surfaceData, pbsData, mainLight, lightData, surface.direct);
 			#endif
 		#endif
 
 		//Finalize the output
 		Composite(surface, surfaceData, pbsData);
 
-		return surface.final;
+		mkFragmentOutput.svTarget0 = surface.final;
+		#ifdef MK_WRITE_RENDERING_LAYERS
+			uint renderingLayers = GetMeshRenderingLayer();
+			mkFragmentOutput.svTarget1 = float4(EncodeMeshRenderingLayer(renderingLayers), 0, 0, 0);
+		#endif
+
+		return mkFragmentOutput;
 	}
 #endif

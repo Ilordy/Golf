@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_IO_FORWARD
@@ -17,9 +17,9 @@
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	struct VertexInputForward
 	{
-		#if defined(MK_VERTCLR) || defined(MK_PARTICLES) || defined(MK_POLYBRUSH)
+		#ifdef MK_VERTEX_COLOR_REQUIRED
 			//use vertexcolors if required
-			autoLP4 color : COLOR0;
+			half4 color : COLOR0;
 		#endif
 		//vertex position - always needed
 		float4 vertex : POSITION;
@@ -44,10 +44,8 @@
 			half3 normal : NORMAL;
 		#endif
 		#ifdef MK_LIT
-			#ifdef MK_FORWARD_BASE_PASS
-				//static lightmap uv
-				DECLARE_STATIC_LIGHTMAP_INPUT(1);
-			#endif
+			//static lightmap uv
+			DECLARE_STATIC_LIGHTMAP_INPUT(1);
 			
 			//use tangents only if tbn matrix is required
 			#if defined(MK_TBN)
@@ -79,8 +77,8 @@
 			float4 uv : TEXCOORD0;
 		#endif
 
-		#if defined(MK_VERTCLR) || defined(MK_PARTICLES) || defined(MK_POLYBRUSH)
-			autoLP4 color : COLOR0;
+		#ifdef MK_VERTEX_COLOR_REQUIRED
+			half4 color : COLOR0;
 		#endif
 	
 		//WorldPos + Fog
@@ -100,7 +98,7 @@
 			//Interplators 5,6,7 + C1 are reserved for lighting stuff
 		#endif
 
-		#ifdef MK_POS_CLIP
+		#ifdef MK_BARYCENTRIC_POS_CLIP
 			float4 positionClip : TEXCOORD3;
 		#endif
 		#ifdef MK_POS_NULL_CLIP

@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_FORWARD_BASE_SETUP
@@ -44,11 +44,14 @@
 		#endif
 	#endif
 
-	#include "../Core.hlsl"
-
-	#if defined(MK_URP) && defined(MK_PARTICLES) && UNITY_VERSION >= 202020
-		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/ParticlesInstancing.hlsl"
+	#if defined(SHADOWS_SCREEN) && defined(LIGHTMAP_ON)
+		#define MK_HANDLE_SHADOWS_BLENDING_IN_GI 1
+		#ifndef HANDLE_SHADOWS_BLENDING_IN_GI
+			#define HANDLE_SHADOWS_BLENDING_IN_GI
+		#endif
 	#endif
+
+	#include "../Core.hlsl"
 
 	#include "ProgramForward.hlsl"
 #endif

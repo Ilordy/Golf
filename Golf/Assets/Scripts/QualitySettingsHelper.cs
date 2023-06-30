@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using TMPro;
+
 namespace MobileTools
 {
     /// <summary>
@@ -9,9 +11,7 @@ namespace MobileTools
     /// </summary>
     public class QualitySettingsHelper : MonoBehaviour
     {
-
         #region Variables
-
         [SerializeField, Tooltip("Should the fpsDisplay be instantiated during builds?")]
         bool m_displayFPSInBuilds = true;
 
@@ -29,33 +29,31 @@ namespace MobileTools
 
         [SerializeField, Tooltip("How often in seconds should the application's framerate be checked before making a decision?")]
         float m_fpsCheckInterval = 3;
-        [SerializeField] TextMeshProUGUI applicationFPS;//for testing
+
+        [SerializeField] TextMeshProUGUI applicationFPS; //for testing
         [SerializeField, ReadOnly] float m_currentFPS;
         private float m_count;
-
         #endregion
 
         #region LifeCycle
-        private IEnumerator Start()
+        private void Start()
         {
 #if !UNITY_EDITOR
             if (!m_displayFPSInBuilds && m_fpsDisplayer != null)
                 Destroy(m_fpsDisplayer.gameObject);
 #endif
-            StartCoroutine(CheckFrameRate());
-            while (true)
-            {
-                m_count = 1f / Time.unscaledDeltaTime;
-                yield return new WaitForSecondsRealtime(0.1f);
-            }
+            //StartCoroutine(CheckFrameRate());
+            //Setting to final quality level.
+            QualitySettings.SetQualityLevel(QualitySettings.names.Length, false);
+            applicationFPS.text = QualitySettings.names[QualitySettings.GetQualityLevel()];
         }
 
         void Update()
         {
-            Debug.Log(Application.targetFrameRate + " THIS THE FRAMERATE");
+            m_count = 1f / Time.unscaledDeltaTime;
+            //Debug.Log(Application.targetFrameRate + " THIS THE FRAMERATE");
             if (m_fpsDisplayer == null) return;
-            m_fpsDisplayer.text = "FPS: " + Mathf.Round(m_count).ToString();
-            applicationFPS.text = QualitySettings.names[QualitySettings.GetQualityLevel()];
+            m_fpsDisplayer.text = "FPS: " + Mathf.Round(m_count);
         }
         #endregion
 
@@ -66,9 +64,10 @@ namespace MobileTools
             if (m_defaultFrameRate - m_count > m_differenceThreshold)
             {
                 QualitySettings.DecreaseLevel(false);
-                if (QualitySettings.GetQualityLevel() == 0 && m_DestroyAtLastLevel)//if we're at the last quality level.
+                if (QualitySettings.GetQualityLevel() == 0 && m_DestroyAtLastLevel) //if we're at the last quality level.
                     Destroy(this);
             }
+
             StartCoroutine(CheckFrameRate());
         }
         #endregion

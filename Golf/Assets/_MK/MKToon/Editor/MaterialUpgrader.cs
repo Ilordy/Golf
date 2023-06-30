@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 using System.Collections;
@@ -25,7 +25,7 @@ namespace MK.Toon.Editor
             window.Show();
         }
 
-        private RenderPipelineUpgrade _targetRenderPipeline;
+        private RenderPipelineUpgrade _targetRenderPipeline = RenderPipelineUpgrade.Noise;
 
         private string[] _guids;
         private List<Material> _mkToonMaterials = new List<Material>();
@@ -54,32 +54,52 @@ namespace MK.Toon.Editor
             if(_mkToonMaterials.Count > 0)
             {
                 MK.Toon.Editor.EditorHelper.Divider();
-                _targetRenderPipeline = (RenderPipelineUpgrade) EditorGUILayout.EnumPopup("Render Pipeline", _targetRenderPipeline);
-                if(GUILayout.Button("Upgrade All MK Toon Project Materials"))
+                _targetRenderPipeline = (RenderPipelineUpgrade) EditorGUILayout.EnumPopup("Upgrade Mode", _targetRenderPipeline);
+                if(_targetRenderPipeline == RenderPipelineUpgrade.Universal)
                 {
-                    EditorUtility.DisplayProgressBar("MK Toon Material Upgrader", "Upgrading Materials...", 0.5f);
-                    for(int i = 0; i < _mkToonMaterials.Count; i++)
+                    if(GUILayout.Button("Upgrade All MK Toon Project Materials"))
                     {
-                        string shaderName = _mkToonMaterials[i].shader.name;
-                        if(_targetRenderPipeline == RenderPipelineUpgrade.Universal)
-                            shaderName = shaderName.Replace("/Built-in/", "/URP/");
-                        else
-                           shaderName = shaderName.Replace("/Built-in/", "/LWRP/");
-                        
-                        Shader shader = Shader.Find(shaderName);
-                        if(shader != null)
+                        EditorUtility.DisplayProgressBar("MK Toon Material Upgrader", "Upgrading Materials...", 0.5f);
+                        for(int i = 0; i < _mkToonMaterials.Count; i++)
                         {
-                            _mkToonMaterials[i].shader = shader;
-                            //Somehow on urp the upgrade for refractive materials requires to reset the surface
-                            MK.Toon.Properties.surface.SetValue(_mkToonMaterials[i], MK.Toon.Properties.surface.GetValue(_mkToonMaterials[i]));
-                            if(!shader.name.Contains("Unlit"))
-                                MK.Toon.Properties.receiveShadows.SetValue(_mkToonMaterials[i], MK.Toon.Properties.receiveShadows.GetValue(_mkToonMaterials[i]));
+                            string shaderName = _mkToonMaterials[i].shader.name;
+                            if(_targetRenderPipeline == RenderPipelineUpgrade.Universal)
+                                shaderName = shaderName.Replace("/Built-in/", "/URP/");
+                            else
+                            shaderName = shaderName.Replace("/Built-in/", "/LWRP/");
+                            
+                            Shader shader = Shader.Find(shaderName);
+                            if(shader != null)
+                            {
+                                _mkToonMaterials[i].shader = shader;
+                                //Somehow on urp the upgrade for refractive materials requires to reset the surface
+                                MK.Toon.Properties.surface.SetValue(_mkToonMaterials[i], MK.Toon.Properties.surface.GetValue(_mkToonMaterials[i]));
+                                if(!shader.name.Contains("Unlit"))
+                                    MK.Toon.Properties.receiveShadows.SetValue(_mkToonMaterials[i], MK.Toon.Properties.receiveShadows.GetValue(_mkToonMaterials[i]));
+                            }
                         }
+                        AssetDatabase.Refresh();
+                        AssetDatabase.SaveAssets();
+                        AssetDatabase.Refresh();
+                        EditorUtility.ClearProgressBar();
                     }
-                    AssetDatabase.Refresh();
-                    AssetDatabase.SaveAssets();
-                    AssetDatabase.Refresh();
-                    EditorUtility.ClearProgressBar();
+                }
+                else if(_targetRenderPipeline == RenderPipelineUpgrade.Noise)
+                {
+                    if(GUILayout.Button("Upgrade All MK Toon Project Materials"))
+                    {
+                        EditorUtility.DisplayProgressBar("MK Toon Material Upgrader", "Upgrading Materials...", 0.5f);
+                        for(int i = 0; i < _mkToonMaterials.Count; i++)
+                        {
+                            Undo.RecordObject(_mkToonMaterials[i], "Set Noise Lookup");
+                            _mkToonMaterials[i].SetTexture("_NoiseMap", AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath("b376780a16f30e141824d5baae6b8f5e"), typeof(Texture2D)) as Texture2D);
+                            EditorUtility.SetDirty(_mkToonMaterials[i]);
+                        }
+                        AssetDatabase.Refresh();
+                        AssetDatabase.SaveAssets();
+                        AssetDatabase.Refresh();
+                        EditorUtility.ClearProgressBar();
+                    }
                 }
             }
         }

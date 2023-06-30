@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #if UNITY_EDITOR
@@ -39,15 +39,17 @@ namespace MK.Toon.Editor
     /// </summary>
     internal abstract class UnlitEditorBase : ShaderGUI
     {
-        public UnlitEditorBase()
+        public UnlitEditorBase(RenderPipeline renderPipeline)
         {
             _shaderTemplate = ShaderTemplate.Unlit;
+            _renderPipeline = renderPipeline;
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 		// Properties                                                                              //
 		/////////////////////////////////////////////////////////////////////////////////////////////
-        protected ShaderTemplate _shaderTemplate;  
+        protected ShaderTemplate _shaderTemplate;
+        protected RenderPipeline _renderPipeline; 
    
         /////////////////
         // Options     //
@@ -58,6 +60,8 @@ namespace MK.Toon.Editor
         protected MaterialProperty _zTest;
         protected MaterialProperty _blendSrc;
         protected MaterialProperty _blendDst;
+        protected MaterialProperty _blendSrcAlpha;
+        protected MaterialProperty _blendDstAlpha;
         protected MaterialProperty _alphaClipping;
         protected MaterialProperty _renderFace;
 
@@ -67,6 +71,9 @@ namespace MK.Toon.Editor
         protected MaterialProperty _albedoColor;
         protected MaterialProperty _alphaCutoff;
         protected MaterialProperty _albedoMap;
+        #if MK_ALBEDO_MAP_INTENSITY
+        protected MaterialProperty _albedoMapIntensity;
+        #endif
 
         /////////////////
         // Stylize     //
@@ -140,12 +147,17 @@ namespace MK.Toon.Editor
             _zTest = FindProperty(Properties.zTest.uniform.name, props);
             _blendSrc = FindProperty(Properties.blendSrc.uniform.name, props);
             _blendDst = FindProperty(Properties.blendDst.uniform.name, props);
+            _blendSrcAlpha = FindProperty(Properties.blendSrcAlpha.uniform.name, props);
+            _blendDstAlpha = FindProperty(Properties.blendDstAlpha.uniform.name, props);
             _alphaClipping = FindProperty(Properties.alphaClipping.uniform.name, props);
             _renderFace = FindProperty(Properties.renderFace.uniform.name, props);
 
             _albedoColor = FindProperty(Properties.albedoColor.uniform.name, props);
             _alphaCutoff = FindProperty(Properties.alphaCutoff.uniform.name, props);
             _albedoMap = FindProperty(Properties.albedoMap.uniform.name, props);
+            #if MK_ALBEDO_MAP_INTENSITY
+            _albedoMapIntensity = FindProperty(Properties.albedoMapIntensity.uniform.name, props);
+            #endif
 
             _colorGrading = FindProperty(Properties.colorGrading.uniform.name, props);
             _contrast = FindProperty(Properties.contrast.uniform.name, props);
@@ -273,23 +285,22 @@ namespace MK.Toon.Editor
         /// <param name="properties"></param>
         public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
         {
+            Material material = materialEditor.target as Material;
             _defaultFontStyle = EditorStyles.label.fontStyle;
             FindProperties(properties);
 
-            DrawInspector(materialEditor, properties);
-            if(_initialized.floatValue == 0)
-            {
-                foreach(Material mat in _initialized.targets)
-                {
-                    EditorProperties.initialized.SetValue(mat, true);
-                }
-                Initialize(materialEditor);
-            }
-        }
+            #if !UNITY_2021_2_OR_NEWER
+            EditorGUI.BeginChangeCheck();
+            #endif
+            DrawInspector(materialEditor, properties, material);
 
-        protected virtual void Initialize(MaterialEditor materialEditor) 
-        {
-            UpdateKeywords();
+            #if !UNITY_2021_2_OR_NEWER
+            if(EditorGUI.EndChangeCheck())
+            {
+                foreach (Material mat in _stylizeTab.targets)
+                    ValidateMaterial(mat);
+            }
+            #endif
         }
 
         /// <summary>
@@ -322,7 +333,7 @@ namespace MK.Toon.Editor
                 Properties.surface.SetValue(materialDst, Surface.Transparent, Properties.alphaClipping.GetValue(materialDst));
             }
 
-            UpdateKeywords();
+            UpdateKeywords(materialDst);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
@@ -347,12 +358,7 @@ namespace MK.Toon.Editor
         
         protected virtual void DrawSurfaceType(MaterialEditor materialEditor)
         {
-            EditorGUI.BeginChangeCheck();
             materialEditor.ShaderProperty(_surface, UI.surface);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsSurface();
-            }
         }
 
         /*
@@ -372,21 +378,16 @@ namespace MK.Toon.Editor
                 materialEditor.ShaderProperty(_zTest, UI.zTest, 1);
                 materialEditor.ShaderProperty(_blendSrc, UI.blendSrc, 1);
                 materialEditor.ShaderProperty(_blendDst, UI.blendDst, 1);
+                if(_renderPipeline == RenderPipeline.Universal)
+                {
+                    materialEditor.ShaderProperty(_blendSrcAlpha, UI.blendSrcAlpha, 1);
+                    materialEditor.ShaderProperty(_blendDstAlpha, UI.blendDstAlpha, 1);
+                }
             }
         }
 
         protected virtual void DrawBlend(MaterialEditor materialEditor)
         {
-            /*
-            EditorGUI.BeginChangeCheck();
-            if((Surface)_surface.floatValue == Surface.Transparent)
-                materialEditor.ShaderProperty(_blend, UI.blend);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsBlend();
-            }
-            */
-
             EditorGUI.showMixedValue = _blend.hasMixedValue;
             Blend blend = (Blend) _blend.floatValue;
 
@@ -399,8 +400,6 @@ namespace MK.Toon.Editor
             {
                 materialEditor.RegisterPropertyChangeUndo("Blend");
                 _blend.floatValue = (int) blend;
-                ManageKeywordsBlend();
-                ManageKeywordsSurface();
             }
             EditorGUI.showMixedValue = false;
         }
@@ -412,21 +411,11 @@ namespace MK.Toon.Editor
 
         protected virtual void DrawAlphaClipping(MaterialEditor materialEditor)
         {
-            EditorGUI.BeginChangeCheck();
             materialEditor.ShaderProperty(_alphaClipping, UI.alphaClipping);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsAlphaClipping();
-                UpdateSystemProperties();
-            }
+
             if(_alphaClipping.floatValue == 1)
             {
-                EditorGUI.BeginChangeCheck();
                 materialEditor.ShaderProperty(_alphaCutoff, UI.alphaCutoff);
-                if(EditorGUI.EndChangeCheck())
-                {
-                    UpdateSystemProperties();
-                }
             }
         }
 
@@ -467,13 +456,18 @@ namespace MK.Toon.Editor
 
         protected virtual void DrawAlbedoMap(MaterialEditor materialEditor)
         {
-            EditorGUI.BeginChangeCheck();
-            materialEditor.TexturePropertySingleLine(UI.albedoMap, _albedoMap, _albedoColor);
-            if(EditorGUI.EndChangeCheck())
+            #if MK_ALBEDO_MAP_INTENSITY
+            if(_albedoMap.textureValue != null)
             {
-                ManageKeywordsAlbedoMap();
-                UpdateSystemProperties();
+                materialEditor.TexturePropertySingleLine(UI.albedoMap, _albedoMap, _albedoMapIntensity, _albedoColor);
             }
+            else
+            {
+                materialEditor.TexturePropertySingleLine(UI.albedoMap, _albedoMap, _albedoColor);
+            }
+            #else
+            materialEditor.TexturePropertySingleLine(UI.albedoMap, _albedoMap, _albedoColor);
+            #endif
         }
 
         protected void DrawAlbedoScaleTransform(MaterialEditor materialEditor)
@@ -516,14 +510,9 @@ namespace MK.Toon.Editor
         protected virtual void DrawColorGrading(MaterialEditor materialEditor)
         {
             //DrawColorGradingHeader();
-            EditorGUI.BeginChangeCheck();
             SetBoldFontStyle(true);
             materialEditor.ShaderProperty(_colorGrading, UI.colorGrading);
             SetBoldFontStyle(false);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsColorGrading();
-            }
             if(_colorGrading.floatValue != (int)(ColorGrading.Off))
             {
                 materialEditor.ShaderProperty(_contrast, UI.contrast);
@@ -540,14 +529,9 @@ namespace MK.Toon.Editor
         protected virtual void DrawDissolve(MaterialEditor materialEditor)
         {
             //DrawDissolveHeader();
-            EditorGUI.BeginChangeCheck();
             SetBoldFontStyle(true);
             materialEditor.ShaderProperty(_dissolve, UI.dissolve);
             SetBoldFontStyle(false);
-            if (EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsDissolve();
-            }
             if(_dissolve.floatValue != (int)Dissolve.Off)
             {
                 if(_dissolveMap.textureValue != null)
@@ -579,29 +563,14 @@ namespace MK.Toon.Editor
         protected virtual void DrawVertexAnimation(MaterialEditor materialEditor)
         {
             //DrawVertexAnimationHeader();
-            EditorGUI.BeginChangeCheck();
             SetBoldFontStyle(true);
             materialEditor.ShaderProperty(_vertexAnimation, UI.vertexAnimation);
             SetBoldFontStyle(false);
-            if (EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsVertexAnimation();
-            }
 
             if((VertexAnimation) _vertexAnimation.floatValue != VertexAnimation.Off)
             {
-                EditorGUI.BeginChangeCheck();
                 materialEditor.TexturePropertySingleLine(UI.vertexAnimationMap, _vertexAnimationMap, _vertexAnimationIntensity);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    ManageKeywordsVertexAnimationMap();
-                }
-                EditorGUI.BeginChangeCheck();
                 materialEditor.ShaderProperty(_vertexAnimationStutter, UI.vertexAnimationStutter);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    ManageKeywordsVertexAnimationStutter();
-                }
                 materialEditor.ShaderProperty(_vertexAnimationFrequency, UI.vertexAnimationFrequency);
             }
         }
@@ -639,13 +608,10 @@ namespace MK.Toon.Editor
         }
 
         //Stencil Builtin
-        private void SetBuiltinStencilSettings(MaterialEditor materialEditor)
+        private void SetBuiltinStencilSettings(MaterialEditor materialEditor, Material material)
         {
             EditorGUI.BeginChangeCheck();
-            foreach(Material mat in _stencil.targets)
-            {
-                Properties.stencil.SetValue(mat, Stencil.Builtin);
-            }
+            Properties.stencil.SetValue(material, Stencil.Builtin);
             if(EditorGUI.EndChangeCheck())
             {
                 materialEditor.RegisterPropertyChangeUndo("Stencil Mode");
@@ -664,12 +630,7 @@ namespace MK.Toon.Editor
 
         protected void DrawRenderPriority(MaterialEditor materialEditor)
         {
-            EditorGUI.BeginChangeCheck();
             materialEditor.ShaderProperty(_renderPriority, UI.renderPriority);
-            if(EditorGUI.EndChangeCheck())
-            {
-                UpdateRenderPriority();
-            }
         }
 
         protected virtual void DrawPipeline(MaterialEditor materialEditor)
@@ -680,7 +641,7 @@ namespace MK.Toon.Editor
             DrawRenderPriority(materialEditor);
         }
 
-        protected virtual void DrawStencil(MaterialEditor materialEditor)
+        protected virtual void DrawStencil(MaterialEditor materialEditor, Material material)
         {
             DrawStencilHeader();
 
@@ -697,7 +658,7 @@ namespace MK.Toon.Editor
             }
             else// if(_stencil.floatValue == (int)Stencil.Builtin)
             {
-                SetBuiltinStencilSettings(materialEditor);
+                SetBuiltinStencilSettings(materialEditor, material);
             }
         }
 
@@ -705,18 +666,18 @@ namespace MK.Toon.Editor
         /// Draw Advanced Content
         /// </summary>
         /// <param name="materialEditor"></param>
-        protected virtual void DrawAdvancedContent(MaterialEditor materialEditor)
+        protected virtual void DrawAdvancedContent(MaterialEditor materialEditor, Material material)
         {            
             DrawPipeline(materialEditor);
             EditorHelper.Divider();
-            DrawStencil(materialEditor);
+            DrawStencil(materialEditor, material);
         }
 
-        private void DrawAdvanced(MaterialEditor materialEditor)
+        private void DrawAdvanced(MaterialEditor materialEditor, Material material)
         {
             if(AdvancedBehavior(materialEditor))
             {
-                DrawAdvancedContent(materialEditor);
+                DrawAdvancedContent(materialEditor, material);
             }
             EditorHelper.DrawSplitter();
         }
@@ -726,7 +687,7 @@ namespace MK.Toon.Editor
         /// </summary>
         /// <param name="materialEditor"></param>
         /// <param name="properties"></param>
-        protected virtual void DrawInspector(MaterialEditor materialEditor, MaterialProperty[] properties)
+        protected virtual void DrawInspector(MaterialEditor materialEditor, MaterialProperty[] properties, Material material)
         {
             //get properties
             FindProperties(properties);
@@ -735,7 +696,7 @@ namespace MK.Toon.Editor
             DrawOptions(materialEditor);
             DrawInput(materialEditor);
             DrawStylize(materialEditor);
-            DrawAdvanced(materialEditor);
+            DrawAdvanced(materialEditor, material);
             _particles.DrawParticles(materialEditor, properties, _surface, _shaderTemplate);
             _refraction.DrawRefraction(materialEditor, properties);
             _outline.DrawOutline(materialEditor, properties);
@@ -747,141 +708,121 @@ namespace MK.Toon.Editor
 		// Variants Setup                                                                          //
 		/////////////////////////////////////////////////////////////////////////////////////////////
         
-        private void ManageKeywordsBlend()
+        private void ManageKeywordsBlend(Material material)
         {
             //Colorsource
-            foreach (Material mat in _blend.targets)
-            {
-                Blend bm = Properties.blend.GetValue(mat);
-                EditorHelper.SetKeyword(Properties.blend.GetValue(mat) == Blend.Premultiply, Keywords.blend[1], mat);
-                EditorHelper.SetKeyword(Properties.blend.GetValue(mat) == Blend.Additive, Keywords.blend[2], mat);
-                EditorHelper.SetKeyword(Properties.blend.GetValue(mat) == Blend.Multiply, Keywords.blend[3], mat);
-                EditorHelper.SetKeyword(Properties.blend.GetValue(mat) == Blend.Custom, Keywords.blend[4], mat);
-                //No Keyword == Alpha
+            Blend bm = Properties.blend.GetValue(material);
+            EditorHelper.SetKeyword(Properties.blend.GetValue(material) == Blend.Premultiply, Keywords.blend[1], material);
+            EditorHelper.SetKeyword(Properties.blend.GetValue(material) == Blend.Additive, Keywords.blend[2], material);
+            EditorHelper.SetKeyword(Properties.blend.GetValue(material) == Blend.Multiply, Keywords.blend[3], material);
+            EditorHelper.SetKeyword(Properties.blend.GetValue(material) == Blend.Custom, Keywords.blend[4], material);
+            //No Keyword == Alpha
 
-                Properties.blend.SetValue(mat, bm);
-            }
+            Properties.blend.SetValue(material, bm);
         }
 
-        private void ManageKeywordsAlbedoMap()
+        private void ManageKeywordsAlbedoMap(Material material)
         {
             //Colorsource
-            foreach (Material mat in _albedoMap.targets)
-            {
-                EditorHelper.SetKeyword(Properties.albedoMap.GetValue(mat), Keywords.albedoMap, mat);
-                //No Keyword == Vertex Colors
-            }
+            EditorHelper.SetKeyword(Properties.albedoMap.GetValue(material), Keywords.albedoMap, material);
+            //No Keyword == Vertex Colors
         }
 
-        private void ManageKeywordsSurface()
+        private void ManageKeywordsSurface(Material material)
         {
             //Surface Type
-            foreach (Material mat in _surface.targets)
-            {
-                Properties.surface.SetValue(mat, Properties.surface.GetValue(mat), Properties.alphaClipping.GetValue(mat));
-                //No Keyword == Opaque
-            }
+            Properties.surface.SetValue(material, Properties.surface.GetValue(material), Properties.alphaClipping.GetValue(material));
+            //No Keyword == Opaque
         }
 
-        private void ManageKeywordsAlphaClipping()
+        private void ManageKeywordsAlphaClipping(Material material)
         {
             //Alpha Clipping
-            foreach (Material mat in _alphaClipping.targets)
-            {
-                Properties.alphaClipping.SetValue(mat, Properties.alphaClipping.GetValue(mat));
-                //No Keyword == No Alpha Clipping
-            }
+            Properties.alphaClipping.SetValue(material, Properties.alphaClipping.GetValue(material));
+            //No Keyword == No Alpha Clipping
         }
 
-        private void ManageKeywordsColorGrading()
+        private void ManageKeywordsColorGrading(Material material)
         {
             //ColorGrading
-            foreach (Material mat in _colorGrading.targets)
-            {
-                EditorHelper.SetKeyword(Properties.colorGrading.GetValue(mat) == ColorGrading.Albedo, Keywords.colorGrading[1], mat);
-                EditorHelper.SetKeyword(Properties.colorGrading.GetValue(mat) == ColorGrading.FinalOutput, Keywords.colorGrading[2], mat);
-                //No keyword = No ColorGrading
-            }
+            EditorHelper.SetKeyword(Properties.colorGrading.GetValue(material) == ColorGrading.Albedo, Keywords.colorGrading[1], material);
+            EditorHelper.SetKeyword(Properties.colorGrading.GetValue(material) == ColorGrading.FinalOutput, Keywords.colorGrading[2], material);
+            //No keyword = No ColorGrading
         }
 
-        private void ManageKeywordsDissolve()
+        private void ManageKeywordsDissolve(Material material)
         {
             //Dissolve
-            foreach (Material mat in _dissolve.targets)
-            {
-                EditorHelper.SetKeyword(Properties.dissolve.GetValue(mat) == Dissolve.Default, Keywords.dissolve[1], mat);
-                EditorHelper.SetKeyword(Properties.dissolve.GetValue(mat) == Dissolve.BorderColor, Keywords.dissolve[2], mat);
-                EditorHelper.SetKeyword(Properties.dissolve.GetValue(mat) == Dissolve.BorderRamp, Keywords.dissolve[3], mat);
-                //No Keyword = Dissolve Off
-            }
+            EditorHelper.SetKeyword(Properties.dissolve.GetValue(material) == Dissolve.Default, Keywords.dissolve[1], material);
+            EditorHelper.SetKeyword(Properties.dissolve.GetValue(material) == Dissolve.BorderColor, Keywords.dissolve[2], material);
+            EditorHelper.SetKeyword(Properties.dissolve.GetValue(material) == Dissolve.BorderRamp, Keywords.dissolve[3], material);
+            //No Keyword = Dissolve Off
         }
 
-        private void ManageKeywordsVertexAnimation()
+        private void ManageKeywordsVertexAnimation(Material material)
         {
             //Vertex animation
-            foreach (Material mat in _vertexAnimation.targets)
-            {
-                EditorHelper.SetKeyword(Properties.vertexAnimation.GetValue(mat) == VertexAnimation.Sine, Keywords.vertexAnimation[1], mat);
-                EditorHelper.SetKeyword(Properties.vertexAnimation.GetValue(mat) == VertexAnimation.Pulse, Keywords.vertexAnimation[2], mat);
-                EditorHelper.SetKeyword(Properties.vertexAnimation.GetValue(mat) == VertexAnimation.Noise, Keywords.vertexAnimation[3], mat);
-                //No Keyword = Vertex Animation Off
-            }
+            EditorHelper.SetKeyword(Properties.vertexAnimation.GetValue(material) == VertexAnimation.Sine, Keywords.vertexAnimation[1], material);
+            EditorHelper.SetKeyword(Properties.vertexAnimation.GetValue(material) == VertexAnimation.Pulse, Keywords.vertexAnimation[2], material);
+            EditorHelper.SetKeyword(Properties.vertexAnimation.GetValue(material) == VertexAnimation.Noise, Keywords.vertexAnimation[3], material);
+            //No Keyword = Vertex Animation Off
         }
 
-        private void ManageKeywordsVertexAnimationStutter()
+        private void ManageKeywordsVertexAnimationStutter(Material material)
         {
-            foreach (Material mat in _vertexAnimationStutter.targets)
-            {
-                EditorHelper.SetKeyword(Properties.vertexAnimationStutter.GetValue(mat), Keywords.vertexAnimationStutter, mat);
-                //No Keyword = Vertex Animation Stutter Off
-            }
+            EditorHelper.SetKeyword(Properties.vertexAnimationStutter.GetValue(material), Keywords.vertexAnimationStutter, material);
+            //No Keyword = Vertex Animation Stutter Off
         }
 
-        private void ManageKeywordsVertexAnimationMap()
+        private void ManageKeywordsVertexAnimationMap(Material material)
         {
-            //Vertex animation map
-            foreach (Material mat in _vertexAnimationMap.targets)
-            {
-                EditorHelper.SetKeyword(Properties.vertexAnimationMap.GetValue(mat) != null, Keywords.vertexAnimationMap, mat);
-                //No Keyword = Vertex Animation Map Off
-            }
+            EditorHelper.SetKeyword(Properties.vertexAnimationMap.GetValue(material) != null, Keywords.vertexAnimationMap, material);
+            //No Keyword = Vertex Animation Map Off
         }
 
-        private void UpdateRenderPriority()
+        private void UpdateRenderPriority(Material material)
         {
-            foreach (Material mat in _renderPriority.targets)
-            {
-                Properties.renderPriority.SetValue(mat, Properties.renderPriority.GetValue(mat));
-            }
+            Properties.renderPriority.SetValue(material, Properties.renderPriority.GetValue(material), Properties.alphaClipping.GetValue(material));
         }
 
-        private void UpdateSystemProperties()
+        private void UpdateSystemProperties(Material material)
         {
-            foreach (Material mat in _albedoMap.targets)
-            {
-                Properties.UpdateSystemProperties(mat);
-            }
+            Properties.UpdateSystemProperties(material);
         }
 
-        protected virtual void UpdateKeywords()
+        protected virtual void UpdateKeywords(Material material)
         {
-            ManageKeywordsBlend();
-            ManageKeywordsAlbedoMap();
-            ManageKeywordsDissolve();
-            ManageKeywordsAlphaClipping();
-            ManageKeywordsSurface();
-            UpdateRenderPriority();
-            UpdateSystemProperties();
-            ManageKeywordsColorGrading();
-            ManageKeywordsVertexAnimation();
-            ManageKeywordsVertexAnimationMap();
-            _particles.UpdateKeywords();
-            _outline.ManageKeywordsOutline();
-            _outline.ManageKeywordsOutlineNoise();
-            _outline.ManageKeywordsOutlineMap();
-            _refraction.ManageKeywordsRefractionMap();
-            _refraction.ManageKeywordsIndexOfRefraction();
+            ManageKeywordsBlend(material);
+            ManageKeywordsAlbedoMap(material);
+            ManageKeywordsDissolve(material);
+            ManageKeywordsAlphaClipping(material);
+            ManageKeywordsSurface(material);
+            UpdateRenderPriority(material);
+            UpdateSystemProperties(material);
+            ManageKeywordsColorGrading(material);
+            ManageKeywordsVertexAnimation(material);
+            ManageKeywordsVertexAnimationMap(material);
+            ManageKeywordsVertexAnimationStutter(material);
+            _particles.UpdateKeywords(material);
+            _outline.ManageKeywordsOutline(material);
+            _outline.ManageKeywordsOutlineNoise(material);
+            _outline.ManageKeywordsOutlineMap(material);
+            _outline.ManageKeywordsOutlineData(material);
+            _refraction.ManageKeywordsRefractionMap(material);
+            _refraction.ManageKeywordsIndexOfRefraction(material);
         }
+
+        #if UNITY_2021_2_OR_NEWER
+        public override void ValidateMaterial(Material material)
+        {
+            UpdateKeywords(material);
+        }
+        #else
+        public void ValidateMaterial(Material material)
+        {
+            UpdateKeywords(material);
+        }
+        #endif
     }
 }
 #endif

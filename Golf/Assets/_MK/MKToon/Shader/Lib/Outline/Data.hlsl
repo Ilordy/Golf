@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_OUTLINE_ONLY_IO
@@ -23,12 +23,10 @@
 	struct VertexInputOutlineOnly
 	{
 		float4 vertex : POSITION;
-		#if defined(MK_OUTLINE_DATA_NORMAL) || defined(MK_PARALLAX) || defined(MK_VERTEX_ANIMATION_PULSE) || defined(MK_VERTEX_ANIMATION_NOISE)
-			half3 normal : NORMAL;
-		#endif
+		half3 normal : NORMAL;
 
-		#if defined(MK_VERTCLR) || defined(MK_POLYBRUSH)
-			autoLP4 color : COLOR0;
+		#ifdef MK_VERTEX_COLOR_REQUIRED
+			half4 color : COLOR0;
 		#endif
 		#ifdef MK_TCM
 			//texcoords0 if needed
@@ -49,8 +47,8 @@
 	struct VertexOutputOutlineOnly
 	{
 		float4 svPositionClip : SV_POSITION;
-		#if defined(MK_VERTCLR) || defined(MK_POLYBRUSH)
-			autoLP4 color : COLOR0;
+		#ifdef MK_VERTEX_COLOR_REQUIRED
+			half4 color : COLOR0;
 		#endif
 		#ifdef MK_TCM
 			float2 uv : TEXCOORD0;
@@ -63,7 +61,7 @@
 			half3 viewTangent : TEXCOORD2;
 		#endif
 
-		#ifdef MK_POS_CLIP
+		#ifdef MK_BARYCENTRIC_POS_CLIP
 			float4 positionClip : TEXCOORD3;
 		#endif
 		#ifdef MK_POS_NULL_CLIP

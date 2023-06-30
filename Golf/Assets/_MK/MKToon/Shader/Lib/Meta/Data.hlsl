@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_META_IO
@@ -28,7 +28,7 @@
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	struct VertexInputMeta
 	{
-		#if defined(MK_VERTCLR) || defined(MK_POLYBRUSH)
+		#ifdef MK_VERTEX_COLOR_REQUIRED
 			half4 color : COLOR;
 		#endif
 		float4 vertex : POSITION;
@@ -52,8 +52,8 @@
 			float4 uv : TEXCOORD0;
 		#endif
 		float4 svPositionClip : SV_POSITION;
-		#if defined(MK_VERTCLR) || defined(MK_POLYBRUSH)
-			autoLP4 color : COLOR;
+		#ifdef MK_VERTEX_COLOR_REQUIRED
+			half4 color : COLOR;
 		#endif
 		#ifdef EDITOR_VISUALIZATION
 			float2 vizUV : TEXCOORD1;

@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_SURFACE
@@ -17,8 +17,12 @@
 	//Dynamic precalc struct
 	struct MKSurfaceData
 	{
+		float4 svPositionClip;
 		#ifdef MK_NORMAL
 			half3 vertexNormalWorld;
+		#endif
+		#if defined(MK_DEPTH_NORMALS_PASS) || defined(MK_LIT)
+			half3 normalWorld;
 		#endif
 		#ifdef MK_LIT
 			#ifdef MK_LIGHTMAP_UV
@@ -27,7 +31,6 @@
 			#ifdef MK_VERTEX_LIGHTING
 				half3 vertexLighting;
 			#endif
-			half3 normalWorld;
 			#ifdef MK_TBN
 				half3 tangentWorld;
 				half3 bitangentWorld;
@@ -59,10 +62,13 @@
 			float fogFactor;
 		#endif
 
-		#if defined(MK_VERTCLR) || defined(MK_PARTICLES) || defined(MK_POLYBRUSH)
-			autoLP4 vertexColor;
+		#ifdef MK_VERTEX_COLOR_REQUIRED
+			half4 vertexColor;
 		#endif
 
+		#if defined(MK_TCM) || defined(MK_TCD)
+			float2 rawUV;
+		#endif
 		#if defined(MK_TCM)
 			float2 baseUV;
 		#endif
@@ -112,6 +118,8 @@
 			half roughnessPow4;
 		#endif
 		half smoothness;
+		half metallic;
+		half3 specular;
 		half3 diffuseRadiance;
 		half3 specularRadiance;
 		#ifdef MK_FRESNEL_HIGHLIGHTS
@@ -124,6 +132,9 @@
 	{
 		half4 final;
 		half3 albedo;
+		#ifdef MK_DETAIL_MAP
+			half4 detail;
+		#endif
 		half alpha;
 		#ifdef MK_REFRACTION
 			half3 refraction;
@@ -168,7 +179,7 @@
 
 	half3 FresnelSchlickGGXIBL(half oneMinusVoN, half3 f0, half smoothness)
 	{
-		return FastPow5(oneMinusVoN) * (max(smoothness, f0) - f0) + f0;
+		return FastPow4(oneMinusVoN) * (max(smoothness, f0) - f0) + f0;
 	} 
 
 	/////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,7 +215,7 @@
 		#define PASS_BASE_UV_ARG(baseUV)
 	#endif
 
-	#if defined(MK_VERTCLR) || defined(MK_PARTICLES) || defined(MK_POLYBRUSH)
+	#ifdef MK_VERTEX_COLOR_REQUIRED
 		#define PASS_VERTEX_COLOR_ARG(vertexColor) ,vertexColor
 	#else
 		#define PASS_VERTEX_COLOR_ARG(vertexColor)
@@ -242,10 +253,10 @@
 		#define PASS_VIEW_TANGENT_ARG(viewTangent)
 	#endif
 
-	#ifdef MK_POS_CLIP
-		#define PASS_POSITION_CLIP_ARG(positionClip) ,positionClip
+	#ifdef MK_BARYCENTRIC_POS_CLIP
+		#define PASS_BARYCENTRIC_POSITION_CLIP_ARG(barycentricPositionClip) ,barycentricPositionClip
 	#else
-		#define PASS_POSITION_CLIP_ARG(positionClip)
+		#define PASS_BARYCENTRIC_POSITION_CLIP_ARG(barycentricPositionClip)
 	#endif
 
 	#ifdef MK_POS_NULL_CLIP
@@ -261,13 +272,19 @@
 	#endif
 
 	//Texture color
-	inline void SurfaceColor(out half3 albedo, out half alpha, DECLARE_SAMPLER_2D_ARGS(albedoMap), float2 uv, float3 blendUV, autoLP4 color)
+	inline void SurfaceColor(out half3 albedo, out half alpha, DECLARE_SAMPLER_2D_ARGS(albedoMap), float2 uv, float3 blendUV, half4 color)
 	{
 		half4 c;
 		#ifdef MK_OUTLINE_PASS
 			c = half4(color.rgb, SAMPLE_SAMPLER2D_FLIPBOOK(albedoMap, uv, blendUV).a * color.a);
 		#else
-			c = SAMPLE_SAMPLER2D_FLIPBOOK(albedoMap, uv, blendUV) * color;
+			c = SAMPLE_SAMPLER2D_FLIPBOOK(albedoMap, uv, blendUV);
+			#ifdef MK_ALBEDO_MAP_INTENSITY
+				c.rgb = lerp(half3(0,0,0), c.rgb, _AlbedoMapIntensity) * color.rgb;
+				c.a *= color.a;
+			#else
+				c *= color;
+			#endif
 		#endif
 		albedo = c.rgb;
 		#if defined(MK_ALPHA_LOOKUP)
@@ -277,7 +294,7 @@
 		#endif
 	}
 
-	inline void SurfaceColor(out half3 albedo, out half alpha, DECLARE_SAMPLER_2D_ARGS(albedoMap), DECLARE_SAMPLER_2D_ARGS(albedoMap1), DECLARE_SAMPLER_2D_ARGS(albedoMap2), DECLARE_SAMPLER_2D_ARGS(albedoMap3), float2 uv, autoLP4 blendColor, float3 blendUV, autoLP4 color)
+	inline void SurfaceColor(out half3 albedo, out half alpha, DECLARE_SAMPLER_2D_ARGS(albedoMap), DECLARE_SAMPLER_2D_ARGS(albedoMap1), DECLARE_SAMPLER_2D_ARGS(albedoMap2), DECLARE_SAMPLER_2D_ARGS(albedoMap3), float2 uv, half4 blendColor, float3 blendUV, half4 color)
 	{
 		half4 c0, c1, c2, c3;
 		#ifdef MK_OUTLINE_PASS
@@ -303,7 +320,7 @@
 	}
 	
 	//Non texture color
-	inline void SurfaceColor(out half3 albedo, out half alpha, autoLP4 vertexColor, autoLP4 color)
+	inline void SurfaceColor(out half3 albedo, out half alpha, half4 vertexColor, half4 color)
 	{
 		half4 c = vertexColor * color;
 		albedo = c.rgb;
@@ -319,8 +336,9 @@
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	inline MKSurfaceData ComputeSurfaceData
 	(
+		in float4 svPositionClip
 		//#ifdef MK_POS_WORLD
-			in float3 positionWorld
+			, in float3 positionWorld
 		//#endif
 		#ifdef MK_FOG
 			, in float fogFactor
@@ -331,14 +349,14 @@
 		#ifdef MK_LIGHTMAP_UV
 			, in float4 lightmapUV
 		#endif
-		#if defined(MK_VERTCLR) || defined(MK_PARTICLES) || defined(MK_POLYBRUSH)
-			, in autoLP4 vertexColor
+		#ifdef MK_VERTEX_COLOR_REQUIRED
+			, in half4 vertexColor
 		#endif
 		#ifdef MK_NORMAL
 			, in half3 normalWorld
 		#endif
 		#ifdef MK_VERTEX_LIGHTING
-			, in autoLP3 vertexLighting
+			, in half3 vertexLighting
 		#endif
 		#if defined(MK_TBN)
 			, in half3 tangentWorld
@@ -349,8 +367,8 @@
 		#if defined(MK_TBN)
 			, in half3 bitangentWorld
 		#endif
-		#ifdef MK_POS_CLIP
-			, in float4 positionClip
+		#ifdef MK_BARYCENTRIC_POS_CLIP
+			, in float4 barycentricPositionClip
 		#endif
 		#ifdef MK_POS_NULL_CLIP
 			, in float4 nullClip
@@ -363,6 +381,7 @@
 		MKSurfaceData surfaceData;
 		INITIALIZE_STRUCT(MKSurfaceData, surfaceData);
 
+		surfaceData.svPositionClip = svPositionClip;
 		#ifdef MK_POS_WORLD
 			surfaceData.positionWorld = positionWorld;
 		#endif
@@ -380,7 +399,7 @@
 			#endif
 		#endif
 
-		#if defined(MK_VERTCLR) || defined(MK_PARTICLES) || defined(MK_POLYBRUSH)
+		#ifdef MK_VERTEX_COLOR_REQUIRED
 			surfaceData.vertexColor = vertexColor;
 		#endif
 
@@ -393,15 +412,21 @@
 		#if defined(MK_OCCLUSION_UV_SECOND)
 			surfaceData.secondUV = 0;
 		#endif
+		#if defined(MK_TCM) || defined(MK_TCD)
+			surfaceData.rawUV = 0;
+		#endif
 
+		#if defined(MK_TCM) || defined(MK_TCD)
+			surfaceData.rawUV = baseUV.xy;
+		#endif
 		#if defined(MK_TCM)
-			surfaceData.baseUV.xy = baseUV.xy * _AlbedoMap_ST.xy + _AlbedoMap_ST.zw;
+			surfaceData.baseUV.xy = surfaceData.rawUV * _AlbedoMap_ST.xy + _AlbedoMap_ST.zw;
 		#endif
 		#if defined(MK_TCM) && defined(MK_OCCLUSION_UV_SECOND)
 			surfaceData.secondUV = baseUV.zw * _AlbedoMap_ST.xy + _AlbedoMap_ST.zw;
 		#endif
 		#if defined(MK_TCD)
-			surfaceData.detailUV = baseUV.xy * _DetailMap_ST.xy + _DetailMap_ST.zw;
+			surfaceData.detailUV = surfaceData.rawUV * _DetailMap_ST.xy + _DetailMap_ST.zw;
 		#endif
 
 		#ifdef MK_FLIPBOOK
@@ -409,11 +434,15 @@
 		#endif
 
 		#ifdef MK_VD
-			surfaceData.viewWorld = SafeNormalize(CAMERA_POSITION_WORLD - surfaceData.positionWorld);
+			surfaceData.viewWorld = MKSafeNormalize(CAMERA_POSITION_WORLD - surfaceData.positionWorld);
+		#endif
+
+		#ifdef MK_VD_O
+			surfaceData.viewTangent = half3(0, 0, 0);
 		#endif
 
 		#ifdef MK_PARALLAX
-			surfaceData.viewTangent = SafeNormalize(viewTangent);
+			surfaceData.viewTangent = MKSafeNormalize(viewTangent);
 		#endif
 
 		#ifdef MK_PARALLAX
@@ -433,7 +462,7 @@
 		#endif
 
 		#if defined(MK_SCREEN_UV)
-			surfaceData.screenUV = ComputeNDC(positionClip);
+			surfaceData.screenUV = ComputeNDC(barycentricPositionClip);
 		#endif
 
 		#if defined(MK_SCREEN_SPACE_OCCLUSION) && defined(MK_URP_2020_2_Or_Newer)
@@ -441,21 +470,28 @@
 		#endif
 
 		#if defined(MK_ARTISTIC)
+			#if defined(MK_ARTISTIC_PROJECTION_SCREEN_SPACE)
+				#ifndef MK_LEGACY_SCREEN_SCALING
+					half orthoViewScale = ScaleToFitOrthographicUV(barycentricPositionClip.w);
+				#else
+					half orthoViewScale = 1;
+				#endif
+			#endif
 			#if defined(MK_ARTISTIC_DRAWN)
 				#if defined(MK_ARTISTIC_PROJECTION_SCREEN_SPACE)
-					surfaceData.artisticUV = ComputeNormalizedScreenUV(surfaceData.screenUV, ComputeNDC(nullClip), _DrawnMapScale);
+					surfaceData.artisticUV = orthoViewScale * ComputeNormalizedScreenUV(surfaceData.screenUV, ComputeNDC(nullClip), _DrawnMapScale);
 				#else
 					surfaceData.artisticUV = surfaceData.baseUV.xy * _DrawnMapScale;
 				#endif
 			#elif defined(MK_ARTISTIC_HATCHING)
 				#if defined(MK_ARTISTIC_PROJECTION_SCREEN_SPACE)
-					surfaceData.artisticUV = ComputeNormalizedScreenUV(surfaceData.screenUV, ComputeNDC(nullClip), _HatchingMapScale);
+					surfaceData.artisticUV = orthoViewScale * ComputeNormalizedScreenUV(surfaceData.screenUV, ComputeNDC(nullClip), _HatchingMapScale);
 				#else
 					surfaceData.artisticUV = surfaceData.baseUV.xy * _HatchingMapScale;
 				#endif
 			#elif defined(MK_ARTISTIC_SKETCH)
 				#if defined(MK_ARTISTIC_PROJECTION_SCREEN_SPACE)
-					surfaceData.artisticUV = ComputeNormalizedScreenUV(surfaceData.screenUV, ComputeNDC(nullClip), _SketchMapScale);
+					surfaceData.artisticUV = orthoViewScale * ComputeNormalizedScreenUV(surfaceData.screenUV, ComputeNDC(nullClip), _SketchMapScale);
 				#else
 					surfaceData.artisticUV = surfaceData.baseUV.xy * _SketchMapScale;
 				#endif
@@ -479,13 +515,13 @@
 		#endif
 
 		#ifdef MK_NORMAL
-			surfaceData.vertexNormalWorld = SafeNormalize(normalWorld);
+			surfaceData.vertexNormalWorld = MKSafeNormalize(normalWorld);
 		#endif
 		#ifdef MK_TBN
-			surfaceData.tangentWorld = SafeNormalize(tangentWorld);
-			surfaceData.bitangentWorld = SafeNormalize(bitangentWorld);
+			surfaceData.tangentWorld = MKSafeNormalize(tangentWorld);
+			surfaceData.bitangentWorld = MKSafeNormalize(bitangentWorld);
 		#endif
-		#if defined(MK_LIT)
+		#if defined(MK_DEPTH_NORMALS_PASS) || defined(MK_LIT)
 			//get normal direction
 			#ifdef MK_TBN
 				//Normalmap extraction
@@ -500,9 +536,10 @@
 				#endif
 
 				#ifdef MK_SPECULAR_ANISOTROPIC
-					//rebuild tangent and bitangent
-					surfaceData.tangentWorld = SafeNormalize(cross(surfaceData.normalWorld, half3(0.0, 1.0, 0.0)));
-					surfaceData.bitangentWorld = SafeNormalize(cross(surfaceData.normalWorld, surfaceData.tangentWorld));
+					//tangent for normal mapping has to be perpendicular
+					//recalculate tangent for aniso orthonormal
+					surfaceData.bitangentWorld = ComputeBitangentWorld(surfaceData.normalWorld, surfaceData.tangentWorld, 1.0);
+					surfaceData.tangentWorld = MKSafeNormalize(cross(surfaceData.bitangentWorld, surfaceData.normalWorld));
 				#endif
 			#else
 				surfaceData.normalWorld = surfaceData.vertexNormalWorld;
@@ -538,12 +575,22 @@
 			#endif
 		#endif
 
-		#ifdef MK_V_DOT_N
-			surfaceData.VoN = saturate(dot(surfaceData.viewWorld, surfaceData.normalWorld));
-			surfaceData.OneMinusVoN = 1.0 - surfaceData.VoN;
-		#endif
-		#ifdef MK_MV_REF_N
-			surfaceData.MVrN = reflect(-surfaceData.viewWorld, surfaceData.normalWorld);
+		#ifndef _DBUFFER
+			#ifdef MK_V_DOT_N
+				surfaceData.VoN = saturate(dot(surfaceData.viewWorld, surfaceData.normalWorld));
+				surfaceData.OneMinusVoN = 1.0 - surfaceData.VoN;
+			#endif
+			#ifdef MK_MV_REF_N
+				surfaceData.MVrN = reflect(-surfaceData.viewWorld, surfaceData.normalWorld);
+			#endif
+		#else
+			#ifdef MK_V_DOT_N
+				surfaceData.VoN = 0;
+				surfaceData.OneMinusVoN = 0;
+			#endif
+			#ifdef MK_MV_REF_N
+				surfaceData.MVrN = 0;
+			#endif
 		#endif
 		return surfaceData;
 	}
@@ -603,7 +650,7 @@
 		#endif
 	}
 
-	inline MKPBSData ComputePBSData(inout Surface surface, in MKSurfaceData surfaceData)
+	inline MKPBSData ComputePBSData(inout Surface surface, inout MKSurfaceData surfaceData)
 	{
 		MKPBSData pbsData;
 		INITIALIZE_STRUCT(MKPBSData, pbsData);
@@ -641,28 +688,82 @@
 
 		#if defined(MK_WORKFLOW_METALLIC)
 			pbsData.smoothness = pbsInput.a;
-			pbsData.oneMinusReflectivity = K_SPEC_DIELECTRIC_MAX - pbsInput.r * K_SPEC_DIELECTRIC_MAX;
-			pbsData.reflectivity = 1.0 - pbsData.oneMinusReflectivity;
-			pbsData.specularRadiance = lerp(K_SPEC_DIELECTRIC_MIN, surface.albedo, pbsInput.r);
-			pbsData.diffuseRadiance = surface.albedo * (pbsData.oneMinusReflectivity * (1.0 - pbsData.specularRadiance));//surface.albedo * pbsData.oneMinusReflectivity;
+			pbsData.metallic = pbsInput.r;
+			pbsData.specular = 0;
 		#elif defined(MK_WORKFLOW_ROUGHNESS)
 			pbsData.smoothness = pbsInput.a;
-			pbsData.oneMinusReflectivity = K_SPEC_DIELECTRIC_MAX - pbsInput.r * K_SPEC_DIELECTRIC_MAX;
+			pbsData.metallic = pbsInput.r;
+			pbsData.specular = 0;
+		#elif defined(MK_WORKFLOW_SPECULAR)
+			pbsData.smoothness = pbsInput.a;
+			pbsData.metallic = 0;
+			pbsData.specular = pbsInput.rgb;
+		#else //Simple
+			pbsData.metallic = 0;
+			pbsData.specular = pbsInput.rgb;
+			pbsData.smoothness = pbsInput.a;
+		#endif
+
+		#ifdef _DBUFFER
+			#ifdef MK_LIT
+				#if defined(MK_WORKFLOW_SPECULAR) || defined(MK_SIMPLE)
+					half metallic = 0;
+					ApplyDecal
+					(
+						surfaceData.svPositionClip,
+						surface.albedo,
+						pbsData.specular,
+						surfaceData.normalWorld,
+						metallic,
+						surface.occlusion.r,
+						pbsData.smoothness
+					);
+				#else
+					half3 specular = 0;
+					ApplyDecal
+					(	
+						surfaceData.svPositionClip,
+						surface.albedo,
+						specular,
+						surfaceData.normalWorld,
+						pbsData.metallic,
+						surface.occlusion.r,
+						pbsData.smoothness
+					);
+				#endif
+
+				#ifdef MK_V_DOT_N
+					surfaceData.VoN = saturate(dot(surfaceData.viewWorld, surfaceData.normalWorld));
+					surfaceData.OneMinusVoN = 1.0 - surfaceData.VoN;
+				#endif
+				#ifdef MK_MV_REF_N
+					surfaceData.MVrN = reflect(-surfaceData.viewWorld, surfaceData.normalWorld);
+				#endif
+			#else
+				ApplyDecalToBaseColor(surfaceData.svPositionClip, surface.albedo);
+			#endif
+		#endif
+
+		#if defined(MK_WORKFLOW_METALLIC)
+			pbsData.oneMinusReflectivity = K_SPEC_DIELECTRIC_MAX - pbsData.metallic * K_SPEC_DIELECTRIC_MAX;
 			pbsData.reflectivity = 1.0 - pbsData.oneMinusReflectivity;
-			pbsData.specularRadiance = lerp(K_SPEC_DIELECTRIC_MIN, surface.albedo, pbsInput.r);
+			pbsData.specularRadiance = lerp(K_SPEC_DIELECTRIC_MIN, surface.albedo, pbsData.metallic);
+			pbsData.diffuseRadiance = surface.albedo * (pbsData.oneMinusReflectivity * (1.0 - pbsData.specularRadiance));//surface.albedo * pbsData.oneMinusReflectivity;
+		#elif defined(MK_WORKFLOW_ROUGHNESS)
+			pbsData.oneMinusReflectivity = K_SPEC_DIELECTRIC_MAX - pbsData.metallic * K_SPEC_DIELECTRIC_MAX;
+			pbsData.reflectivity = 1.0 - pbsData.oneMinusReflectivity;
+			pbsData.specularRadiance = lerp(K_SPEC_DIELECTRIC_MIN, surface.albedo, pbsData.metallic);
 			pbsData.diffuseRadiance = surface.albedo * ((1.0 - pbsData.specularRadiance) * pbsData.oneMinusReflectivity);
 		#elif defined(MK_WORKFLOW_SPECULAR)
-			pbsData.reflectivity = max(max(pbsInput.r, pbsInput.g), pbsInput.b);
-			pbsData.smoothness = pbsInput.a;
+			pbsData.reflectivity = max(max(pbsData.specular.r, pbsData.specular.g), pbsData.specular.b);
 			pbsData.oneMinusReflectivity = 1.0 - pbsData.reflectivity;
-			pbsData.specularRadiance = pbsInput.rgb;
-			pbsData.diffuseRadiance = surface.albedo * (half3(1.0, 1.0, 1.0) - pbsInput.rgb);
+			pbsData.specularRadiance = pbsData.specular.rgb;
+			pbsData.diffuseRadiance = surface.albedo * (half3(1.0, 1.0, 1.0) - pbsData.specular.rgb);
 		#else //Simple
 			pbsData.reflectivity = 0;
-			pbsData.smoothness = pbsInput.a;
 			pbsData.oneMinusReflectivity = 1.0 - pbsData.reflectivity;
 			pbsData.diffuseRadiance = surface.albedo;
-			pbsData.specularRadiance = pbsInput.rgb;
+			pbsData.specularRadiance = pbsData.specular.rgb;
 		#endif
 
 		pbsData.roughness = 1.0 - pbsData.smoothness;
@@ -684,7 +785,7 @@
 		return pbsData;
 	}
 
-	inline Surface InitSurface(in MKSurfaceData surfaceData, DECLARE_SAMPLER_2D_ARGS(samp2D), inout half4 albedoTint, in float4 pC)
+	inline Surface InitSurface(inout MKSurfaceData surfaceData, DECLARE_SAMPLER_2D_ARGS(samp2D), in half4 albedoTint, in float4 pC)
 	{
 		//Init Surface
 		Surface surface;
@@ -715,11 +816,9 @@
 
 		//add detail
 		#ifdef MK_DETAIL_MAP
-			MixAlbedoDetail(surface.albedo, PASS_TEXTURE_2D(_DetailMap, SAMPLER_REPEAT_MAIN), surfaceData.detailUV, SURFACE_FLIPBOOK_UV);
-		#endif
-
-		#ifdef _DBUFFER
-			ApplyDecalToBaseColor(pC, surface.albedo);
+			surface.detail = SAMPLE_TEX2D_FLIPBOOK(_DetailMap, SAMPLER_REPEAT_MAIN, surfaceData.detailUV, SURFACE_FLIPBOOK_UV);
+			surface.detail.rgb *= _DetailColor.rgb;
+			MixAlbedoDetail(surface.albedo, surface.detail);
 		#endif
 
 		#if defined(MK_ALPHA_CLIPPING)

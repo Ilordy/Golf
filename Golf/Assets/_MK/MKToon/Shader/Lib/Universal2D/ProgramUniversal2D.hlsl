@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_UNIVERSAL2D
@@ -31,7 +31,7 @@
 
 		vertexOutput.svPositionClip = mul(MATRIX_MVP, float4(vertexInput.vertex.xyz, 1.0));
 
-		#if defined(MK_VERTCLR) || defined(MK_PARTICLES) || defined(MK_POLYBRUSH)
+		#ifdef MK_VERTEX_COLOR_REQUIRED
 			vertexOutput.color = vertexInput.color;
 		#endif
 
@@ -52,6 +52,7 @@
 
 		MKSurfaceData surfaceData = ComputeSurfaceData
 		(
+			vertexOutput.svPositionClip,
 			PASS_POSITION_WORLD_ARG(0)
 			PASS_FOG_FACTOR_WORLD_ARG(0)
 			PASS_BASE_UV_ARG(float4(vertexOutput.uv.xy, 0, 0))
@@ -62,7 +63,7 @@
 			PASS_TANGENT_WORLD_ARG(1)
 			PASS_VIEW_TANGENT_ARG(1)
 			PASS_BITANGENT_WORLD_ARG(1)
-			PASS_POSITION_CLIP_ARG(0)
+			PASS_BARYCENTRIC_POSITION_CLIP_ARG(0)
 			PASS_NULL_CLIP_ARG(0)
 			PASS_FLIPBOOK_UV_ARG(0)
 		);
@@ -70,6 +71,6 @@
 		MKPBSData pbsData = ComputePBSData(surface, surfaceData);
 		Composite(surface, surfaceData, pbsData);
 
-    	return 0;
+    	return half4(surface.final.rgb, surface.alpha);
 	}
 #endif

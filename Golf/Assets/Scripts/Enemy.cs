@@ -37,8 +37,6 @@ public class Enemy : EnemyClass
 
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.M))
-            OnEnable();
         if (isPassive) return;
         animator.SetInteger("IdleID", -1);
         speed = EvaluateSpeed();

@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #if UNITY_EDITOR
@@ -12,7 +12,7 @@ using UnityEditor;
 
 namespace MK.Toon.Editor
 {
-    internal static partial class EditorHelper
+    public static partial class EditorHelper
     {
         //Based on unity builtin styles
         internal static class EditorStyles

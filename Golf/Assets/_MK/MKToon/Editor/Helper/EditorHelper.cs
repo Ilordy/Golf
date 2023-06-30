@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 #if UNITY_EDITOR
 using UnityEngine;
@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace MK.Toon.Editor
 {
-    internal static partial class EditorHelper
+    public static partial class EditorHelper
     {
         /// <summary>
         /// Draw a default splitter
@@ -165,7 +165,7 @@ namespace MK.Toon.Editor
             }
         }
         
-        internal static void Divider()
+        public static void Divider()
         {
             GUILayout.Box("", new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(2) });
         }

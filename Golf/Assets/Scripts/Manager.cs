@@ -262,8 +262,8 @@ public class Manager : Singleton<Manager>
         else
         {
             //HANDLE VICTORY
-            if (Input.GetKeyDown(KeyCode.X) || (EnemyClass.TotalKilledCount == EnemyClass.AliveCount && !m_isBossFight && m_startedSpawning != null))
-            {
+            if (Input.GetKeyDown(KeyCode.X) || (EnemyClass.TotalKilledCount >= EnemyClass.AliveCount && !m_isBossFight && m_startedSpawning != null))
+            {//CHANGE BACK TO == WHEN DONE TESTING.
                 // HandleVictory();
                 //put boss here and then handle victory.
                 m_isBossFight = true;

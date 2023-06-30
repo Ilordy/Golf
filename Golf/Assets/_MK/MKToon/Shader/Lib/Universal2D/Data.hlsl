@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_UNIVERSAL2D_IO
@@ -20,8 +20,8 @@
 		#if defined(MK_VERTEX_ANIMATION_PULSE) || defined(MK_VERTEX_ANIMATION_NOISE)
 			half3 normal : NORMAL;
 		#endif
-		#if defined(MK_VERTCLR) || defined(MK_PARTICLES) || defined(MK_POLYBRUSH)
-			autoLP4 color : COLOR0;
+		#ifdef MK_VERTEX_COLOR_REQUIRED
+			half4 color : COLOR0;
 		#endif
 		#ifdef MK_TCM
 			float2 texcoord0 : TEXCOORD0;
@@ -36,8 +36,8 @@
 	struct VertexOutputUniversal2D
 	{
 		float4 svPositionClip : SV_POSITION;
-		#if defined(MK_VERTCLR) || defined(MK_PARTICLES) || defined(MK_POLYBRUSH)
-			autoLP4 color : COLOR0;
+		#ifdef MK_VERTEX_COLOR_REQUIRED
+			half4 color : COLOR0;
 		#endif
 		#ifdef MK_TCM
 			float2 uv : TEXCOORD0;

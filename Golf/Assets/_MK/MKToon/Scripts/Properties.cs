@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 namespace MK.Toon
@@ -19,15 +19,17 @@ namespace MK.Toon
         /////////////////
         // Options     //
         /////////////////
-        public static readonly EnumProperty<Workflow> workflow     = new EnumProperty<Workflow>(Uniforms.workflow, Keywords.workflow);
-        public static readonly EnumProperty<RenderFace> renderFace = new EnumProperty<RenderFace>(Uniforms.renderFace);
-        public static readonly SurfaceProperty surface             = new SurfaceProperty(Uniforms.surface, Keywords.surface);
-        public static readonly EnumProperty<ZWrite> zWrite         = new EnumProperty<ZWrite>(Uniforms.zWrite);
-        public static readonly EnumProperty<ZTest> zTest           = new EnumProperty<ZTest>(Uniforms.zTest);
-        public static readonly EnumProperty<BlendFactor> blendSrc  = new EnumProperty<BlendFactor>(Uniforms.blendSrc);
-        public static readonly EnumProperty<BlendFactor> blendDst  = new EnumProperty<BlendFactor>(Uniforms.blendDst);
-        public static readonly BlendProperty blend                 = new BlendProperty(Uniforms.blend, Keywords.blend);
-        public static readonly AlphaClippingProperty alphaClipping = new AlphaClippingProperty(Uniforms.alphaClipping, Keywords.alphaClipping);
+        public static readonly EnumProperty<Workflow> workflow          = new EnumProperty<Workflow>(Uniforms.workflow, Keywords.workflow);
+        public static readonly EnumProperty<RenderFace> renderFace      = new EnumProperty<RenderFace>(Uniforms.renderFace);
+        public static readonly SurfaceProperty surface                  = new SurfaceProperty(Uniforms.surface, Keywords.surface);
+        public static readonly EnumProperty<ZWrite> zWrite              = new EnumProperty<ZWrite>(Uniforms.zWrite);
+        public static readonly EnumProperty<ZTest> zTest                = new EnumProperty<ZTest>(Uniforms.zTest);
+        public static readonly EnumProperty<BlendFactor> blendSrc       = new EnumProperty<BlendFactor>(Uniforms.blendSrc);
+        public static readonly EnumProperty<BlendFactor> blendDst       = new EnumProperty<BlendFactor>(Uniforms.blendDst);
+        public static readonly EnumProperty<BlendFactor> blendSrcAlpha  = new EnumProperty<BlendFactor>(Uniforms.blendSrcAlpha);
+        public static readonly EnumProperty<BlendFactor> blendDstAlpha  = new EnumProperty<BlendFactor>(Uniforms.blendDstAlpha);
+        public static readonly BlendProperty blend                      = new BlendProperty(Uniforms.blend, Keywords.blend);
+        public static readonly AlphaClippingProperty alphaClipping      = new AlphaClippingProperty(Uniforms.alphaClipping, Keywords.alphaClipping);
 
         /////////////////
         // Input       //
@@ -35,6 +37,9 @@ namespace MK.Toon
         public static readonly ColorProperty albedoColor                         = new ColorProperty(Uniforms.albedoColor);
         public static readonly RangeProperty alphaCutoff                         = new RangeProperty(Uniforms.alphaCutoff, 0, 1);
         public static readonly TextureProperty albedoMap                         = new TextureProperty(Uniforms.albedoMap, Keywords.albedoMap);
+        #if MK_ALBEDO_MAP_INTENSITY
+        public static readonly RangeProperty albedoMapIntensity                  = new RangeProperty(Uniforms.albedoMapIntensity, 0, 1);
+        #endif
         public static readonly TilingProperty mainTiling                         = new TilingProperty(Uniforms.albedoMap);
         public static readonly OffsetProperty mainOffset                         = new OffsetProperty(Uniforms.albedoMap);
         public static readonly ColorProperty specularColor                       = new ColorProperty(Uniforms.specularColor);
@@ -87,7 +92,7 @@ namespace MK.Toon
         public static readonly TextureProperty specularRamp                        = new TextureProperty(Uniforms.specularRamp);
         public static readonly TextureProperty rimRamp                             = new TextureProperty(Uniforms.rimRamp);
         public static readonly TextureProperty lightTransmissionRamp               = new TextureProperty(Uniforms.lightTransmissionRamp);
-        public static readonly StepProperty lightBands                             = new StepProperty(Uniforms.lightBands, 2, 6);
+        public static readonly StepProperty lightBands                             = new StepProperty(Uniforms.lightBands, 2, 12);
         public static readonly RangeProperty lightBandsScale                       = new RangeProperty(Uniforms.lightBandsScale, 0, 1);
         public static readonly RangeProperty lightThreshold                        = new RangeProperty(Uniforms.lightThreshold, 0, 1);
         public static readonly TextureProperty thresholdMap                        = new TextureProperty(Uniforms.thresholdMap, Keywords.thresholdMap);
@@ -148,6 +153,7 @@ namespace MK.Toon
         public static readonly RangeProperty lightTransmissionIntensity             = new RangeProperty(Uniforms.lightTransmissionIntensity, 0);
         public static readonly EnvironmentReflectionProperty environmentReflections = new EnvironmentReflectionProperty(Uniforms.environmentReflections, Keywords.environmentReflections);
         public static readonly BoolProperty fresnelHighlights                       = new BoolProperty(Uniforms.fresnelHighlights, Keywords.fresnelHighlights);
+        public static readonly BoolProperty indirectFade                            = new BoolProperty(Uniforms.IndirectFade);
         public static readonly RenderPriorityProperty renderPriority                = new RenderPriorityProperty(Uniforms.renderPriority);
         //Stencil
         public static readonly StencilModeProperty stencil                          = new StencilModeProperty(Uniforms.stencil);
@@ -167,7 +173,7 @@ namespace MK.Toon
         public static readonly TextureProperty outlineMap            = new TextureProperty(Uniforms.outlineMap, Keywords.outlineMap);
         public static readonly RangeProperty outlineSize             = new RangeProperty(Uniforms.outlineSize, 0);
         public static readonly ColorProperty outlineColor            = new ColorProperty(Uniforms.outlineColor);
-        #if MK_TOON_OUTLINE_FADE
+        #if MK_TOON_OUTLINE_FADING_LINEAR  || MK_TOON_OUTLINE_FADING_EXPONENTIAL || MK_TOON_OUTLINE_FADING_INVERSE_EXPONENTIAL
             public static readonly FloatProperty outlineFadeMin      = new FloatProperty(Uniforms.outlineFadeMin);
             public static readonly FloatProperty outlineFadeMax      = new FloatProperty(Uniforms.outlineFadeMax);
         #endif
@@ -206,6 +212,7 @@ namespace MK.Toon
         {
             material.SetTexture(Uniforms.mainTex.id, Properties.albedoMap.GetValue(material));
             material.SetFloat(Uniforms.cutoff.id, Properties.alphaCutoff.GetValue(material));
+            material.SetColor(Uniforms.color.id, Properties.albedoColor.GetValue(material));
         }
     }
 }

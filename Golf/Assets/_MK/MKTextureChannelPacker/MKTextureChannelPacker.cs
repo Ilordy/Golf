@@ -42,18 +42,22 @@ namespace MK.TextureChannelPacker
         };
 
         private Texture2D _sourceTexture0 = null;
+        private bool _sourceChanncel0Invert = false;
         private TextureChannel _sourceChannel0 = TextureChannel.Red;
         private TextureChannel _targetChannel0 = TextureChannel.Red;
         private ChannelColor _targetChannelColor0 = ChannelColor.Black;
         private Texture2D _sourceTexture1 = null;
+        private bool _sourceChanncel1Invert = false;
         private TextureChannel _sourceChannel1 = TextureChannel.Green;
         private TextureChannel _targetChannel1 = TextureChannel.Green;
         private ChannelColor _targetChannelColor1 = ChannelColor.Black;
         private Texture2D _sourceTexture2 = null;
+        private bool _sourceChanncel2Invert = false;
         private TextureChannel _sourceChannel2 = TextureChannel.Blue;
         private TextureChannel _targetChannel2 = TextureChannel.Blue;
         private ChannelColor _targetChannelColor2 = ChannelColor.Black;
         private Texture2D _sourceTexture3 = null;
+        private bool _sourceChanncel3Invert = false;
         private TextureChannel _sourceChannel3 = TextureChannel.Alpha;
         private TextureChannel _targetChannel3 = TextureChannel.Alpha;
         private ChannelColor _targetChannelColor3 = ChannelColor.Black;
@@ -70,7 +74,7 @@ namespace MK.TextureChannelPacker
         private void OnGUI()
         {
             _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos, false, true);
-            EditorGUILayout.LabelField("V 0.1");
+            EditorGUILayout.LabelField("V 0.2");
             EditorGUILayout.LabelField("Pack different color channels of input textures and create a new texture. The Aspect Ratio of the input should match!", flowTextStyle);
             Divider();
 
@@ -83,10 +87,10 @@ namespace MK.TextureChannelPacker
 
             Divider();
             EditorGUILayout.LabelField("Input:", UnityEditor.EditorStyles.boldLabel);
-            PackerPopup(ref _sourceTexture0, ref _sourceChannel0, ref _targetChannel0, ref _targetChannelColor0);
-            PackerPopup(ref _sourceTexture1, ref _sourceChannel1, ref _targetChannel1, ref _targetChannelColor1);
-            PackerPopup(ref _sourceTexture2, ref _sourceChannel2, ref _targetChannel2, ref _targetChannelColor2);
-            PackerPopup(ref _sourceTexture3, ref _sourceChannel3, ref _targetChannel3, ref _targetChannelColor3);
+            PackerPopup(ref _sourceTexture0, ref _sourceChannel0, ref _sourceChanncel0Invert, ref _targetChannel0, ref _targetChannelColor0);
+            PackerPopup(ref _sourceTexture1, ref _sourceChannel1, ref _sourceChanncel1Invert, ref _targetChannel1, ref _targetChannelColor1);
+            PackerPopup(ref _sourceTexture2, ref _sourceChannel2, ref _sourceChanncel2Invert, ref _targetChannel2, ref _targetChannelColor2);
+            PackerPopup(ref _sourceTexture3, ref _sourceChannel3, ref _sourceChanncel3Invert, ref _targetChannel3, ref _targetChannelColor3);
             Divider();
 
             EditorGUILayout.LabelField("Output Settings:", UnityEditor.EditorStyles.boldLabel);
@@ -168,10 +172,10 @@ namespace MK.TextureChannelPacker
                             sourceRead2 = ReadPixelValue(_sourceTexture2, pPos, _targetChannelColor2);
                             sourceRead3 = ReadPixelValue(_sourceTexture3, pPos, _targetChannelColor3);
 
-                            PackColorChannelValueIntoChannel(sourceRead0, _sourceChannel0, _targetChannel0, ref pixelColor);
-                            PackColorChannelValueIntoChannel(sourceRead1, _sourceChannel1, _targetChannel1, ref pixelColor);
-                            PackColorChannelValueIntoChannel(sourceRead2, _sourceChannel2, _targetChannel2, ref pixelColor);
-                            PackColorChannelValueIntoChannel(sourceRead3, _sourceChannel3, _targetChannel3, ref pixelColor);
+                            PackColorChannelValueIntoChannel(sourceRead0, _sourceChannel0, _targetChannel0, _sourceChanncel0Invert, ref pixelColor);
+                            PackColorChannelValueIntoChannel(sourceRead1, _sourceChannel1, _targetChannel1, _sourceChanncel1Invert, ref pixelColor);
+                            PackColorChannelValueIntoChannel(sourceRead2, _sourceChannel2, _targetChannel2, _sourceChanncel2Invert, ref pixelColor);
+                            PackColorChannelValueIntoChannel(sourceRead3, _sourceChannel3, _targetChannel3, _sourceChanncel3Invert, ref pixelColor);
 
                             _outputTexture.SetPixel(j, i, pixelColor);
                         }
@@ -205,8 +209,9 @@ namespace MK.TextureChannelPacker
             return isReadable;
         }
 
-        private static void PackColorChannelValueIntoChannel(Color source, TextureChannel sourceChannel, TextureChannel targetChannel, ref Color color)
+        private static void PackColorChannelValueIntoChannel(Color source, TextureChannel sourceChannel, TextureChannel targetChannel, bool invertChannel, ref Color color)
         {
+            source = invertChannel ? Color.white - source : source;
             switch(sourceChannel)
             {
                 case TextureChannel.Alpha:
@@ -311,7 +316,7 @@ namespace MK.TextureChannelPacker
             }
         }
 
-        private static void PackerPopup(ref Texture2D texture, ref TextureChannel sourceChannel, ref TextureChannel targetChannel, ref ChannelColor targetChannelColor)
+        private static void PackerPopup(ref Texture2D texture, ref TextureChannel sourceChannel, ref bool sourceChannelInvert, ref TextureChannel targetChannel, ref ChannelColor targetChannelColor)
         {
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.BeginVertical();
@@ -319,6 +324,10 @@ namespace MK.TextureChannelPacker
             EditorGUILayout.EndVertical();
             if(texture != null)
             {
+                EditorGUILayout.BeginVertical();
+                EditorGUILayout.LabelField("Invert?:", UnityEditor.EditorStyles.boldLabel,  GUILayout.Width(70));
+                sourceChannelInvert = EditorGUILayout.Toggle(sourceChannelInvert, GUILayout.Width(70));
+                EditorGUILayout.EndVertical();
                 EditorGUILayout.BeginVertical();
                 EditorGUILayout.LabelField("From:", UnityEditor.EditorStyles.boldLabel,  GUILayout.Width(70));
                 sourceChannel = (TextureChannel) EditorGUILayout.EnumPopup(sourceChannel,  GUILayout.Width(70));
@@ -330,6 +339,7 @@ namespace MK.TextureChannelPacker
             }
             else
             {
+                sourceChannelInvert = false;
                 EditorGUILayout.BeginVertical();
                 EditorGUILayout.LabelField("Assume:", UnityEditor.EditorStyles.boldLabel,  GUILayout.Width(70));
                 targetChannelColor = (ChannelColor) EditorGUILayout.EnumPopup(targetChannelColor,  GUILayout.Width(70));

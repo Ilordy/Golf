@@ -13,6 +13,7 @@ public class EmojiController : MonoBehaviour
     [SerializeField] ParticleSystemRenderer psRenderer;
     Material emojiMat;
     [SerializeField] Texture2D[] emojiTextures;
+    readonly int baseMap = Shader.PropertyToID("_BaseMap");
     #endregion
 
     #region Methods
@@ -43,7 +44,7 @@ public class EmojiController : MonoBehaviour
         else
             psRenderer.flip = Vector3.zero;
         transform.localPosition = new Vector3(psRenderer.flip.x < 1 ? -1.2f : 1.2f, transform.localPosition.y, 0);
-        emojiMat.SetTexture("_BaseMap", emojiTextures[Random.Range(0, emojiTextures.Length)]);
+        emojiMat.SetTexture(baseMap, emojiTextures[Random.Range(0, emojiTextures.Length)]);
         emojiPS.Play();
         StartCoroutine(ShowEmoji());
     }

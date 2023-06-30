@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_DEPTH_NORMALS_IO
@@ -49,7 +49,7 @@
 			#endif
 		#endif
 
-		#ifdef MK_POS_CLIP
+		#ifdef MK_BARYCENTRIC_POS_CLIP
 			float4 positionClip : TEXCOORD5;
 		#endif
 		#ifdef MK_POS_NULL_CLIP

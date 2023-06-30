@@ -35,12 +35,12 @@ public class AudioManager : Singleton<AudioManager> {
         powerUpSource = sources[3];
         vfxSource = sources[4];
     }
-
+    
     public void PlayEnemyHit() {
         if (GameManager.SoundEnabled < 0) return;
         enemyHitSource.PlayOneShot(enemyHit);
         if (GameManager.HapticsEnabled < 0) return;
-        HapticPatterns.PlayPreset(HapticPatterns.PresetType.HeavyImpact);
+        HapticPatterns.PlayPreset(HapticPatterns.PresetType.LightImpact);
     }
     public void PlayBallHit() {
         if (GameManager.SoundEnabled < 0) return;

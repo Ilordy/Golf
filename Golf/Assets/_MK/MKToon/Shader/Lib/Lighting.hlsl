@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_LIGHTING
@@ -18,6 +18,49 @@
 	#else
 		#include "AutoLight.cginc"
 		#include "UnityGlobalIllumination.cginc"
+
+		#ifdef POINT
+			#define UNITY_LIGHT_ATTENUATION_DISTANCE(destName, input, worldPos) \
+			unityShadowCoord3 lightDistanceCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1)).xyz; \
+			fixed destName = tex2D(_LightTexture0, dot(lightDistanceCoord, lightDistanceCoord).rr).r;
+		#endif
+
+		#ifdef SPOT
+			#if !defined(UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS)
+				#define DECLARE_LIGHT_DISTANCE_COORD(input, worldPos) unityShadowCoord4 lightDistanceCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1))
+			#else
+				#define DECLARE_LIGHT_DISTANCE_COORD(input, worldPos) unityShadowCoord4 lightDistanceCoord = input._LightCoord
+			#endif
+			#define UNITY_LIGHT_ATTENUATION_DISTANCE(destName, input, worldPos) \
+			DECLARE_LIGHT_DISTANCE_COORD(input, worldPos); \
+			fixed destName = (lightDistanceCoord.z > 0) * UnitySpotCookie(lightDistanceCoord) * UnitySpotAttenuate(lightDistanceCoord.xyz);
+		#endif
+
+		#ifdef DIRECTIONAL
+			#define UNITY_LIGHT_ATTENUATION_DISTANCE(destName, input, worldPos) fixed destName = UNITY_SHADOW_ATTENUATION(input, worldPos);
+		#endif
+
+		#ifdef POINT_COOKIE
+			#if !defined(UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS)
+				#define DECLARE_LIGHT_DISTANCE_COORD(input, worldPos) unityShadowCoord3 lightDistanceCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1)).xyz
+			#else
+				#define DECLARE_LIGHT_DISTANCE_COORD(input, worldPos) unityShadowCoord3 lightDistanceCoord = input._LightCoord
+			#endif
+			#define UNITY_LIGHT_ATTENUATION_DISTANCE(destName, input, worldPos) \
+			DECLARE_LIGHT_DISTANCE_COORD(input, worldPos); \
+			fixed destName = tex2D(_LightTextureB0, dot(lightDistanceCoord, lightDistanceCoord).rr).r * texCUBE(_LightTexture0, lightDistanceCoord).w;
+		#endif
+
+		#ifdef DIRECTIONAL_COOKIE
+			#if !defined(UNITY_HALF_PRECISION_FRAGMENT_SHADER_REGISTERS)
+				#define DECLARE_LIGHT_DISTANCE_COORD(input, worldPos) unityShadowCoord2 lightDistanceCoord = mul(unity_WorldToLight, unityShadowCoord4(worldPos, 1)).xy
+			#else
+				#define DECLARE_LIGHT_DISTANCE_COORD(input, worldPos) unityShadowCoord2 lightDistanceCoord = input._LightCoord
+			#endif
+			#define UNITY_LIGHT_ATTENUATION_DISTANCE(destName, input, worldPos) \
+			DECLARE_LIGHT_DISTANCE_COORD(input, worldPos); \
+			fixed destName = tex2D(_LightTexture0, lightDistanceCoord).w;
+		#endif
 	#endif
 
 	#include "Surface.hlsl"
@@ -39,14 +82,19 @@
 
 	struct MKLight
 	{
-		autoLP3 color;
-		autoLP3 radiometricColor;
+		half3 color;
+		half3 radiometricColor;
 		half3 dirWorld;
 		half attenuation;
 		half distanceAttenuation;
 		half shadowAttenuation;
 		#if defined(MK_URP) && UNITY_VERSION >= 202120
 			uint layerMask;
+		#endif
+		#ifdef MK_LEGACY_RP
+			#ifdef MK_HANDLE_SHADOWS_BLENDING_IN_GI
+				half giBlend;
+			#endif
 		#endif
 	};
 
@@ -77,24 +125,24 @@
 		#ifdef MK_V_DOT_LND
 			half VoLND;
 		#endif
-		#ifdef MK_HV
-			half3 HV;
+		#ifdef MK_LHV
+			half3 LHV;
 		#endif
-		#ifdef MK_L_DOT_HV
-			half LoHV;
+		#ifdef MK_L_DOT_LHV
+			half LoLHV;
 		#endif
-		#ifdef MK_V_DOT_HV
-			half VoHV;
+		#ifdef MK_V_DOT_LHV
+			half VoLHV;
 			half oneMinusVoHV;
 		#endif
-		#ifdef MK_T_DOT_HV
-			half ToHV;
+		#ifdef MK_T_DOT_LHV
+			half ToLHV;
 		#endif
-		#ifdef MK_B_DOT_HV
-			half BoHV;
+		#ifdef MK_B_DOT_LHV
+			half BoLHV;
 		#endif
-		#ifdef MK_N_DOT_HV
-			half NoHV;
+		#ifdef MK_N_DOT_LHV
+			half NoLHV;
 		#endif
 		#ifdef MK_ML_REF_N
 			half3 MLrN;
@@ -132,7 +180,7 @@
 		*/
 		//lighting coords are currently also used for later PS usage when cascade is enabled, so always set shadow coord
 		#define DECLARE_LIGHTING_COORDS(i, j) float4 _ShadowCoord : TEXCOORD##i;
-		#ifdef MK_SHADOW_COORD_INTERPOLATOR
+		#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
 			#if defined(_MAIN_LIGHT_SHADOWS_SCREEN) && !defined(MK_SURFACE_TYPE_TRANSPARENT)
 				#define TRANSFORM_WORLD_TO_SHADOW_COORDS(o, i, l) l._ShadowCoord = ComputeScreenPos(l.SV_CLIP_POS);
 			#else
@@ -161,7 +209,7 @@
 		#ifdef MK_LIT
 			#ifdef MK_VERTEX_LIGHTING
 				//should be automatically clamped (0 - 1) at a 8bit precision, still enough for a simple vertex lighting
-				autoLP3 vertexLighting : COLOR1;
+				half3 vertexLighting : COLOR1;
 			#endif
 			#ifdef MK_LIGHTMAP_UV
 				DECLARE_LIGHTMAP_UV(5);
@@ -176,6 +224,15 @@
 			return SampleSHVertex(normalWorld);
 		#else
 			return ShadeSHPerVertex(normalWorld, 0); //Base Ambient = 0 0 0
+		#endif
+	}
+
+	inline half3 ComputeSHVertex(float3 positionWorld, half3 normalWorld, half3 viewDirectionWorld)
+	{
+		#if UNITY_VERSION >= 202310 && (defined(PROBE_VOLUMES_L1) || defined(PROBE_VOLUMES_L2))
+			return SampleProbeVolumeVertex(positionWorld, normalWorld, viewDirectionWorld);
+		#else
+			return ComputeSHVertex(normalWorld);
 		#endif
 	}
 
@@ -253,83 +310,101 @@
 		#else
 			stretchDir = bitangentWorld;
 		#endif
-		half3 reflectNormal = SafeNormalize(lerp(normalWorld, cross(cross(reflectDirection, stretchDir), stretchDir), abs(anisotropy) * 0.5));
-		data.reflectDirection = reflectDirection - 3.0 * dot(reflectNormal, reflectDirection) * reflectNormal;
+		half3 reflectNormal = MKSafeNormalize(lerp(normalWorld, cross(cross(reflectDirection, stretchDir), stretchDir), abs(anisotropy) * 0.5));
+		data.reflectDirection = reflectDirection - 2.0 * dot(reflectNormal, reflectDirection) * reflectNormal;
 		return data;
 	}
 
 	//GI functions should match input
-	inline MKGI MKGlobalIllumination(MKGlossyEnvironmentData glossyED, half occlusion, MKLight mkLight, float3 positionWorld, half3 viewWorld, half3 normalWorld, float4 lightmapUVAndSH)
+	inline MKGI MKGlobalIllumination(in MKGlossyEnvironmentData glossyED, half occlusion, MKLight mkLight, in MKSurfaceData surfaceData)
 	{
 		MKGI gi;
 		INITIALIZE_STRUCT(MKGI, gi);
-
-		#if defined(MK_URP) || defined(MK_LWRP)
-			#if defined(LIGHTMAP_ON) && defined(DYNAMICLIGHTMAP_ON)
-				gi.diffuse = SampleLightmap(lightmapUVAndSH.xy, lightmapUVAndSH.zw, normalWorld);
-			#elif defined(DYNAMICLIGHTMAP_ON)
-				gi.diffuse = SampleLightmap(0, lightmapUVAndSH.zw, normalWorld);
-			#elif defined(LIGHTMAP_ON)
-				#if UNITY_VERSION >= 202120
-					gi.diffuse = SampleLightmap(lightmapUVAndSH.xy, 0, normalWorld);
+		#ifdef MK_INDIRECT
+			#if defined(MK_URP) || defined(MK_LWRP)
+				#if UNITY_VERSION >= 202310
+					#if defined(DYNAMICLIGHTMAP_ON)
+						gi.diffuse = SAMPLE_GI(surfaceData.lightmapUV.xy, surfaceData.lightmapUV.zw, surfaceData.lightmapUV.rgb, surfaceData.normalWorld);
+					#elif !defined(LIGHTMAP_ON) && (defined(PROBE_VOLUMES_L1) || defined(PROBE_VOLUMES_L2))
+						gi.diffuse = SAMPLE_GI(surfaceData.lightmapUV.rgb,
+							GetAbsolutePositionWS(surfaceData.positionWorld),
+							surfaceData.normalWorld,
+							surfaceData.viewWorld,
+							surfaceData.svPositionClip.xy);
+					#else
+						gi.diffuse = SAMPLE_GI(surfaceData.lightmapUV.xy, surfaceData.lightmapUV.rgb, surfaceData.normalWorld);
+					#endif
 				#else
-					gi.diffuse = SampleLightmap(lightmapUVAndSH.xy, normalWorld);
+					#if defined(LIGHTMAP_ON) && defined(DYNAMICLIGHTMAP_ON)
+						gi.diffuse = SampleLightmap(surfaceData.lightmapUV.xy, surfaceData.lightmapUV.zw, surfaceData.normalWorld);
+					#elif defined(DYNAMICLIGHTMAP_ON)
+						gi.diffuse = SampleLightmap(0, surfaceData.lightmapUV.zw, surfaceData.normalWorld);
+					#elif defined(LIGHTMAP_ON)
+						#if UNITY_VERSION >= 202120
+							gi.diffuse = SampleLightmap(surfaceData.lightmapUV.xy, 0, surfaceData.normalWorld);
+						#else
+							gi.diffuse = SampleLightmap(surfaceData.lightmapUV.xy, surfaceData.normalWorld);
+						#endif
+					#else
+						gi.diffuse = SampleSHPixel(surfaceData.lightmapUV.rgb, surfaceData.normalWorld);
+					#endif
 				#endif
+
+				gi.diffuse *= occlusion;
+				#if UNITY_VERSION >= 202220
+					gi.specular = GlossyEnvironmentReflection(glossyED.reflectDirection, surfaceData.positionWorld, glossyED.roughness, occlusion, surfaceData.screenUV.xy);
+				#else
+					gi.specular = GlossyEnvironmentReflection(glossyED.reflectDirection, glossyED.roughness, occlusion);
+				#endif
+
+				return gi;
 			#else
-				gi.diffuse = SampleSH(normalWorld);
+				UnityGIInput giInput;
+				UnityLight unityLight;
+				unityLight.color = mkLight.color;
+				unityLight.dir = mkLight.dirWorld;
+				giInput.light = unityLight;
+				giInput.worldPos = surfaceData.positionWorld;
+				#ifdef MK_ENVIRONMENT_REFLECTIONS_AMBIENT
+					giInput.worldViewDir = -surfaceData.viewWorld;
+				#else
+					giInput.worldViewDir = 0;
+				#endif
+				giInput.atten = mkLight.attenuation;
+				#if defined(LIGHTMAP_ON) || defined(DYNAMICLIGHTMAP_ON)
+					giInput.ambient = 0;
+					giInput.lightmapUV = surfaceData.lightmapUV;
+				#endif
+				#if UNITY_SHOULD_SAMPLE_SH && !UNITY_SAMPLE_FULL_SH_PER_PIXEL
+					giInput.ambient = surfaceData.lightmapUV.rgb;
+					giInput.lightmapUV = 0;
+				#endif
+
+				giInput.probeHDR[0] = unity_SpecCube0_HDR;
+				giInput.probeHDR[1] = unity_SpecCube1_HDR;
+				#if defined(UNITY_SPECCUBE_BLENDING) || defined(UNITY_SPECCUBE_BOX_PROJECTION)
+					giInput.boxMin[0] = unity_SpecCube0_BoxMin; // .w holds lerp value for blending
+				#endif
+				#ifdef UNITY_SPECCUBE_BOX_PROJECTION
+					giInput.boxMax[0] = unity_SpecCube0_BoxMax;
+					giInput.probePosition[0] = unity_SpecCube0_ProbePosition;
+					giInput.boxMax[1] = unity_SpecCube1_BoxMax;
+					giInput.boxMin[1] = unity_SpecCube1_BoxMin;
+					giInput.probePosition[1] = unity_SpecCube1_ProbePosition;
+				#endif
+
+				//indirect specular depends on the _GLOSSYREFLECTIONS_OFF keyword by default
+				//however its not defined in the non glossy MKGI function and we get no indirect specular via the unity_IndirectSpecColor RGB
+				//so we always create the glossy environment
+				Unity_GlossyEnvironmentData uge;
+				uge.roughness = glossyED.roughness;
+				uge.reflUVW = glossyED.reflectDirection;
+
+				UnityGI unityGI = UnityGlobalIllumination(giInput, occlusion, surfaceData.normalWorld, uge);
+
+				gi.diffuse = unityGI.indirect.diffuse;
+				gi.specular = unityGI.indirect.specular;
 			#endif
-
-			gi.diffuse *= occlusion;
-
-			#ifdef MK_ENVIRONMENT_REFLECTIONS_ADVANCED
-				gi.specular = GlossyEnvironmentReflection(glossyED.reflectDirection, glossyED.roughness, occlusion);
-			#else
-				gi.specular = gi.diffuse;
-			#endif
-
-			return gi;
-		#else
-			UnityGIInput giInput;
-			UnityLight unityLight;
-			unityLight.color = mkLight.color;
-			unityLight.dir = mkLight.dirWorld;
-			giInput.light = unityLight;
-			giInput.worldPos = positionWorld;
-			giInput.worldViewDir = -viewWorld;
-			giInput.atten = mkLight.attenuation;
-			#if defined(LIGHTMAP_ON) || defined(DYNAMICLIGHTMAP_ON)
-				giInput.ambient = 0;
-				giInput.lightmapUV = lightmapUVAndSH;
-			#endif
-			#if UNITY_SHOULD_SAMPLE_SH && !UNITY_SAMPLE_FULL_SH_PER_PIXEL
-				giInput.ambient = lightmapUVAndSH.rgb;
-				giInput.lightmapUV = 0;
-			#endif
-
-			giInput.probeHDR[0] = unity_SpecCube0_HDR;
-			giInput.probeHDR[1] = unity_SpecCube1_HDR;
-			#if defined(UNITY_SPECCUBE_BLENDING) || defined(UNITY_SPECCUBE_BOX_PROJECTION)
-				giInput.boxMin[0] = unity_SpecCube0_BoxMin; // .w holds lerp value for blending
-			#endif
-			#ifdef UNITY_SPECCUBE_BOX_PROJECTION
-				giInput.boxMax[0] = unity_SpecCube0_BoxMax;
-				giInput.probePosition[0] = unity_SpecCube0_ProbePosition;
-				giInput.boxMax[1] = unity_SpecCube1_BoxMax;
-				giInput.boxMin[1] = unity_SpecCube1_BoxMin;
-				giInput.probePosition[1] = unity_SpecCube1_ProbePosition;
-			#endif
-
-			//indirect specular depends on the _GLOSSYREFLECTIONS_OFF keyword by default
-			//however its not defined in the non glossy MKGI function and we get no indirect specular via the unity_IndirectSpecColor RGB
-			//so we always create the glossy environment
-			Unity_GlossyEnvironmentData uge;
-			uge.roughness = glossyED.roughness;
-			uge.reflUVW = glossyED.reflectDirection;
-
-			UnityGI unityGI = UnityGlobalIllumination(giInput, occlusion, normalWorld, uge);
-
-			gi.diffuse = unityGI.indirect.diffuse;
-			gi.specular = unityGI.indirect.specular;
 
 			return gi;
 		#endif
@@ -373,25 +448,25 @@
 		#ifdef MK_V_DOT_LND
 			lightData.VoLND = saturate(dot(surfaceData.viewWorld, -lightData.LND));
 		#endif
-		#ifdef MK_HV
-			lightData.HV = SafeNormalize(light.dirWorld + surfaceData.viewWorld);
+		#ifdef MK_LHV
+			lightData.LHV = MKSafeNormalize(light.dirWorld + surfaceData.viewWorld);
 		#endif
-		#ifdef MK_V_DOT_HV
-			lightData.VoHV = saturate(dot(lightData.HV, surfaceData.viewWorld));
-			lightData.oneMinusVoHV = 1.0 - lightData.VoHV;
+		#ifdef MK_V_DOT_LHV
+			lightData.VoLHV = saturate(dot(lightData.LHV, surfaceData.viewWorld));
+			lightData.oneMinusVoHV = 1.0 - lightData.VoLHV;
 		#endif
 		//tohv and bohv should not be clamped because of the aniso usage
-		#ifdef MK_T_DOT_HV
-			lightData.ToHV = dot(surfaceData.tangentWorld, lightData.HV);
+		#ifdef MK_T_DOT_LHV
+			lightData.ToLHV = dot(surfaceData.tangentWorld, lightData.LHV);
 		#endif
-		#ifdef MK_B_DOT_HV
-			lightData.BoHV = dot(surfaceData.bitangentWorld, lightData.HV);
+		#ifdef MK_B_DOT_LHV
+			lightData.BoLHV = dot(surfaceData.bitangentWorld, lightData.LHV);
 		#endif
-		#ifdef MK_N_DOT_HV
-			lightData.NoHV = saturate(dot(surfaceData.normalWorld, lightData.HV));
+		#ifdef MK_N_DOT_LHV
+			lightData.NoLHV = saturate(dot(surfaceData.normalWorld, lightData.LHV));
 		#endif
-		#ifdef MK_L_DOT_HV
-			lightData.LoHV = saturate(dot(light.dirWorld, lightData.HV));
+		#ifdef MK_L_DOT_LHV
+			lightData.LoLHV = dot(light.dirWorld, lightData.LHV);
 		#endif
 		#ifdef MK_ML_REF_N
 			lightData.MLrN = reflect(-light.dirWorld, surfaceData.normalWorld);
@@ -434,7 +509,6 @@
 				INITIALIZE_STRUCT(Light, light);
 
 				light.color = mkLight.color;
-				light.distanceAttenuation = mkLight.distanceAttenuation;
 				light.direction = mkLight.dirWorld;
 				
 				light.distanceAttenuation = mkLight.distanceAttenuation;
@@ -447,15 +521,42 @@
 			}
 		#endif
 
+		#if defined(MK_URP) || defined(MK_LWRP)
+			#ifdef MK_LINEAR_lIGHT_DISTANCE_ATTENUATION
+				inline void LinearDistanceAttenuation(inout Light light, in MKSurfaceData surfaceData, in int index)
+				{
+					//color & light layers should be untouched
+					#if USE_STRUCTURED_BUFFER_FOR_LIGHT_DATA
+						float4 lightPositionWS = _AdditionalLightsBuffer[index].position;
+						half4 distanceAndSpotAttenuation = _AdditionalLightsBuffer[index].attenuation;
+						half4 spotDirection = _AdditionalLightsBuffer[index].spotDirection;
+						half4 lightOcclusionProbeInfo = _AdditionalLightsBuffer[index].occlusionProbeChannels;
+					#else
+						float4 lightPositionWS = _AdditionalLightsPosition[index];
+						half4 distanceAndSpotAttenuation = _AdditionalLightsAttenuation[index];
+						half4 spotDirection = _AdditionalLightsSpotDir[index];
+						half4 lightOcclusionProbeInfo = _AdditionalLightsOcclusionProbes[index];
+					#endif
+
+					float3 LightToWorld = lightPositionWS.xyz - surfaceData.positionWorld * lightPositionWS.w;
+					float distanceSqr = max(dot(LightToWorld, LightToWorld), HALF_MIN);
+					half3 LightDir = half3(LightToWorld * rsqrt(distanceSqr));
+
+					float lightRangeSqr = Rcp(distanceAndSpotAttenuation.x);
+					light.distanceAttenuation = saturate(saturate((1 - (distanceSqr / lightRangeSqr)) * 5.0) * Rcp(1.0 + 25.0 * distanceSqr / lightRangeSqr)) * AngleAttenuation(spotDirection.xyz, LightDir, distanceAndSpotAttenuation.zw);
+				}
+			#endif
+		#endif
+
 		MKLight ComputeMainLight(in MKSurfaceData surfaceData, inout VertexOutputLight vertexOutputLight)
 		{
 			MKLight mkLight;
 			INITIALIZE_STRUCT(MKLight, mkLight);
 
 			#if defined(MK_URP) || defined(MK_LWRP)
-				#if defined(MK_SHADOW_COORD_INTERPOLATOR)
+				#if defined(REQUIRES_VERTEX_SHADOW_COORD_INTERPOLATOR)
 					//skip interpolator...
-				#elif defined(MK_MAIN_LIGHT_CALCULATE_SHADOWS)
+				#elif defined(MAIN_LIGHT_CALCULATE_SHADOWS)
 					vertexOutputLight._ShadowCoord = TransformWorldToShadowCoord(surfaceData.positionWorld);
 				#else
 					vertexOutputLight._ShadowCoord = float4(0, 0, 0, 0);
@@ -485,14 +586,29 @@
 			#else
 				//lightdirection and attenuation
 				#ifdef USING_DIRECTIONAL_LIGHT
-					mkLight.dirWorld = SafeNormalize(_WorldSpaceLightPos0.xyz);
+					mkLight.dirWorld = MKSafeNormalize(_WorldSpaceLightPos0.xyz);
 					mkLight.distanceAttenuation = 1;
 				#else
-					mkLight.dirWorld = SafeNormalize(_WorldSpaceLightPos0.xyz - surfaceData.positionWorld);
-					mkLight.distanceAttenuation = saturate(1.0 - ((distance(_WorldSpaceLightPos0.xyz, surfaceData.positionWorld)) / Rcp(_LightPositionRange.w)));
+					mkLight.dirWorld = MKSafeNormalize(_WorldSpaceLightPos0.xyz - surfaceData.positionWorld);
+					//Atten Old
+					//mkLight.distanceAttenuation = saturate(1.0 - ((distance(_WorldSpaceLightPos0.xyz, surfaceData.positionWorld)) / Rcp(_LightPositionRange.w)));
+					UNITY_LIGHT_ATTENUATION_DISTANCE(distanceAtten, vertexOutputLight, surfaceData.positionWorld);
+					mkLight.distanceAttenuation = distanceAtten;
 				#endif
 
 				UNITY_LIGHT_ATTENUATION(atten, vertexOutputLight, surfaceData.positionWorld);
+
+				#ifdef MK_HANDLE_SHADOWS_BLENDING_IN_GI
+					mkLight.giBlend = 0;
+					atten = SHADOW_ATTENUATION(vertexOutputLight);
+					float shadowFade = UnityComputeShadowFade(UnityComputeShadowFadeDistance(surfaceData.positionWorld, dot(_WorldSpaceCameraPos - surfaceData.positionWorld, UNITY_MATRIX_V[2].xyz)));
+					float bakedOcclusion = UnitySampleBakedOcclusion(surfaceData.lightmapUV.xy, surfaceData.positionWorld);
+					atten = UnityMixRealtimeAndBakedShadows(atten, bakedOcclusion, shadowFade);
+					#if defined(LIGHTMAP_SHADOW_MIXING) && !defined(SHADOWS_SHADOWMASK)
+						mkLight.giBlend = atten;
+					#endif
+				#endif
+
 				mkLight.attenuation = atten;
 				mkLight.shadowAttenuation = SHADOW_ATTENUATION(vertexOutputLight);
 				mkLight.color = _LightColor0.rgb;
@@ -506,7 +622,7 @@
 		{
 			#if defined(MK_URP) || defined(MK_LWRP)
 				MKLight mkLight;
-				INITIALIZE_STRUCT(MKLight, light);
+				INITIALIZE_STRUCT(MKLight, mkLight);
 				Light light;
 				INITIALIZE_STRUCT(Light, light);
 				#if defined(MK_URP_2020_2_Or_Newer)
@@ -515,12 +631,15 @@
 					light = GetAdditionalLight(index, surfaceData.positionWorld);
 				#endif
 
+				#ifdef MK_LINEAR_lIGHT_DISTANCE_ATTENUATION
+					LinearDistanceAttenuation(light, surfaceData, GetPerObjectLightIndex(index));
+				#endif
+				mkLight.distanceAttenuation = light.distanceAttenuation;
 				mkLight.color = light.color;
 				mkLight.radiometricColor = mkLight.color * PI;
 				mkLight.attenuation = light.distanceAttenuation * light.shadowAttenuation;
 				mkLight.dirWorld = light.direction;
 
-				mkLight.distanceAttenuation = light.distanceAttenuation;
 				mkLight.shadowAttenuation = light.shadowAttenuation;
 				#if UNITY_VERSION >= 202120
 					mkLight.layerMask = light.layerMask;
@@ -629,60 +748,52 @@
 	//Scale of the aniso
 	inline half2 AnisoScale(half roughness, half anisotropy)
 	{
-		return half2(roughness * (1 + anisotropy), roughness * (1 - anisotropy));
+		//original ggx roughness
+		//half aspect = sqrt(1.0 - 0.9 * anisotropy);
+		//return half2(roughness / aspect, roughness * aspect);
+
+		//approximated
+		return half2(roughness * (1 + 0.9 * anisotropy), roughness * (1 - 0.9 * anisotropy));
 	}
 
-	inline half DistributionGGX(half NoHV, half ToHV, half BoHV, half roughness, half anisoropy)
+	inline half DistributionGGX(half NoLHV, half ToLHV, half BoLHV, half roughness, half anisoropy)
 	{
 		half2 anisoScale = AnisoScale(roughness, anisoropy);
 		half anisoStretch = anisoScale.x * anisoScale.y;
-		half3 anisoView = half3(anisoScale.x * ToHV, anisoScale.y * BoHV, anisoStretch * NoHV);
 
 		half p = Rcp(anisoStretch);
-		half ay = FastPow2(ToHV) / FastPow2(anisoScale.x);
-		half ax = FastPow2(BoHV) / FastPow2(anisoScale.y);
+		half ay = FastPow2(ToLHV) / FastPow2(anisoScale.x);
+		half ax = FastPow2(BoLHV) / FastPow2(anisoScale.y);
 
-		return p * Rcp(PI * FastPow2(ay + ax + FastPow2(NoHV)));
+		return INV_PI * p * Rcp(FastPow2(ay + ax + FastPow2(NoLHV)));
 	}
 
-	inline half DistributionGGX(half NoHV, half roughnessP4)
+	inline half DistributionGGX(half NoLHV, half roughnessP4)
 	{
-		return roughnessP4 / (PI * FastPow2(FastPow2(NoHV) * (roughnessP4 - 1.0) + 1));
+		return SafeDivide(roughnessP4, (PI * FastPow2(FastPow2(NoLHV) * (roughnessP4 - 1.0) + 1)));
 	}
 
 	inline half GeometricSchlickGGX(half VoN, half roughness)
 	{	
-		return VoN / (VoN * (1.0 - roughness) + roughness);
+		return SafeDivide(VoN, (VoN * (1.0 - roughness) + roughness));
 	}
 
 	inline half GeometricSmithGGX(half VoN, half NoL, half roughness)
 	{
-		half directRoughness = FastPow2(roughness + 1.0) * THRESHOLD_OFFSET_NORMALIZER;
+		half directRoughness = FastPow2(roughness + 1.0) * 0.125;
 		return GeometricSchlickGGX(VoN, directRoughness) * GeometricSchlickGGX(NoL, directRoughness);
 	}
 
-	half GeometricSmithkGGX(half anisoropy, half ToHV, half BoHV, half ToL, half BoL, half VoN, half NoL, half roughness) 
+	inline half3 FresnelCSch(half LoLHV, half3 f0)
 	{
-		half2 anisoScale = AnisoScale(roughness, anisoropy);
-		half V = NoL * length(half3(anisoScale.x * ToHV, anisoScale.y * BoHV, VoN));
-		half L = VoN * length(half3(anisoScale.x * ToL, anisoScale.y * BoL, NoL));
-		return SafeDivide(0.5, V + L);
-	}
-
-	half3 FresnelSchlickGGX(half oneMinusVoHV, half3 f0, half smoothness)
-	{
-		return FastPow5(oneMinusVoHV) * (max(smoothness, f0) - f0) + f0;
-	}
-
-	half3 FresnelCSch(half LoHV, half3 f0, half roughness)
-	{
-		return SafeDivide(f0, LoHV);
+		//limit, because C.Sch goes to infinity instead of 1.
+		return saturate(SafeDivide(f0, LoLHV));
 	}
 
 	//Aniso specular blinn phong
 	inline half BlinnSpecularAniso(half3 normal, half3 halfV, half ndhv, half shine, half offset, half4 aDir, half ndl)
 	{
-		half term = pow(lerp(ndhv, max(0.0, sin(radians((dot(SafeNormalize(normal + aDir.rgb), halfV) + offset) * 180.0))), aDir.a), shine);
+		half term = pow(lerp(ndhv, max(0.0, sin(radians((dot(MKSafeNormalize(normal + aDir.rgb), halfV) + offset) * 180.0))), aDir.a), shine);
 		#if SHADER_TARGET >= 30
 			return (ndl > 0.0) ? term : 0.0;
 		#else
@@ -720,9 +831,9 @@
 				#endif
 
 				#if defined(MK_ENVIRONMENT_REFLECTIONS_ADVANCED)
-					gi = MKGlobalIllumination(ged, surface.occlusion.r, light, surfaceData.positionWorld, surfaceData.viewWorld, surfaceData.normalWorld, surfaceData.lightmapUV);
+					gi = MKGlobalIllumination(ged, surface.occlusion.r, light, surfaceData);
 				#elif defined(MK_ENVIRONMENT_REFLECTIONS_AMBIENT)
-					gi = MKGlobalIllumination(ged, surface.occlusion.r, light, surfaceData.positionWorld, 0, surfaceData.normalWorld, surfaceData.lightmapUV);
+					gi = MKGlobalIllumination(ged, surface.occlusion.r, light, surfaceData);
 				#endif
 				#if defined(MK_URP) || defined(MK_LWRP)
 					Light urpLight;
@@ -760,6 +871,10 @@
 				surface.indirect += Rcp(pbsData.roughnessPow4 + 1.0) * gi.specular * iL;
 			#endif
 
+			#ifdef MK_PBS
+				_IndirectFade = lerp(_IndirectFade, pbsData.reflectivity, pbsData.reflectivity);
+			#endif
+
 			#ifdef MK_EMISSION
 				//Emission handled as indirect
 				surface.indirect += surface.emission;
@@ -783,12 +898,6 @@
 				diffuse = lightData.NoL;
 			#endif
 
-			//Customize light atten
-			//LIGHT_STYLE_RAW_1D(light.attenuation, _LightThreshold, _DiffuseSmoothness * 0.5, _DiffuseSmoothness * 0.5, _DiffuseRamp);
-			//ARTISTIC_RAW(light.attenuation);
-
-			//diffuse.a = lerp(diffuse.a, diffuse.a * light.attenuation, step(0, diffuse.a));
-
 			#if defined(MK_WRAPPED_DIFFUSE)
 				diffuse = HalfWrap(diffuse, 0.5);
 			#endif
@@ -799,8 +908,19 @@
 			#endif
 
 			//Lighting could be optimized by combining every component (diffuse, specular, lightTransmission, indirect/direct), may break gooch
+			#ifdef MK_STYLIZE_SYSTEM_SHADOWS
+				diffuse *= light.attenuation;
+			#endif
 			LIGHT_STYLE_RAW_2D(diffuse, light.distanceAttenuation, _LightThreshold, _DiffuseSmoothness * 0.5, _DiffuseSmoothness * 0.5, _DiffuseRamp, SAMPLER_CLAMPED_MAIN);
-			diffuse *= light.attenuation;
+			#ifndef MK_STYLIZE_SYSTEM_SHADOWS
+				diffuse *= light.attenuation;
+			#endif
+
+			#ifdef MK_LEGACY_RP
+				#ifdef MK_HANDLE_SHADOWS_BLENDING_IN_GI
+					diffuse *= saturate(1.0 - light.giBlend);
+				#endif
+			#endif
 			return diffuse;
 		#else
 			return 1;
@@ -833,22 +953,22 @@
 					half3 sFresnel;
 					#ifdef MK_SPECULAR_ANISOTROPIC
 						//BRDF Aniso Specular
-						distribution = DistributionGGX(lightData.NoHV, lightData.ToHV, lightData.BoHV, pbsData.roughnessPow2, _Anisotropy);
+						distribution = DistributionGGX(lightData.NoLHV, lightData.ToLHV, lightData.BoLHV, pbsData.roughnessPow2, _Anisotropy);
 						//Isotropic Geo term is producing more pleasant results so its used for now
-						geometric = GeometricSmithGGX(surfaceData.VoN, diffuse.a, pbsData.roughness);
-						//geometric = GeometricSmithkGGX(_Anisotropy, lightData.ToHV, lightData.BoHV, dot(surfaceData.tangentWorld, light.dirWorld), dot(surfaceData.bitangentWorld, light.dirWorld), surfaceData.VoN, diffuse.a, pbsData.roughnessPow2);
-						//sFresnel = FresnelSchlickGGX(lightData.oneMinusVoHV, pbsData.specularRadiance, pbsData.smoothness);
-						sFresnel = FresnelCSch(lightData.LoHV, pbsData.specularRadiance, pbsData.roughness);
+						geometric = GeometricSmithGGX(surfaceData.VoN, lightData.NoL, pbsData.roughness);
+						sFresnel = FresnelCSch(lightData.LoLHV, pbsData.specularRadiance);
 					#else
-						distribution = DistributionGGX(lightData.NoHV, pbsData.roughnessPow4);
-						geometric = GeometricSmithGGX(surfaceData.VoN, diffuse.a, pbsData.roughness);
-						//sFresnel = FresnelSchlickGGX(lightData.oneMinusVoHV, pbsData.specularRadiance, pbsData.smoothness);
-						sFresnel = FresnelCSch(lightData.LoHV, pbsData.specularRadiance, pbsData.roughness);
+						distribution = DistributionGGX(lightData.NoLHV, pbsData.roughnessPow4);
+						geometric = GeometricSmithGGX(surfaceData.VoN, lightData.NoL, pbsData.roughness);
+						sFresnel = FresnelCSch(lightData.LoLHV, pbsData.specularRadiance);
 					#endif
-					specular.a = distribution * geometric;
-					specular.a = SafeDivide(specular.a, 4 * surfaceData.VoN * diffuse.a);
+					specular.a = SafeDivide(distribution * geometric, 4 * surfaceData.VoN * lightData.NoL);
 				#else //MK_SIMPLE Iso Only
-					specular.a = BlinnSpecular(lightData.NoHV, pbsData.smoothness);
+					specular.a = BlinnSpecular(lightData.NoLHV, pbsData.smoothness);
+				#endif
+
+				#ifdef MK_SHADER_API_MOBILE
+					specular.a = clamp(specular.a, 0.0, 100.0);
 				#endif
 
 				#ifdef MK_THRESHOLD_MAP
@@ -922,7 +1042,7 @@
 			half diffuseRaw = MKLightingDiffuse(surface, surfaceData, pbsData, light, lightData);
 			half4 diffuse = half4(0, 0, 0, diffuseRaw);
 			ARTISTIC_RAW(diffuse.a);
-			diffuse.a *= diffuseRaw;
+			//diffuse.a *= diffuseRaw;
 			TRANSFER_SCALAR_TO_VECTOR(diffuse);
 			
 			MKLightingSFX(surface, surfaceData, pbsData, light, lightData, diffuse, finalLightColor);

@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #if UNITY_EDITOR
@@ -72,11 +72,7 @@ namespace MK.Toon.Editor
                 if(EditorHelper.HandleBehavior(UI.refractionTab.text, "", _refractionBehavior, null, materialEditor, false))
                 {
                     FindProperties(properties);
-                    EditorGUI.BeginChangeCheck();
                     materialEditor.ShaderProperty(_indexOfRefraction, UI.indexOfRefraction);
-                    if(EditorGUI.EndChangeCheck())
-                        ManageKeywordsIndexOfRefraction();
-                    EditorGUI.BeginChangeCheck();
                     if(_refractionDistortionMap.textureValue != null)
                     {
                         materialEditor.TexturePropertySingleLine(UI.refractionDistortionMap, _refractionDistortionMap, _refractionDistortionMapScale);
@@ -84,10 +80,6 @@ namespace MK.Toon.Editor
                     }
                     else
                         materialEditor.TexturePropertySingleLine(UI.refractionDistortionMap, _refractionDistortionMap);
-                    if (EditorGUI.EndChangeCheck())
-                    {
-                        ManageKeywordsRefractionMap();
-                    }
                     materialEditor.ShaderProperty(_refractionDistortionFade, UI.refractionDistortionFade);
                 }
 
@@ -95,27 +87,21 @@ namespace MK.Toon.Editor
             }
         }
 
-        internal void ManageKeywordsRefractionMap()
+        internal void ManageKeywordsRefractionMap(Material material)
         {
             if(_refractionBehavior != null)
             {
-                foreach (Material mat in _refractionDistortionMap.targets)
-                {
-                    mat.SetShaderPassEnabled("Always", true);
-                    EditorHelper.SetKeyword(Properties.refractionDistortionMap.GetValue(mat) != null, Keywords.refractionDistortionMap, mat);
-                    //No Refraction Map = use mesh normals
-                }
+                material.SetShaderPassEnabled("Always", true);
+                EditorHelper.SetKeyword(Properties.refractionDistortionMap.GetValue(material) != null, Keywords.refractionDistortionMap, material);
+                //No Refraction Map = use mesh normals
             }
         }
 
-        internal void ManageKeywordsIndexOfRefraction()
+        internal void ManageKeywordsIndexOfRefraction(Material material)
         {
             if(_refractionBehavior != null)
             {
-                foreach (Material mat in _indexOfRefraction.targets)
-                {
-                    EditorHelper.SetKeyword(Properties.indexOfRefraction.GetValue(mat) != 0, Keywords.indexOfRefraction, mat);
-                }
+                EditorHelper.SetKeyword(Properties.indexOfRefraction.GetValue(material) != 0, Keywords.indexOfRefraction, material);
             }
         }
     }

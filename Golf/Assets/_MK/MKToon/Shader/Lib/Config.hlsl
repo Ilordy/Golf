@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_DEFINES
@@ -12,45 +12,7 @@
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// Custom User Config
 	/////////////////////////////////////////////////////////////////////////////////////////////
-	
-	/*
-	//Enable alpha blending for lighting
-	#ifndef MK_LIGHTING_ALPHA
-		#define MK_LIGHTING_ALPHA
-	#endif
-	*/
-
-	/*
-	//Enable vertex colors be combined with the albedo map
-	#ifndef MK_COMBINE_VERTEX_COLOR_WITH_ALBEDO_MAP
-		#define MK_COMBINE_VERTEX_COLOR_WITH_ALBEDO_MAP
-	#endif
-	*/
-	
-	/*
-	//Enable outline distance based fading
-	//Also set compile directive on project window: MK_TOON_OUTLINE_FADE
-	#ifndef MK_OUTLINE_FADE
-		#define MK_OUTLINE_FADE
-	#endif
-	*/
-
-	/*
-	//Enable Point Filtering instead of Bilinear
-	//This can't be customized by the user in any other way, since sampler objects has to be are hardcoded
-	#ifndef MK_POINT_FILTERING
-		#define MK_POINT_FILTERING
-	#endif
-	*/
-
-	
-	//Enable screen spaced dissolve instead of tangent spaced
-	/*
-	#ifndef MK_DISSOLVE_PROJECTION_SCREEN_SPACE
-		#define MK_DISSOLVE_PROJECTION_SCREEN_SPACE
-	#endif
-	*/
-
+	#include "GlobalShaderFeatures.hlsl"
 	//Force (baked & mixed) lightmaps
 	/*
 	#ifndef MK_FORCE_LIGHTMAPS
@@ -64,13 +26,26 @@
 		#define MK_OCCLUSION_UV_SECOND
 	#endif
 	*/
-
-	//Disable Local Antialiasing
+	
 	/*
-	#ifndef MK_LOCAL_ANTIALIASING_OFF
-		#define MK_LOCAL_ANTIALIASING_OFF
+	//Enable alpha blending for lighting
+	#ifndef MK_LIGHTING_ALPHA
+		#define MK_LIGHTING_ALPHA
 	#endif
 	*/
+
+	//Enable Legacy Banded Lighting - Banded Lighting was reworked with 3.0.13
+	/*
+	#ifndef MK_LEGACY_BANDED_LIGHTING
+		#define MK_LEGACY_BANDED_LIGHTING
+	#endif
+	*/
+	
+	#if defined(MK_OUTLINE_FADING_LINEAR) || defined(MK_OUTLINE_FADING_EXPONENTIAL) || defined(MK_OUTLINE_FADING_INVERSE_EXPONENTIAL)
+		#ifndef MK_OUTLINE_FADING
+			#define MK_OUTLINE_FADING
+		#endif
+	#endif
 
 	// ------------------------------------------------------------------------------------------
 
@@ -95,36 +70,25 @@
 	// Basic setup
 	/////////////////////////////////////////////////////////////////////////////////////////////
 
-	//SRP's dont accept fixed variables, switched to half instead while defining pipeline
-	#if defined(MK_URP) || defined(MK_LWRP)
-		#ifndef autoLP
-			#define autoLP half
-		#endif
-		#ifndef autoLP2
-			#define autoLP2 half2
-		#endif
-		#ifndef autoLP3
-			#define autoLP3 half3
-		#endif
-		#ifndef autoLP4
-			#define autoLP4 half4
-		#endif
-	#else
-		#ifndef autoLP
-			#define autoLP fixed
-		#endif
-		#ifndef autoLP2
-			#define autoLP2 fixed2
-		#endif
-		#ifndef autoLP3
-			#define autoLP3 fixed3
-		#endif
-		#ifndef autoLP4
-			#define autoLP4 fixed4
+	#if UNITY_VERSION >= 202220 && defined(LOD_FADE_CROSSFADE)
+		#ifndef MK_LOD_FADE_CROSSFADE
+			#define MK_LOD_FADE_CROSSFADE
 		#endif
 	#endif
 
-	#if SHADER_TARGET >= 35 && !defined(SHADER_API_GLES) && !defined(SHADER_API_GLES3) && !defined(MK_LOCAL_ANTIALIASING_OFF)
+	#if UNITY_VERSION >= 202220 && defined(MK_URP) && defined(_WRITE_RENDERING_LAYERS)
+		#ifndef MK_WRITE_RENDERING_LAYERS
+			#define MK_WRITE_RENDERING_LAYERS
+		#endif
+	#endif
+
+	#if defined(SHADER_API_MOBILE) || defined(SHADER_API_SWITCH)
+		#ifndef MK_SHADER_API_MOBILE
+			#define MK_SHADER_API_MOBILE
+		#endif
+	#endif
+
+	#if SHADER_TARGET >= 35 && !defined(MK_SHADER_API_MOBILE) && defined(MK_LOCAL_ANTIALIASING)
 		#ifndef MK_LOCAL_ANTIALIASING
 			#define MK_LOCAL_ANTIALIASING
 		#endif
@@ -138,6 +102,12 @@
 	#if defined(MK_URP) && UNITY_VERSION >= 202020
 		#ifndef MK_URP_2020_2_Or_Newer
 			#define MK_URP_2020_2_Or_Newer
+		#endif
+	#endif
+
+	#if defined(PROBE_VOLUMES_L1) || defined(PROBE_VOLUMES_L2)
+		#ifndef MK_PROBE_VOLUMES
+			#define MK_PROBE_VOLUMES
 		#endif
 	#endif
 
@@ -757,7 +727,7 @@
 		#endif
 	#endif
 
-	#if defined(MK_LIT) || defined(MK_INDEX_OF_REFRACTION) || defined(MK_VERTEX_ANIMATION_PULSE) || defined(MK_VERTEX_ANIMATION_NOISE)
+	#if defined(MK_DEPTH_NORMALS_PASS) || defined(MK_PROBE_VOLUMES) || defined(MK_LIT) || defined(MK_INDEX_OF_REFRACTION) || defined(MK_VERTEX_ANIMATION_PULSE) || defined(MK_VERTEX_ANIMATION_NOISE)
 		#ifndef MK_NORMAL
 			#define MK_NORMAL
 		#endif
@@ -767,10 +737,10 @@
 	// Constants
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	#ifndef OUTLINE_OBJECT_SCALE
-		#define OUTLINE_OBJECT_SCALE 0.00000025
+		#define OUTLINE_OBJECT_SCALE 0.0005
 	#endif
 	#ifndef OUTLINE_ORIGIN_SCALE
-		#define OUTLINE_ORIGIN_SCALE 0.0015
+		#define OUTLINE_ORIGIN_SCALE 0.001
 	#endif
 	#ifndef K_SPEC_DIELECTRIC_MIN
 		#define K_SPEC_DIELECTRIC_MIN 0.04
@@ -836,7 +806,7 @@
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// Input dependent defines
 	/////////////////////////////////////////////////////////////////////////////////////////////
-	#if defined(MK_PBS_MAP_0) || defined(MK_PBS_MAP_1) || defined(MK_POLYBRUSH) || defined(MK_OUTLINE_MAP) || defined(MK_VERTEX_ANIMATION_MAP) || defined(MK_THRESHOLD_MAP) || defined(MK_PARTICLES) || defined(MK_ALBEDO_MAP) || defined(MK_DISSOLVE) || defined(MK_GOOCH_MAP) || defined(MK_THICKNESS_MAP) || defined(MK_NORMAL_MAP) || defined(MK_DETAIL_NORMAL_MAP) || defined(MK_EMISSION_MAP) || defined(MK_OCCLUSION_MAP) || defined(MK_HEIGHT_MAP) || defined(MK_ARTISTIC_HATCHING) || defined(MK_ARTISTIC_DRAWN) || defined(MK_ARTISTIC_SKETCH) || defined(MK_REFRACTION_DISTORTION_MAP)
+	#if defined(MK_PBS_MAP_0) || defined(MK_PBS_MAP_1) || defined(MK_POLYBRUSH) || defined(MK_VERTEX_ANIMATION_NOISE) || defined(MK_OUTLINE_MAP) || defined(MK_OUTLINE_NOISE) || defined(MK_VERTEX_ANIMATION_MAP) || defined(MK_THRESHOLD_MAP) || defined(MK_PARTICLES) || defined(MK_ALBEDO_MAP) || defined(MK_DISSOLVE) || defined(MK_GOOCH_MAP) || defined(MK_THICKNESS_MAP) || defined(MK_NORMAL_MAP) || defined(MK_DETAIL_NORMAL_MAP) || defined(MK_EMISSION_MAP) || defined(MK_OCCLUSION_MAP) || defined(MK_HEIGHT_MAP) || defined(MK_ARTISTIC_HATCHING) || defined(MK_ARTISTIC_DRAWN) || defined(MK_ARTISTIC_SKETCH) || defined(MK_REFRACTION_DISTORTION_MAP)
 		#ifndef MK_TCM
 			#define MK_TCM
 		#endif
@@ -870,7 +840,7 @@
 		#endif
 	#endif
 
-	#if defined(MK_REFRACTION) || defined(MK_IRIDESCENCE) || defined(MK_LightTransmission) || defined(MK_RIM) || defined(MK_SPECULAR) || defined(LIGHTMAP_ON) || defined(UNITY_SHOULD_SAMPLE_SH) || defined(DYNAMICLIGHTMAP_ON) || defined(DIRLIGHTMAP_COMBINED) || defined(MK_RIM) || defined(MK_ENVIRONMENT_REFLECTIONS_ADVANCED) || defined(MK_FRESNEL_HIGHLIGHTS) || defined(MK_DIFFUSE_MINNAERT) || defined(MK_DIFFUSE_OREN_NAYAR)
+	#if defined(MK_PROBE_VOLUMES) || defined(MK_REFRACTION) || defined(MK_IRIDESCENCE) || defined(MK_LightTransmission) || defined(MK_RIM) || defined(MK_SPECULAR) || defined(LIGHTMAP_ON) || defined(UNITY_SHOULD_SAMPLE_SH) || defined(DYNAMICLIGHTMAP_ON) || defined(DIRLIGHTMAP_COMBINED) || defined(MK_RIM) || defined(MK_ENVIRONMENT_REFLECTIONS_ADVANCED) || defined(MK_FRESNEL_HIGHLIGHTS) || defined(MK_DIFFUSE_MINNAERT) || defined(MK_DIFFUSE_OREN_NAYAR)
 		#ifndef MK_VD
 			#define MK_VD
 		#endif
@@ -882,7 +852,7 @@
 		#endif
 	#endif
 
-	#if	defined(MK_REFRACTION) || defined(MK_SOFT_FADE) || defined(MK_CAMERA_FADE) || defined(MK_NORMALIZED_SCREEN_UV) || defined(MK_SCREEN_SPACE_OCCLUSION)
+	#if	(UNITY_VERSION >= 202220 && defined(MK_INDIRECT)) || defined(USE_CLUSTERED_LIGHTING) || defined(USE_FORWARD_PLUS) || defined(MK_REFRACTION) || defined(MK_SOFT_FADE) || defined(MK_CAMERA_FADE) || defined(MK_NORMALIZED_SCREEN_UV) || defined(MK_SCREEN_SPACE_OCCLUSION)
 		#ifndef MK_SCREEN_UV
 			#define MK_SCREEN_UV
 		#endif
@@ -895,8 +865,8 @@
 	#endif
 
 	#if defined(MK_POS_NULL_CLIP) || defined(MK_REFRACTION) || defined(MK_SOFT_FADE) || defined(MK_CAMERA_FADE) || defined(MK_SCREEN_UV)
-		#ifndef MK_POS_CLIP
-			#define MK_POS_CLIP
+		#ifndef MK_BARYCENTRIC_POS_CLIP
+			#define MK_BARYCENTRIC_POS_CLIP
 		#endif
 	#endif
 
@@ -918,27 +888,27 @@
 	#endif
 	#if defined(MK_SPECULAR)
 		#ifdef MK_SPECULAR_ANISOTROPIC
-			#ifndef MK_T_DOT_HV
-				#define MK_T_DOT_HV
+			#ifndef MK_T_DOT_LHV
+				#define MK_T_DOT_LHV
 			#endif
-			#ifndef MK_B_DOT_HV
-				#define MK_B_DOT_HV
+			#ifndef MK_B_DOT_LHV
+				#define MK_B_DOT_LHV
 			#endif
 		#endif
-		#ifndef MK_HV
-			#define MK_HV
+		#ifndef MK_LHV
+			#define MK_LHV
 		#endif
-		#ifndef MK_N_DOT_HV
-			#define MK_N_DOT_HV
+		#ifndef MK_N_DOT_LHV
+			#define MK_N_DOT_LHV
 		#endif
 		//used for C.Sch Fresnel, if switched back to Schlick this should be disabled
-		#ifndef MK_L_DOT_HV
-			#define MK_L_DOT_HV
+		#ifndef MK_L_DOT_LHV
+			#define MK_L_DOT_LHV
 		#endif
 		/*
 		//used for Schlick Fresnel
-		#ifndef MK_V_DOT_HV
-			#define MK_V_DOT_HV
+		#ifndef MK_V_DOT_LHV
+			#define MK_V_DOT_LHV
 		#endif
 		*/
 	#endif
@@ -979,7 +949,7 @@
 	#endif
 	*/
 
-	#if defined(MK_TBN) || defined(MK_FLIPBOOK) || defined(MK_TCM) || defined(MK_TCD) || defined(MK_T_DOT_HV) || defined(MK_B_DOT_HV) || defined(MK_WORKFLOW_PBS) || defined(MK_ML_REF_N_DOT_V) || defined(MK_ML_DOT_V) || defined(MK_MV_REF_N) || defined(MK_ML_REF_N) || defined(MK_N_DOT_HV) || defined(MK_HV) || defined(MK_N_DOT_L) || defined(MK_V_DOT_L) || defined(MK_V_DOT_N) || defined(MK_LIT) || defined(MK_DISSOLVE) || defined(MK_REFRACTION)
+	#if defined(MK_TBN) || defined(MK_FLIPBOOK) || defined(MK_TCM) || defined(MK_TCD) || defined(MK_T_DOT_LHV) || defined(MK_B_DOT_LHV) || defined(MK_WORKFLOW_PBS) || defined(MK_ML_REF_N_DOT_V) || defined(MK_ML_DOT_V) || defined(MK_MV_REF_N) || defined(MK_ML_REF_N) || defined(MK_N_DOT_LHV) || defined(MK_LHV) || defined(MK_N_DOT_L) || defined(MK_V_DOT_L) || defined(MK_V_DOT_N) || defined(MK_LIT) || defined(MK_DISSOLVE) || defined(MK_REFRACTION)
 		#ifndef MK_SURFACE_DATA_REQUIRED
 			#define MK_SURFACE_DATA_REQUIRED
 		#endif
@@ -997,31 +967,16 @@
 		#endif
 	#endif
 
-	#if defined(LIGHTMAP_ON) || defined(DYNAMICLIGHTMAP_ON) || defined(MK_ENVIRONMENT_REFLECTIONS)
+	//#if defined(LIGHTMAP_ON) || defined(DYNAMICLIGHTMAP_ON) || defined(MK_ENVIRONMENT_REFLECTIONS) || (defined( SHADOWS_SCREEN ) && defined( LIGHTMAP_ON ))
+	#ifdef MK_LIT
 		#ifndef MK_LIGHTMAP_UV
 			#define MK_LIGHTMAP_UV
 		#endif
 	#endif
 
-	#ifdef MK_LIT
-		#if defined(MK_RECEIVE_SHADOWS)
-			#if defined(MK_URP_2021_1_Or_Newer)
-				#if defined(_MAIN_LIGHT_SHADOWS) || defined(_MAIN_LIGHT_SHADOWS_CASCADE) || defined(_MAIN_LIGHT_SHADOWS_SCREEN)
-					#define MK_MAIN_LIGHT_CALCULATE_SHADOWS
-
-					#if !defined(_MAIN_LIGHT_SHADOWS_CASCADE)
-						#define MK_SHADOW_COORD_INTERPOLATOR
-					#endif
-				#endif
-			#else
-				#if defined(_MAIN_LIGHT_SHADOWS)
-					#define MK_MAIN_LIGHT_CALCULATE_SHADOWS
-
-					#if !defined(_MAIN_LIGHT_SHADOWS_CASCADE)
-						#define MK_SHADOW_COORD_INTERPOLATOR
-					#endif
-				#endif
-			#endif
+	#if defined(MK_VERTCLR) || defined(MK_PARTICLES) || defined(MK_POLYBRUSH)
+		#ifndef MK_VERTEX_COLOR_REQUIRED
+			#define MK_VERTEX_COLOR_REQUIRED
 		#endif
 	#endif
 #endif

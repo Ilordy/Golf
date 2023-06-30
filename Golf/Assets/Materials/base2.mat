@@ -114,8 +114,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - Color_4b87829eb8d5418e9ae2ed3dd70c1c49: {r: 0, g: 1, b: 0.9709249, a: 0}
-    - Color_b5917b20fac6484ba3e52055822f0a9e: {r: 0.0031594948, g: 0.5463574, b: 0.6698113,
-        a: 0}
+    - Color_b5917b20fac6484ba3e52055822f0a9e: {r: 0, g: 0.3599334, b: 0.4433962, a: 0}
     - _BaseColor: {r: 0.1792453, g: 0.1792453, b: 0.1792453, a: 1}
     - _Color: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

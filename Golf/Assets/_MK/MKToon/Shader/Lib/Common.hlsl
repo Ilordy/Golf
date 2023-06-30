@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_COMMON
@@ -23,6 +23,8 @@
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// COMMON
 	/////////////////////////////////////////////////////////////////////////////////////////////
+	#define MK_NOISE_MULT 2.0h
+
 	inline float Stutter(float t, float f)
 	{
 		return frac(SafeDivide(round(t * f), f));
@@ -34,6 +36,39 @@
 	inline float3 Stutter(float t, float3 f)
 	{
 		return frac(SafeDivide(round(t * f), f));
+	}
+
+	inline half ScaleToFitResolution(half2 referenceAspect, half2 referenceResolution, half2 resolution)
+	{
+		half aspect = SafeDivide(resolution.x, resolution.y);
+		half scaledAspect = SafeDivide(max(referenceAspect.x, referenceAspect.y), aspect);
+		half scaledResolution = lerp((resolution.y / referenceResolution.y), (resolution.x / referenceResolution.x), saturate(resolution.y / resolution.x));
+		scaledAspect = lerp(1.0 / scaledAspect, scaledAspect, saturate(aspect));
+		return scaledAspect * scaledResolution;
+	}
+
+	inline half ScaleToFitOrthograpicSize(float clipScale)
+	{
+		half orthographicScale = 1;
+		UNITY_BRANCH
+		if(unity_OrthoParams.w > 0)
+			orthographicScale = clipScale / unity_OrthoParams.y;
+		return orthographicScale;
+	}
+
+	inline half ScaleToFitOrthographicUV(float clipScale)
+	{
+		half scaleFactor;
+		#if defined(MK_MULTI_PASS_STEREO_SCALING) || defined(UNITY_SINGLE_PASS_STEREO) || defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
+			scaleFactor = 2.0;
+		#else
+			scaleFactor = 1.0;
+		#endif
+		half orhtographicUVScale = 1;
+		UNITY_BRANCH
+		if(unity_OrthoParams.w > 0)
+			orhtographicUVScale = 2.0 * clipScale * unity_OrthoParams.y;
+		return orhtographicUVScale * scaleFactor;
 	}
 
 	inline half SoftFade(float near, float far, float4 ndc)
@@ -56,10 +91,8 @@
 		return saturate((depth - near) * far);
 	}
 
-	inline void MixAlbedoDetail(inout half3 albedo, DECLARE_TEXTURE_2D_ARGS(tex, samplerTex), float2 uv, float3 blendUV)
+	inline void MixAlbedoDetail(inout half3 albedo, in half4 detail)
 	{
-		half4 detail = SAMPLE_TEX2D_FLIPBOOK(tex, samplerTex, uv, blendUV);
-		detail.rgb *= _DetailColor.rgb;
 		#if defined(MK_DETAIL_BLEND_MIX)
 			albedo = lerp(albedo, detail.rgb, _DetailMix * detail.a);
 		#elif defined(MK_DETAIL_BLEND_ADD)
@@ -113,59 +146,66 @@
 
 	inline half3 NormalMappingWorld(DECLARE_TEXTURE_2D_ARGS(normalMap, samplerTex), float2 uv, float3 blendUV, half bumpiness, half3x3 tbn)
 	{
-		return SafeNormalize(mul(UnpackNormalMap(PASS_TEXTURE_2D(normalMap, samplerTex), uv, blendUV, bumpiness), tbn));
+		return MKSafeNormalize(mul(UnpackNormalMap(PASS_TEXTURE_2D(normalMap, samplerTex), uv, blendUV, bumpiness), tbn));
 	}
 
 	inline half3 NormalMappingWorld(DECLARE_TEXTURE_2D_ARGS(normalMap, samplerTex), float2 uvMain, float3 blendUV, half bumpiness, DECLARE_TEXTURE_2D_ARGS(detailNormalMap, samplerTex2), float2 uvDetail, half bumpinessDetail, half3x3 tbn)
 	{
 		half3 normalTangent = UnpackNormalMap(PASS_TEXTURE_2D(normalMap, samplerTex), uvMain, blendUV, bumpiness);
 		half3 normalDetailTangent = UnpackNormalMap(PASS_TEXTURE_2D(detailNormalMap, samplerTex2), uvDetail, blendUV, bumpinessDetail);
-		return SafeNormalize(mul(SafeNormalize(half3(normalTangent.xy + normalDetailTangent.xy, lerp(normalTangent.z, normalDetailTangent.z, 0.5))), tbn));
+		return MKSafeNormalize(mul(MKSafeNormalize(half3(normalTangent.xy + normalDetailTangent.xy, lerp(normalTangent.z, normalDetailTangent.z, 0.5))), tbn));
 	}
 
 	//threshold based lighting type
 	inline half Cel(half threshold, half smoothnessMin, half smoothnessMax, half value)
 	{
 		#ifdef MK_LOCAL_ANTIALIASING
-			half ddxy = fwidth(value);
-			return smoothstep(threshold - smoothnessMin - ddxy, threshold + smoothnessMax + ddxy, value);
+			half ddx = fwidth(value);
+			return smoothstep(threshold - smoothnessMin - ddx, threshold + smoothnessMax + ddx, value);
 		#else
 			return smoothstep(threshold - smoothnessMin, threshold + smoothnessMax, value);
 		#endif
 	}
 
-	/*
-	inline half SmoothFloor(half v, half smoothness, half threshold)
+	inline half SmoothFloor(half v, half smoothness)
 	{
-		threshold = 1.0 - threshold;
-		return ((cos(max((frac(v + threshold) - (1 - smoothness)) / smoothness, 0.5) * PI_TWO) + 1) * 0.5) + floor(v + threshold);
+		half roughness = 1.0 - smoothness;
+		half scale = cos(PI_TWO*max((frac(v) - roughness) / smoothness, 0.5));
+		half bias = (scale + 1) * 0.5;
+		return floor(v) + bias;
 	}
-	*/
 
 	//level based lighting type
 	inline half Banding(half v, half levels, half smoothnessMin, half smoothnessMax, half threshold, half fade)
 	{	
-		/*
-		levels--;
-		half banding = v * lerp(1, 3, fade);
-		return saturate(SafeDivide(SmoothFloor(banding * levels, smoothnessMin + smoothnessMax, threshold), levels));
-		*/
-		
-		levels--;
-		threshold = lerp(threshold, threshold * levels, fade);
-		half vl = v * lerp(1, levels, fade);
-		half levelStep = Rcp(levels);
+		#ifdef MK_LEGACY_BANDED_LIGHTING
+			levels--;
+			threshold = lerp(threshold, threshold * levels, fade);
+			half vl = v * lerp(1, levels, fade);
+			half levelStep = Rcp(levels);
 
-		half bands = Cel(threshold, smoothnessMin, smoothnessMax, vl);
-		bands += Cel(levelStep + threshold, smoothnessMin, smoothnessMax, vl);
-		bands += Cel(levelStep * 2 + threshold, smoothnessMin, smoothnessMax, vl) * step(3, levels);
-		bands += Cel(levelStep * 3 + threshold, smoothnessMin, smoothnessMax, vl) * step(4, levels);
-		bands += Cel(levelStep * 4 + threshold, smoothnessMin, smoothnessMax, vl) * step(5, levels);
-		bands += Cel(levelStep * 5 + threshold, smoothnessMin, smoothnessMax, vl) * step(6, levels);
+			half bands = Cel(threshold, smoothnessMin, smoothnessMax, vl);
+			bands += Cel(levelStep + threshold, smoothnessMin, smoothnessMax, vl);
+			bands += Cel(levelStep * 2 + threshold, smoothnessMin, smoothnessMax, vl) * step(3, levels);
+			bands += Cel(levelStep * 3 + threshold, smoothnessMin, smoothnessMax, vl) * step(4, levels);
+			bands += Cel(levelStep * 4 + threshold, smoothnessMin, smoothnessMax, vl) * step(5, levels);
+			bands += Cel(levelStep * 5 + threshold, smoothnessMin, smoothnessMax, vl) * step(6, levels);
 
-		return bands * levelStep;
-		//return lerp(bands, Cel(threshold, smoothnessMin, smoothnessMax, v), smoothnessMin + smoothnessMax); // * step(threshold, 0)
-		//return ceil(v * levels) / levels;
+			return bands * levelStep;
+		#else
+			levels--;
+			half smoothness = smoothnessMin + smoothnessMax;
+			#ifdef MK_LOCAL_ANTIALIASING
+				//TODO proper hardware AA still missing...
+				smoothness = max(smoothness, 0.005);
+			#endif
+
+			v = max(0.0, v - threshold * 0.5);
+			half offset = (2.0 / levels) + fade + 1 - smoothness * Rcp(levels);
+			half level = offset * v;
+			half banding = SmoothFloor(level * levels, smoothness);
+			return saturate(banding / levels);
+		#endif
 	}
 
 	//Rampcolor when dissolving
@@ -193,18 +233,22 @@
 		return color;
 	}
 
-	inline float NoiseSimple(float3 v)
+	inline float NoiseSimple(float3 v, float2 uv)
 	{
-		return frac(sin( dot(v, REL_LUMA * 123456.54321)) * 987654.56789);
+		#ifdef MK_LEGACY_NOISE
+			return frac(sin(dot(v, REL_LUMA * 123456.54321)) * 987654.56789);
+		#else
+			return MK_NOISE_MULT * tex2Dlod(_NoiseMap, float4(uv.xy, 0, 0)).r;
+		#endif
 	}
 
 	inline half Drawn(half value, half artistic, half artisticClampMin, half artisticClampMax)
 	{			
 		//currently implemented as soft pattern, see repo for hard pattern prototype
 		#ifdef MK_LOCAL_ANTIALIASING
-			half ddxy = fwidth(value);
-			return lerp(artisticClampMin, 1, value) * smoothstep(artistic - HALF_MIN - ddxy, artistic + ddxy, clamp(value, artisticClampMin, artisticClampMax));
-			//return lerp(artisticClampMin, 1, value) * smoothstep(artistic - T_H - ddxy, artistic, clamp(value, artisticClampMin, artisticClampMax));
+			half ddx = fwidth(value);
+			return lerp(artisticClampMin, 1, value) * smoothstep(artistic - HALF_MIN - ddx, artistic + ddx, clamp(value, artisticClampMin, artisticClampMax));
+			//return lerp(artisticClampMin, 1, value) * smoothstep(artistic - T_H - ddx, artistic, clamp(value, artisticClampMin, artisticClampMax));
 		#else
 			return lerp(artisticClampMin, 1, value) * smoothstep(artistic - HALF_MIN, artistic, clamp(value, artisticClampMin, artisticClampMax));
 		#endif
@@ -220,9 +264,9 @@
 		half stepMax = clamp(value, threshold, 1.0h) * 6.0h;
 		half3 darkCoeff, brightCoeff;
 		#ifdef MK_LOCAL_ANTIALIASING
-			half ddxy = fwidth(value);
-			darkCoeff = saturate(stepMax - half3(0, 1, 2) - ddxy); //half3(0, 1, 2));  7 step
-			brightCoeff = saturate(stepMax - half3(3, 4, 5) - ddxy);
+			half ddx = fwidth(value);
+			darkCoeff = saturate(stepMax - half3(0, 1, 2) - ddx); //half3(0, 1, 2));  7 step
+			brightCoeff = saturate(stepMax - half3(3, 4, 5) - ddx);
 		#else
 			darkCoeff = saturate(stepMax - half3(0, 1, 2)); //half3(0, 1, 2));  7 step
 			brightCoeff = saturate(stepMax - half3(3, 4, 5));
@@ -247,8 +291,8 @@
 	inline half Sketch(half vMin, half vMax, half value)
 	{
 		#ifdef MK_LOCAL_ANTIALIASING
-			half ddxy = fwidth(value);
-			return max(lerp(vMin - T_V - ddxy, vMax, value), 0);
+			half ddx = fwidth(value);
+			return max(lerp(vMin - T_V - ddx, vMax, value), 0);
 		#else
 			return max(lerp(vMin - T_V, vMax, value), 0);
 		#endif
@@ -322,12 +366,12 @@
 		return positionObject;
 	}
 
-	inline float3 VertexAnimationNoise(float3 positionObject, half3 normalObject, half intensity, half3 frequency)
+	inline float3 VertexAnimationNoise(float3 positionObject, float2 uv, half3 normalObject, half intensity, half3 frequency)
 	{
 		#ifdef MK_VERTEX_ANIMATION_STUTTER
-			positionObject += normalObject * sin(Stutter(NoiseSimple(positionObject) * _Time.y, frequency.xyz) * frequency.xyz) * intensity;
+			positionObject += normalObject * sin(Stutter(NoiseSimple(positionObject, normalObject.xz) * _Time.y, frequency.xyz) * frequency.xyz) * intensity;
 		#else
-			positionObject += normalObject * sin((NoiseSimple(positionObject) * _Time.y) * frequency.xyz) * intensity;
+			positionObject += normalObject * sin((NoiseSimple(positionObject, normalObject.xz) * _Time.y) * frequency.xyz) * intensity;
 		#endif
 		return positionObject;
 	}
@@ -356,7 +400,7 @@
 		#if defined(MK_VERTEX_ANIMATION_PULSE)
 			return VertexAnimationPulse(positionObject, normalObject, intensity, frequency);
 		#elif defined(MK_VERTEX_ANIMATION_NOISE)
-			return VertexAnimationNoise(positionObject, normalObject, intensity, frequency);
+			return VertexAnimationNoise(positionObject, uv, normalObject, intensity, frequency);
 		#else
 			return VertexAnimationSine(positionObject, intensity, frequency);
 		#endif

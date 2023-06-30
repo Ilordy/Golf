@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 namespace MK.Toon
@@ -20,6 +20,8 @@ namespace MK.Toon
         public static readonly Uniform zTest         = new Uniform("_ZTest");
         public static readonly Uniform blendSrc      = new Uniform("_BlendSrc");
         public static readonly Uniform blendDst      = new Uniform("_BlendDst");
+        public static readonly Uniform blendSrcAlpha = new Uniform("_BlendSrcAlpha");
+        public static readonly Uniform blendDstAlpha = new Uniform("_BlendDstAlpha");
         public static readonly Uniform blend         = new Uniform("_Blend");
         public static readonly Uniform alphaClipping = new Uniform("_AlphaClipping");
 
@@ -29,6 +31,9 @@ namespace MK.Toon
         public static readonly Uniform albedoColor                 = new Uniform("_AlbedoColor");
         public static readonly Uniform alphaCutoff                 = new Uniform("_AlphaCutoff");
         public static readonly Uniform albedoMap                   = new Uniform("_AlbedoMap");
+        #if MK_ALBEDO_MAP_INTENSITY
+        public static readonly Uniform albedoMapIntensity          = new Uniform("_AlbedoMapIntensity");
+        #endif
         public static readonly Uniform specularColor               = new Uniform("_SpecularColor");
         public static readonly Uniform metallic                    = new Uniform("_Metallic");
         public static readonly Uniform smoothness                  = new Uniform("_Smoothness");
@@ -138,6 +143,7 @@ namespace MK.Toon
         public static readonly Uniform lightTransmissionIntensity = new Uniform("_LightTransmissionIntensity");
         public static readonly Uniform environmentReflections     = new Uniform("_EnvironmentReflections");
         public static readonly Uniform fresnelHighlights          = new Uniform("_FresnelHighlights");
+        public static readonly Uniform IndirectFade               = new Uniform("_IndirectFade");
         public static readonly Uniform stencil                    = new Uniform("_Stencil");
         public static readonly Uniform renderPriority             = new Uniform("_RenderPriority");
         public static readonly Uniform stencilRef                 = new Uniform("_StencilRef");
@@ -155,7 +161,7 @@ namespace MK.Toon
         public static readonly Uniform outlineData    = new Uniform("_OutlineData");
         public static readonly Uniform outlineMap     = new Uniform("_OutlineMap");
         public static readonly Uniform outlineSize    = new Uniform("_OutlineSize");
-        #if MK_TOON_OUTLINE_FADE
+        #if MK_TOON_OUTLINE_FADING_LINEAR  || MK_TOON_OUTLINE_FADING_EXPONENTIAL || MK_TOON_OUTLINE_FADING_INVERSE_EXPONENTIAL
         public static readonly Uniform outlineFadeMin = new Uniform("_OutlineFadeMin");
         public static readonly Uniform outlineFadeMax = new Uniform("_OutlineFadeMax");
         #endif
@@ -200,5 +206,6 @@ namespace MK.Toon
         /////////////////
         public static readonly Uniform mainTex = new Uniform("_MainTex");
         public static readonly Uniform cutoff  = new Uniform("_Cutoff");
+        public static readonly Uniform color  = new Uniform("_Color");
     }
 }

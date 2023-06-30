@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 using UnityEngine;
@@ -226,6 +226,7 @@ namespace MK.Toon
         public override void SetValue(Material material, UnityEngine.Color color)
         {
             material.SetColor(_uniform.id, color);
+            SetKeyword(material, color.maxColorComponent > 0, 0);
         }
     }
     public class TextureProperty : Property<UnityEngine.Texture>
@@ -471,6 +472,8 @@ namespace MK.Toon
                 {
                     Properties.blendSrc.SetValue(material, BlendFactor.One);
                     Properties.blendDst.SetValue(material, BlendFactor.Zero);
+                    Properties.blendSrcAlpha.SetValue(material, BlendFactor.One);
+                    Properties.blendDstAlpha.SetValue(material, BlendFactor.Zero);
                 }
                 else
                 {
@@ -479,22 +482,32 @@ namespace MK.Toon
                         case Blend.Alpha: //Alpha
                         Properties.blendSrc.SetValue(material, BlendFactor.SrcAlpha);
                         Properties.blendDst.SetValue(material, BlendFactor.OneMinusSrcAlpha);
+                        Properties.blendSrcAlpha.SetValue(material, BlendFactor.One);
+                        Properties.blendDstAlpha.SetValue(material, BlendFactor.OneMinusSrcAlpha);
                         break;
                         case Blend.Premultiply:
                         Properties.blendSrc.SetValue(material, BlendFactor.One);
                         Properties.blendDst.SetValue(material, BlendFactor.OneMinusSrcAlpha);
+                        Properties.blendSrcAlpha.SetValue(material, BlendFactor.One);
+                        Properties.blendDstAlpha.SetValue(material, BlendFactor.OneMinusSrcAlpha);
                         break;
                         case Blend.Additive:
-                        Properties.blendSrc.SetValue(material, BlendFactor.One);
+                        Properties.blendSrc.SetValue(material, BlendFactor.SrcAlpha);
                         Properties.blendDst.SetValue(material, BlendFactor.One);
+                        Properties.blendSrcAlpha.SetValue(material, BlendFactor.One);
+                        Properties.blendDstAlpha.SetValue(material, BlendFactor.One);
                         break;
                         case Blend.Multiply:
                         Properties.blendSrc.SetValue(material, BlendFactor.DstColor);
                         Properties.blendDst.SetValue(material, BlendFactor.Zero);
+                        Properties.blendSrcAlpha.SetValue(material, BlendFactor.Zero);
+                        Properties.blendDstAlpha.SetValue(material, BlendFactor.One);
                         break;
                         default:
                         Properties.blendSrc.SetValue(material, BlendFactor.SrcAlpha);
                         Properties.blendDst.SetValue(material, BlendFactor.OneMinusSrcAlpha);
+                        Properties.blendSrcAlpha.SetValue(material, BlendFactor.One);
+                        Properties.blendDstAlpha.SetValue(material, BlendFactor.OneMinusSrcAlpha);
                         break;
                     }
                 }

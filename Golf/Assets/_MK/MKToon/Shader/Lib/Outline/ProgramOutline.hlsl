@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_OUTLINE_ONLY_BASE
@@ -35,21 +35,36 @@
 		#endif
 
 		#ifdef MK_OUTLINE_NOISE
-			_OutlineSize = lerp(_OutlineSize, _OutlineSize * NoiseSimple(normalize(vertexInput.vertex.xyz)), _OutlineNoise);
+			_OutlineSize = lerp(_OutlineSize, _OutlineSize * NoiseSimple(normalize(vertexInput.vertex.xyz), vertexInput.normal.xz), _OutlineNoise);
 		#endif
 
 		#ifdef MK_VERTEX_ANIMATION
 			vertexInput.vertex.xyz = VertexAnimation(PASS_VERTEX_ANIMATION_ARG(_VertexAnimationMap, PASS_VERTEX_ANIMATION_UV(vertexOutput.uv), _VertexAnimationIntensity, _VertexAnimationFrequency.xyz, vertexInput.vertex.xyz, vertexInput.normal));
 		#endif
 
-		#ifdef MK_OUTLINE_FADE
-			float dist = distance(CAMERA_POSITION_WORLD , mul(MATRIX_M, float4(vertexInput.vertex.xyz, 1.0)).xyz);
-			_OutlineSize *= saturate((dist - _OutlineFadeMin) / (_OutlineFadeMax - _OutlineFadeMin));
+		#ifndef MK_LEGACY_SCREEN_SCALING
+			#if defined(MK_MULTI_PASS_STEREO_SCALING) || defined(UNITY_SINGLE_PASS_STEREO) || defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
+				_OutlineSize *= 0.5;
+			#endif
 		#endif
+
+		#ifdef MK_OUTLINE_FADING
+			float dist = distance(CAMERA_POSITION_WORLD , mul(MATRIX_M, float4(vertexInput.vertex.xyz, 1.0)).xyz);
+			#if defined(MK_OUTLINE_FADING_EXPONENTIAL)
+				_OutlineSize *= smoothstep(_OutlineFadeMin, _OutlineFadeMax, dist);
+			#elif defined(MK_OUTLINE_FADING_INVERSE_EXPONENTIAL)
+				float interp = saturate((dist - _OutlineFadeMin) / (_OutlineFadeMax - _OutlineFadeMin));
+				_OutlineSize *= (interp + (interp - (interp * interp * (3.0f - 2.0f * interp))));
+			#else
+				_OutlineSize *= saturate((dist - _OutlineFadeMin) / (_OutlineFadeMax - _OutlineFadeMin));
+			#endif
+		#endif
+
+		vertexInput.normal = MKSafeNormalize(vertexInput.normal);
 
 		#if defined(MK_OUTLINE_HULL_ORIGIN)
 			//float4x4 modelMatrix = MATRIX_M;
-			//vertexInput.vertex.xyz += SafeNormalize(vertexInput.vertex.xyz) * _OutlineSize * OUTLINE_ORIGIN_SCALE;
+			//vertexInput.vertex.xyz += MKSafeNormalize(vertexInput.vertex.xyz) * _OutlineSize * OUTLINE_ORIGIN_SCALE;
 			//float3 positionWorld = mul(modelMatrix, float4(vertexInput.vertex.xyz, 1.0)).xyz;
 			float3 scaleOrigin = 1 + _OutlineSize * OUTLINE_ORIGIN_SCALE;
 			float3x3 scale = float3x3
@@ -70,22 +85,33 @@
 
 		#if defined(MK_OUTLINE_HULL_ORIGIN)
 			vertexOutput.svPositionClip = ComputeWorldToClipSpace(positionWorld);
-		#else
+		#elif defined(MK_OUTLINE_HULL_CLIP)
 			//Make it pixel perfect and SCALED on different aspects and resolutions
-			half scaledAspect = SafeDivide(REFERENCE_ASPECT.x, SafeDivide(_ScreenParams.x, _ScreenParams.y));
-			half scaledResolution = SafeDivide(_ScreenParams.x, REFERENCE_RESOLUTION.x);
 			vertexOutput.svPositionClip = ComputeObjectToClipSpace(vertexInput.vertex.xyz);
+
+			#ifndef MK_LEGACY_SCREEN_SCALING
+				half oScale;
+				oScale = ScaleToFitOrthograpicSize(vertexOutput.svPositionClip.w);
+				half scale = ScaleToFitResolution(REFERENCE_ASPECT, REFERENCE_RESOLUTION, _ScreenParams.xy);
+			#else
+				half oScale = 1;
+				half scaledAspect = SafeDivide(REFERENCE_ASPECT.x, SafeDivide(_ScreenParams.x, _ScreenParams.y));
+				half scaledResolution = SafeDivide(_ScreenParams.x, REFERENCE_RESOLUTION.x);
+				half scale = scaledAspect * scaledResolution;
+			#endif
 
 			#if defined(MK_OUTLINE_DATA_UV7)
 				half3 normalBakedClip = ComputeNormalObjectToClipSpace(vertexInput.normalBaked.xyz);
-				vertexOutput.svPositionClip.xy += 2 * _OutlineSize * SafeDivide(normalBakedClip.xy, _ScreenParams.xy) * scaledAspect * scaledResolution;
+				vertexOutput.svPositionClip.xy += 2 * oScale * _OutlineSize * SafeDivide(normalBakedClip.xy, _ScreenParams.xy) * scale;
 			#else
 				half3 normalClip = ComputeNormalObjectToClipSpace(vertexInput.normal.xyz);
-				vertexOutput.svPositionClip.xy += 2 * _OutlineSize * SafeDivide(normalClip.xy, _ScreenParams.xy) * scaledAspect * scaledResolution;
+				vertexOutput.svPositionClip.xy += 2 * oScale * _OutlineSize * SafeDivide(normalClip.xy, _ScreenParams.xy) * scale;
 			#endif
+		#else
+			vertexOutput.svPositionClip = ComputeObjectToClipSpace(vertexInput.vertex.xyz);
 		#endif
 
-		#if defined(MK_VERTCLR) || defined(MK_POLYBRUSH)
+		#ifdef MK_VERTEX_COLOR_REQUIRED
 			vertexOutput.color = vertexInput.color;
 		#endif
 
@@ -97,7 +123,7 @@
 			vertexOutput.fogFactor = FogFactorVertex(vertexOutput.svPositionClip.z);
 		#endif
 
-		#ifdef MK_POS_CLIP
+		#ifdef MK_BARYCENTRIC_POS_CLIP
 			vertexOutput.positionClip = vertexOutput.svPositionClip;
 		#endif
 		#ifdef MK_POS_NULL_CLIP
@@ -114,13 +140,21 @@
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// FRAGMENT SHADER
 	/////////////////////////////////////////////////////////////////////////////////////////////
-	half4 OutlineFrag(VertexOutputOutlineOnly vertexOutput) : SV_Target
+	MKFragmentOutput OutlineFrag(VertexOutputOutlineOnly vertexOutput)
 	{
 		UNITY_SETUP_INSTANCE_ID(vertexOutput);
 		UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(vertexOutput);
 
+		MKFragmentOutput mkFragmentOutput;
+		INITIALIZE_STRUCT(MKFragmentOutput, mkFragmentOutput);
+
+		#ifdef MK_LOD_FADE_CROSSFADE
+			LODFadeCrossFade(vertexOutput.SV_CLIP_POS);
+		#endif
+
 		MKSurfaceData surfaceData = ComputeSurfaceData
 		(
+			vertexOutput.svPositionClip,
 			PASS_POSITION_WORLD_ARG(0)
 			PASS_FOG_FACTOR_WORLD_ARG(vertexOutput.fogFactor)
 			PASS_BASE_UV_ARG(float4(vertexOutput.uv.xy, 0, 0))
@@ -131,14 +165,20 @@
 			PASS_TANGENT_WORLD_ARG(1)
 			PASS_VIEW_TANGENT_ARG(vertexOutput.viewTangent)
 			PASS_BITANGENT_WORLD_ARG(1)
-			PASS_POSITION_CLIP_ARG(vertexOutput.positionClip)
+			PASS_BARYCENTRIC_POSITION_CLIP_ARG(vertexOutput.positionClip)
 			PASS_NULL_CLIP_ARG(vertexOutput.nullClip)
 			PASS_FLIPBOOK_UV_ARG(vertexOutput.flipbookUV)
 		);
-		Surface surface = InitSurface(surfaceData, PASS_SAMPLER_2D(_AlbedoMap), autoLP4(_OutlineColor.rgb, _AlbedoColor.a), vertexOutput.svPositionClip);
+		Surface surface = InitSurface(surfaceData, PASS_SAMPLER_2D(_AlbedoMap), half4(_OutlineColor.rgb, _AlbedoColor.a), vertexOutput.svPositionClip);
 		MKPBSData pbsData = ComputePBSData(surface, surfaceData);
 		Composite(surface, surfaceData, pbsData);
 
-		return surface.final;
+		mkFragmentOutput.svTarget0 = surface.final;
+		#ifdef MK_WRITE_RENDERING_LAYERS
+			uint renderingLayers = GetMeshRenderingLayer();
+			mkFragmentOutput.svTarget1 = float4(EncodeMeshRenderingLayer(renderingLayers), 0, 0, 0);
+		#endif
+
+		return mkFragmentOutput;
 	}
 #endif

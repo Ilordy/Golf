@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_PIPELINE
@@ -23,82 +23,118 @@
 	/////////////////////////////////////////////////////////////////////////////////////////////
 	// Helpers
 	/////////////////////////////////////////////////////////////////////////////////////////////
-	//Somehow on Metal overloaded methods (with different types) cause a redefinition compiler issue
+	//On Metal overloaded methods (with different types) cause a redefinition compiler issue
 	//therefore force float only on Metal here
-	#ifndef SHADER_API_METAL
-		half SafeDivide(half v, half d)
+	#if !defined(SHADER_API_METAL) && !defined(SHADER_API_VULKAN)
+		inline half SafeDivide(half v, half d)
 		{
-			return v / (d + HALF_MIN);
+			return (v) / (d);
 		}
-		half2 SafeDivide(half2 v, half d)
+		inline half2 SafeDivide(half2 v, half d)
 		{
-			return v / (d + HALF_MIN);
+			return (v) / (d);
 		}
-		half2 SafeDivide(half2 v, half2 d)
+		inline half2 SafeDivide(half2 v, half2 d)
 		{
-			return v / (d + HALF_MIN);
+			return (v) / (d);
 		}
-		half3 SafeDivide(half3 v, half d)
+		inline half3 SafeDivide(half3 v, half d)
 		{
-			return v / (d + HALF_MIN);
+			return (v) / (d);
 		}
-		half3 SafeDivide(half3 v, half3 d)
+		inline half3 SafeDivide(half3 v, half3 d)
 		{
-			return v / (d + HALF_MIN);
+			return (v) / (d);
 		}
-		half4 SafeDivide(half4 v, half d)
+		inline half4 SafeDivide(half4 v, half d)
 		{
-			return v / (d + HALF_MIN);
+			return (v) / (d);
 		}
-		half4 SafeDivide(half4 v, half4 d)
+		inline half4 SafeDivide(half4 v, half4 d)
 		{
-			return v / (d + HALF_MIN);
+			return (v) / (d);
+		}
+
+		inline half MKSafeNormalize(half v)
+		{
+			half d = max(HALF_MIN, dot(v, v));
+			return v * rsqrt(d);
+			//return normalize(v);
+		}
+		inline half2 MKSafeNormalize(half2 v)
+		{
+			half d = max(HALF_MIN, dot(v, v));
+			return v * rsqrt(d);
+			//return normalize(v);
+		}
+		inline half3 MKSafeNormalize(half3 v)
+		{
+			half d = max(HALF_MIN, dot(v, v));
+			return v * rsqrt(d);
+			//return normalize(v);
+		}
+		inline half4 MKSafeNormalize(half4 v)
+		{
+			half d = max(HALF_MIN, dot(v, v));
+			return v * rsqrt(d);
+			//return normalize(v);
 		}
 	#endif
-	float SafeDivide(float v, float d)
+	//No infinite/zero/NaN checks are happening right now
+	//always make sure divisions can't be any of the above
+	inline float SafeDivide(float v, float d)
 	{
-		return v / (d + HALF_MIN);
+		return (v) / (d);
 	}
-	float2 SafeDivide(float2 v, float d)
+	inline float2 SafeDivide(float2 v, float d)
 	{
-		return v / (d + HALF_MIN);
+		return (v) / (d);
 	}
-	float2 SafeDivide(float2 v, float2 d)
+	inline float2 SafeDivide(float2 v, float2 d)
 	{
-		return v / (d + HALF_MIN);
+		return (v) / (d);
 	}
-	float3 SafeDivide(float3 v, float d)
+	inline float3 SafeDivide(float3 v, float d)
 	{
-		return v / (d + HALF_MIN);
+		return (v) / (d);
 	}
-	float3 SafeDivide(float3 v, float3 d)
+	inline float3 SafeDivide(float3 v, float3 d)
 	{
-		return v / (d + HALF_MIN);
+		return (v) / (d);
 	}
-	float4 SafeDivide(float4 v, float d)
+	inline float4 SafeDivide(float4 v, float d)
 	{
-		return v / (d + HALF_MIN);
+		return (v) / (d);
 	}
-	float4 SafeDivide(float4 v, float4 d)
+	inline float4 SafeDivide(float4 v, float4 d)
 	{
-		return v / (d + HALF_MIN);
+		return (v) / (d);
 	}
 
-	half SafeNormalize(half v)
+	//make sure vectors never have a lenth of 0
+	inline float MKSafeNormalize(float v)
 	{
-		return normalize(v + HALF_MIN);
+		float d = max(HALF_MIN, dot(v, v));
+		return v * rsqrt(d);
+		//return normalize(v);
 	}
-	half2 SafeNormalize(half2 v)
+	inline float2 MKSafeNormalize(float2 v)
 	{
-		return normalize(v + HALF_MIN);
+		float d = max(HALF_MIN, dot(v, v));
+		return v * rsqrt(d);
+		//return normalize(v);
 	}
-	half3 SafeNormalize(half3 v)
+	inline float3 MKSafeNormalize(float3 v)
 	{
-		return normalize(v + HALF_MIN);
+		float d = max(HALF_MIN, dot(v, v));
+		return v * rsqrt(d);
+		//return normalize(v);
 	}
-	half4 SafeNormalize(half4 v)
+	inline float4 MKSafeNormalize(float4 v)
 	{
-		return normalize(v + HALF_MIN);
+		float d = max(HALF_MIN, dot(v, v));
+		return v * rsqrt(d);
+		//return normalize(v);
 	}
 
 	inline half FastPow2(half v)
@@ -427,46 +463,46 @@
 	inline half3 ComputeNormalWorld(half3 normalDirectionObject)
 	{
 		#ifdef UNITY_ASSUME_UNIFORM_SCALING
-			return SafeNormalize(mul((float3x3) MATRIX_M, normalDirectionObject));
+			return MKSafeNormalize(mul((float3x3) MATRIX_M, normalDirectionObject));
 		#else
 			// Normal need to be multiply by inverse transpose
-			return SafeNormalize(mul(normalDirectionObject, (float3x3) MATRIX_I_M));
+			return MKSafeNormalize(mul(normalDirectionObject, (float3x3) MATRIX_I_M));
 		#endif
 	}
 
 	inline half3 ComputeNormalObjectToClipSpace(half3 normalDirectionObject)
 	{
 		#ifdef UNITY_ASSUME_UNIFORM_SCALING
-			return SafeNormalize(mul((float3x3) UNITY_MATRIX_VP, mul((float3x3) MATRIX_M, normalDirectionObject)));
+			return MKSafeNormalize(mul((float3x3) UNITY_MATRIX_VP, mul((float3x3) MATRIX_M, normalDirectionObject)));
 		#else
 			// Normal need to be multiply by inverse transpose
-			return SafeNormalize(mul((float3x3) UNITY_MATRIX_VP, mul(normalDirectionObject, (float3x3) MATRIX_I_M)));
+			return MKSafeNormalize(mul((float3x3) UNITY_MATRIX_VP, mul(normalDirectionObject, (float3x3) MATRIX_I_M)));
 		#endif
 	}
 
 	inline half3 ComputeTangentWorld(half3 tangentObject)
 	{
-		return SafeNormalize(mul((float3x3) MATRIX_M, tangentObject));
+		return MKSafeNormalize(mul((float3x3) MATRIX_M, tangentObject));
 	}
 
 	inline half3 ComputeBitangentWorld(half3 normalWorld, half3 tangentWorld, half scale)
 	{
-		return SafeNormalize(cross(normalWorld, tangentWorld)) * scale;
+		return MKSafeNormalize(cross(normalWorld, tangentWorld)) * scale;
 	}
 
 	inline half3 ComputeViewWorld(float3 positionWorld)
 	{
-		return SafeNormalize(CAMERA_POSITION_WORLD - positionWorld);
+		return MKSafeNormalize(CAMERA_POSITION_WORLD - positionWorld);
 	}
 
 	inline half3 ComputeViewObject(float3 positionObject)
 	{
-    	return SafeNormalize(mul(MATRIX_I_M, float4(CAMERA_POSITION_WORLD, 1)).xyz - positionObject);
+    	return MKSafeNormalize(mul(MATRIX_I_M, float4(CAMERA_POSITION_WORLD, 1)).xyz - positionObject);
 	}
 
 	inline half3 ComputeViewTangent(half3 view, half3 normal, half3 tangent, half3 bitangent)
 	{
-		return SafeNormalize(mul(half3x3(tangent, bitangent, normal), view));
+		return MKSafeNormalize(mul(half3x3(tangent, bitangent, normal), view));
 	}
 
 	inline float ComputeLinearDepth(float depth)

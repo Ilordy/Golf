@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_UNIFORM
@@ -35,54 +35,55 @@
 	// Sampler2D | Sampler3D
 	
 	CBUFFER_START(UnityPerMaterial)
-		uniform autoLP _AlphaCutoff;
-		uniform autoLP _Metallic;
-		uniform autoLP _Smoothness;
-		uniform autoLP _Roughness;
-		uniform autoLP _Anisotropy;
-		uniform autoLP _LightTransmissionDistortion;
-		uniform autoLP _LightBandsScale;
-		uniform autoLP _LightThreshold;
-		uniform autoLP _DrawnClampMin;
-		uniform autoLP _DrawnClampMax;
-		uniform autoLP _Contrast;
-		uniform autoLP _Saturation;
-		uniform autoLP _Brightness;
-		uniform autoLP _DiffuseSmoothness;
-		uniform autoLP _DiffuseThresholdOffset;
-		uniform autoLP _SpecularSmoothness;
-		uniform autoLP _SpecularThresholdOffset;
-		uniform autoLP _RimSmoothness;
-		uniform autoLP _RimThresholdOffset;
-		uniform autoLP _IridescenceSmoothness;
-		uniform autoLP _IridescenceThresholdOffset;
-		uniform autoLP _LightTransmissionSmoothness;
-		uniform autoLP _LightTransmissionThresholdOffset;
-		uniform autoLP _RimSize;
-		uniform autoLP _IridescenceSize;
-		uniform autoLP _DissolveAmount;
-		uniform autoLP _DissolveBorderSize;
-		uniform autoLP _OutlineNoise;
-		uniform autoLP _DiffuseWrap;
-		uniform autoLP _DetailMix;
-		uniform autoLP _RefractionDistortionFade;
-		uniform autoLP _GoochRampIntensity;
-		uniform autoLP _VertexAnimationIntensity;
+		uniform half _AlphaCutoff;
+		uniform half _Metallic;
+		uniform half _Smoothness;
+		uniform half _Roughness;
+		uniform half _Anisotropy;
+		uniform half _LightTransmissionDistortion;
+		uniform half _LightBandsScale;
+		uniform half _LightThreshold;
+		uniform half _DrawnClampMin;
+		uniform half _DrawnClampMax;
+		uniform half _Contrast;
+		uniform half _Saturation;
+		uniform half _Brightness;
+		uniform half _DiffuseSmoothness;
+		uniform half _DiffuseThresholdOffset;
+		uniform half _SpecularSmoothness;
+		uniform half _SpecularThresholdOffset;
+		uniform half _RimSmoothness;
+		uniform half _RimThresholdOffset;
+		uniform half _IridescenceSmoothness;
+		uniform half _IridescenceThresholdOffset;
+		uniform half _LightTransmissionSmoothness;
+		uniform half _LightTransmissionThresholdOffset;
+		uniform half _RimSize;
+		uniform half _IridescenceSize;
+		uniform half _DissolveAmount;
+		uniform half _DissolveBorderSize;
+		uniform half _OutlineNoise;
+		uniform half _DiffuseWrap;
+		uniform half _DetailMix;
+		uniform half _RefractionDistortionFade;
+		uniform half _GoochRampIntensity;
+		uniform half _VertexAnimationIntensity;
+		uniform half _IndirectFade;
 
-		uniform autoLP3 _DetailColor;
-		uniform autoLP3 _SpecularColor;
-		uniform autoLP3 _LightTransmissionColor;
+		uniform half3 _DetailColor;
+		uniform half3 _SpecularColor;
+		uniform half3 _LightTransmissionColor;
 
-		uniform autoLP4 _AlbedoColor;
-		uniform autoLP4 _DissolveBorderColor;
-		uniform autoLP4 _OutlineColor;
-		uniform autoLP4 _IridescenceColor;
-		uniform autoLP4 _RimColor;
-		uniform autoLP4 _RimBrightColor;
-		uniform autoLP4 _RimDarkColor;
-		uniform autoLP4 _GoochDarkColor;
-		uniform autoLP4 _GoochBrightColor;
-		uniform autoLP4 _VertexAnimationFrequency;
+		uniform half4 _AlbedoColor;
+		uniform half4 _DissolveBorderColor;
+		uniform half4 _OutlineColor;
+		uniform half4 _IridescenceColor;
+		uniform half4 _RimColor;
+		uniform half4 _RimBrightColor;
+		uniform half4 _RimDarkColor;
+		uniform half4 _GoochDarkColor;
+		uniform half4 _GoochBrightColor;
+		uniform half4 _VertexAnimationFrequency;
 
 		uniform half _DetailNormalMapIntensity;
 		uniform half _NormalMapIntensity;
@@ -150,5 +151,6 @@
 	//Depth											//25
 	//Refraction									//26
 	uniform sampler2D _OutlineMap;					// Only Outline
+	uniform sampler2D _NoiseMap;					// Only Vertex
 	uniform sampler3D _DitherMaskLOD;				// Only Shadows
 #endif

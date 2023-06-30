@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 using System.Collections;
@@ -11,13 +11,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-#if UNITY_EDITOR && !UNITY_CLOUD_BUILD
+#if UNITY_EDITOR
+using Configuration = MK.Toon.Editor.InstallWizard.Configuration;
 namespace MK.Toon.Editor.InstallWizard
 {
     public sealed class InstallWizard : EditorWindow
     {
+        public static InstallWizard instance = null;
         #pragma warning disable CS0414
-        private static readonly string _version = "3.0.12.5";
+        private static readonly string _version = "3.0.21.1";
         #pragma warning restore CS0414
         
         private static readonly Vector2Int _referenceResolution = new Vector2Int(2560, 1440);
@@ -51,6 +53,9 @@ namespace MK.Toon.Editor.InstallWizard
             _window = (InstallWizard)EditorWindow.GetWindow<InstallWizard>(true, _title, true);
             _window.minSize = new Vector2(_scaledWidth, _scaledHeight);
             _window.maxSize = new Vector2(_scaledWidth * 2, _scaledHeight * 2);
+            Configuration.ConfigureGlobalShaderFeatures();
+            Configuration.BeginRegisterChangesOnGlobalShaderFeatures();
+            Configuration.SetCompileDirectives();
             _window.Show();
         }
 
@@ -82,6 +87,8 @@ namespace MK.Toon.Editor.InstallWizard
 
         private void OnGUI()
         {
+            instance = this;
+            int setupIndex = 1;
             if(Configuration.isReady)
             {
                 _windowScrollPos = EditorGUILayout.BeginScrollView(_windowScrollPos);
@@ -97,7 +104,7 @@ namespace MK.Toon.Editor.InstallWizard
                     GUILayout.Label("", GUILayout.Height(titleScaledHeight - 20));
                     Divider();
                 }
-                EditorGUILayout.LabelField("1. Select your Render Pipeline", UnityEditor.EditorStyles.boldLabel);
+                EditorGUILayout.LabelField(string.Concat(setupIndex++.ToString(), ". ", "Select your Render Pipeline"), UnityEditor.EditorStyles.boldLabel);
                 _targetRenderPipeline = Configuration.TryGetRenderPipeline();
                 EditorGUI.BeginChangeCheck();
                 _targetRenderPipeline = (RenderPipeline) EditorGUILayout.EnumPopup("Render Pipeline", _targetRenderPipeline);
@@ -106,41 +113,46 @@ namespace MK.Toon.Editor.InstallWizard
                 VerticalSpace();
                 Divider();
                 VerticalSpace();
-                EditorGUILayout.LabelField("2. Import Package", UnityEditor.EditorStyles.boldLabel);
+                EditorGUILayout.LabelField(string.Concat(setupIndex++.ToString(), ". ", "Import Package"), UnityEditor.EditorStyles.boldLabel);
                 if(GUILayout.Button("Import / Update Package"))
                 {
                     EditorUtility.DisplayProgressBar("MK Toon Install Wizard", "Importing Package", 0.5f);
                     Configuration.ImportShaders(_targetRenderPipeline);
                     EditorUtility.ClearProgressBar();
                 }
+                if(_targetRenderPipeline == RenderPipeline.Universal)
+                {
+                    VerticalSpace();
+                    Divider();
+                    VerticalSpace();
+                    EditorGUILayout.LabelField(string.Concat(setupIndex++.ToString(), ". ", "Setup Per Object Outlines"), UnityEditor.EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField("1. Select your renderer asset.", _flowTextStyle);
+                    EditorGUILayout.LabelField("All of your used renderer assets can be found in the renderers list on your Universal Render Pipeline Assets.", _flowTextStyle);
+                    EditorGUILayout.LabelField("2. Click the “Add Renderer Features” button and add the “MK Toon Per Object Outlines” component.", _flowTextStyle);
+                    VerticalSpace();
+                    #if MK_URP
+                    Configuration.ShowURPOutlineWarning();
+                    #endif
+                }
                 VerticalSpace();
                 Divider();
                 VerticalSpace();
-                int readMeNumber = 4;
-                /*
-                if(_targetRenderPipeline == RenderPipeline.Lightweight)
                 {
-                    readMeNumber = 3;
-                    EditorGUILayout.LabelField("3. Examples are not available for the Lightweight Render Pipeline.", _flowTextStyle);
-                    VerticalSpace();
-                    Divider();
-                }
-                else
-                */
-                {
-                    EditorGUILayout.LabelField("3. Import Examples (optional)", UnityEditor.EditorStyles.boldLabel);
+                    EditorGUILayout.LabelField(string.Concat(setupIndex++.ToString(), ". ", "Import Examples (optional)"), UnityEditor.EditorStyles.boldLabel);
                     switch(_targetRenderPipeline)
                     {
                         case RenderPipeline.Built_in:
-                        EditorGUILayout.LabelField("Make sure Postprocessing Stack v2 and Text Mesh Pro is installed first!", _flowTextStyle);
+                        EditorGUILayout.LabelField("Make sure Postprocessing Stack v2 and Text Mesh Pro is installed.", _flowTextStyle);
+                        EditorGUILayout.LabelField("Example Scenes are based on Linear Color Space. Make sure to change from Gamma to Linear Color Space via Project Settings.", _flowTextStyle);
                         break;
                         //case RenderPipeline.Lightweight:
                         //EditorGUILayout.LabelField("Make sure Text Mesh Pro is installed first!", _flowTextStyle);
                         //break;
                         case RenderPipeline.Universal:
-                        EditorGUILayout.LabelField("Make sure Text Mesh Pro is installed first!", _flowTextStyle);
+                        EditorGUILayout.LabelField("Make sure Text Mesh Pro is installed.", _flowTextStyle);
                         break;
                     }
+                    EditorGUILayout.LabelField("Old Input Manager is used for the examples.", _flowTextStyle);
                     if(GUILayout.Button("Import Examples"))
                     {
                         EditorUtility.DisplayProgressBar("MK Toon Install Wizard", "Importing Examples", 0.5f);
@@ -154,19 +166,22 @@ namespace MK.Toon.Editor.InstallWizard
                     {
                         VerticalSpace();
                         EditorGUILayout.LabelField("Example Scenes:");
-                        EditorGUILayout.BeginHorizontal();
                         for(int i = 0; i < examples.Length; i++)
                         {
+                            if(i % 5 == 0)
+                                EditorGUILayout.BeginHorizontal();
                             if(examples[i].scene != null)
                                 examples[i].DrawEditorButton();
+                            if(i != 0 && i % 5 == 4 || i == examples.Length - 1)
+                                EditorGUILayout.EndHorizontal();
+
                         }
-                        EditorGUILayout.EndHorizontal();
                         VerticalSpace();
                         Divider();
                     }
                 }
                 VerticalSpace();
-                EditorGUILayout.LabelField(readMeNumber.ToString() + ". Read Me (Recommended)", UnityEditor.EditorStyles.boldLabel);
+                EditorGUILayout.LabelField(string.Concat(setupIndex++.ToString(), ". ", "Read Me (Recommended)"), UnityEditor.EditorStyles.boldLabel);
                 if(GUILayout.Button("Open Read Me"))
                 {
                     Configuration.OpenReadMe();
@@ -175,6 +190,34 @@ namespace MK.Toon.Editor.InstallWizard
                 VerticalSpace();
                 Divider();
                 VerticalSpace();
+
+                EditorGUILayout.LabelField(string.Concat(setupIndex++.ToString(), ". ", "Customize the Shaders (optional)"), UnityEditor.EditorStyles.boldLabel);
+
+                EditorGUIUtility.labelWidth = EditorGUIUtility.currentViewWidth * 0.67f;
+                Configuration.DrawGlobalShaderFeaturesInspector();
+                
+                if(Configuration.CheckGlobalShaderFeaturesChanges())
+                {
+                    if(GUILayout.Button("Apply Changes"))
+                    {
+                        Configuration.ConfigureGlobalShaderFeatures();
+                        Configuration.BeginRegisterChangesOnGlobalShaderFeatures();
+                    }
+                }
+
+                VerticalSpace();
+                Divider();
+                VerticalSpace();
+                #if MK_URP
+                if(_targetRenderPipeline == RenderPipeline.Universal)
+                {
+                    bool disablePerObjectOutlinesWarning = Configuration.TryGetDisablePerOutlinesWarning();
+                    EditorGUI.BeginChangeCheck();
+                    disablePerObjectOutlinesWarning = EditorGUILayout.Toggle("Disable Per Object Outlines Warning", disablePerObjectOutlinesWarning);
+                    if(EditorGUI.EndChangeCheck())
+                        Configuration.TrySetDisablePerOutlinesWarning(disablePerObjectOutlinesWarning);
+                }
+                #endif
 
                 _showInstallerOnReload = Configuration.TryGetShowInstallerOnReload();
                 EditorGUI.BeginChangeCheck();
@@ -189,6 +232,11 @@ namespace MK.Toon.Editor.InstallWizard
             {
                 Repaint();
             }
+        }
+
+        private void OnDestroy()
+        {
+            instance = null;
         }
 
         private static void VerticalSpace()

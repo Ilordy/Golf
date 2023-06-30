@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_COMPOSITE
@@ -30,7 +30,7 @@
 			surface.direct.rgb *= surface.occlusion.g;
 
 			#if defined(MK_FORWARD_BASE_PASS) && defined(MK_INDIRECT)
-				surface.final.rgb = surface.indirect + surface.direct.rgb;
+				surface.final.rgb = surface.indirect * lerp(dot(surface.direct.rgb, REL_LUMA), half3(1, 1, 1), _IndirectFade) + surface.direct.rgb;
 			#elif defined(MK_FORWARD_BASE_PASS) && !defined(MK_INDIRECT)
 				surface.final.rgb = surface.direct.rgb;
 			#elif defined(MK_FORWARD_ADD_PASS)

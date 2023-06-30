@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #if UNITY_EDITOR
@@ -23,9 +23,10 @@ namespace MK.Toon.Editor
     /// </summary>
     internal abstract class SimpleEditorBase : UnlitEditorBase
     {
-        public SimpleEditorBase()
+        public SimpleEditorBase(RenderPipeline renderPipeline) : base(renderPipeline)
         {
             _shaderTemplate = ShaderTemplate.Simple;
+            _renderPipeline = renderPipeline;
         }
         /////////////////////////////////////////////////////////////////////////////////////////////
 		// Properties                                                                              //
@@ -92,6 +93,7 @@ namespace MK.Toon.Editor
         // Advanced    //
         /////////////////
         protected MaterialProperty _receiveShadows;
+        protected MaterialProperty _IndirectFade;
         protected MaterialProperty _wrappedDiffuse;
         protected MaterialProperty _specular;
         protected MaterialProperty _specularIntensity;
@@ -153,6 +155,7 @@ namespace MK.Toon.Editor
             _rimDarkColor = FindProperty(Properties.rimDarkColor.uniform.name, props);
             
             _receiveShadows = FindProperty(Properties.receiveShadows.uniform.name, props);
+            _IndirectFade = FindProperty(Properties.indirectFade.uniform.name, props);
             _wrappedDiffuse = FindProperty(Properties.wrappedLighting.uniform.name, props);
             _specular = FindProperty(Properties.specular.uniform.name, props);
             _specularIntensity = FindProperty(Properties.specularIntensity.uniform.name, props);
@@ -176,6 +179,7 @@ namespace MK.Toon.Editor
             MaterialProperty specularHighlights = FindProperty("_SpecularHighlights", propertiesSrc, false);
             MaterialProperty glossyReflections = FindProperty("_GlossyReflections", propertiesSrc, false);
             MaterialProperty environmentReflections = FindProperty("_EnvironmentReflections", propertiesSrc, false);
+            MaterialProperty specular = FindProperty("_Specular", propertiesSrc, false);
             
             if(metallicGlossMap != null)
                 Properties.specularMap.SetValue(materialDst, metallicGlossMap.textureValue);
@@ -192,20 +196,49 @@ namespace MK.Toon.Editor
             if(bumpMap != null)
                 Properties.normalMap.SetValue(materialDst, bumpMap.textureValue);
 
-            bool srcIsMKLit = materialSrc.shader.name.Contains("MK/Toon/") && !materialSrc.shader.name.Contains("Unlit");
+            bool srctIsMKLitSimple = materialSrc.shader.name.Contains("MK/Toon/") && materialSrc.shader.name.Contains("Simple");
+            bool srcIsMKLitPBS = materialSrc.shader.name.Contains("MK/Toon/") && materialSrc.shader.name.Contains("Physically Based");
+            bool srcIsMKUnlit = materialSrc.shader.name.Contains("MK/Toon/") && materialSrc.shader.name.Contains("Unlit");
 
-            if(specularHighlights != null && !srcIsMKLit)
+            bool dstIsMKLitSimple = materialDst.shader.name.Contains("MK/Toon/") && materialDst.shader.name.Contains("Simple");
+            bool dstIsMKLitPBS = materialDst.shader.name.Contains("MK/Toon/") && materialDst.shader.name.Contains("Physically Based");
+            bool dstIsMKUnlit = materialDst.shader.name.Contains("MK/Toon/") && materialDst.shader.name.Contains("Unlit");
+
+            if(specularHighlights != null && !srcIsMKUnlit && !srctIsMKLitSimple && !srcIsMKLitPBS)
                 Properties.specular.SetValue(materialDst, specularHighlights.floatValue > 0 ? Specular.Isotropic : Specular.Off);
-            if(!srcIsMKLit)
-                Properties.environmentReflections.SetValue(materialDst, EnvironmentReflection.Ambient);
-            if(glossyReflections != null && !srcIsMKLit)
-                Properties.environmentReflections.SetValue(materialDst, EnvironmentReflection.Ambient);
-            if(environmentReflections != null && !srcIsMKLit)
-                Properties.environmentReflections.SetValue(materialDst, EnvironmentReflection.Ambient);
-            if(srcIsMKLit)
+            else if(specular == null && srcIsMKUnlit && (dstIsMKLitSimple || dstIsMKLitPBS))
+                if(dstIsMKLitPBS)
+                    Properties.specular.SetValue(materialDst, Properties.specular.GetValue(materialDst));
+                else
+                    Properties.specular.SetValue(materialDst, Properties.specular.GetValue(materialDst) > 0 ? Specular.Isotropic : Specular.Off);
+            else if(srcIsMKLitPBS && dstIsMKLitSimple)
+                Properties.specular.SetValue(materialDst, Properties.specular.GetValue(materialSrc) > 0 ? Specular.Isotropic : Specular.Off);
+            else
+                {}
+            
+            if(glossyReflections != null && !srcIsMKUnlit && !srctIsMKLitSimple && !srcIsMKLitPBS)
+                Properties.environmentReflections.SetValue(materialDst, glossyReflections.floatValue > 0 ? EnvironmentReflection.Advanced : EnvironmentReflection.Ambient);
+            else if(environmentReflections == null && srcIsMKUnlit && (dstIsMKLitSimple || dstIsMKLitPBS))
+                if(dstIsMKLitPBS)
+                    Properties.environmentReflections.SetValue(materialDst, Properties.environmentReflections.GetValue(materialDst));
+                else
+                    Properties.environmentReflections.SetValue(materialDst, (Properties.environmentReflections.GetValue(materialDst)) > EnvironmentReflection.Ambient ? EnvironmentReflection.Ambient : Properties.environmentReflections.GetValue(materialDst));
+            else if(srcIsMKUnlit && (dstIsMKLitSimple || dstIsMKLitPBS))
+                if(dstIsMKLitPBS)
+                    Properties.environmentReflections.SetValue(materialDst, Properties.environmentReflections.GetValue(materialDst));
+                else
+                {
+                    Properties.environmentReflections.SetValue(materialDst, (Properties.environmentReflections.GetValue(materialDst)) > EnvironmentReflection.Ambient ? EnvironmentReflection.Ambient : Properties.environmentReflections.GetValue(materialDst));
+                }
+            else if(srcIsMKLitPBS && dstIsMKLitSimple)
+                Properties.environmentReflections.SetValue(materialDst, (Properties.environmentReflections.GetValue(materialSrc)) > EnvironmentReflection.Ambient ? EnvironmentReflection.Ambient : Properties.environmentReflections.GetValue(materialSrc));
+            else
+                {}
+            if(!materialSrc.shader.name.Contains("MK/Toon/"))
             {
-                Properties.specular.SetValue(materialDst, (int) Properties.specular.GetValue(materialSrc) > 0 ? Specular.Isotropic : Specular.Off);
-                Properties.environmentReflections.SetValue(materialDst, (int) Properties.environmentReflections.GetValue(materialSrc) > 0 ? EnvironmentReflection.Ambient : EnvironmentReflection.Off);
+                bool emissionEnabled = materialSrc.globalIlluminationFlags.HasFlag(MaterialGlobalIlluminationFlags.EmissiveIsBlack);
+                if(emissionEnabled)
+                    Properties.emissionColor.SetValue(materialDst, Color.black);
             }
         }
 
@@ -214,12 +247,7 @@ namespace MK.Toon.Editor
         /////////////////
         protected virtual void DrawSpecularMap(MaterialEditor materialEditor)
         {
-            EditorGUI.BeginChangeCheck();
             materialEditor.TexturePropertySingleLine(UI.specularMap, _specularMap, _specularMap.textureValue == null ? _specularColor : null);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsSpecularMap();
-            }
         }
 
         protected virtual void DrawSmoothness(MaterialEditor materialEditor)
@@ -229,15 +257,10 @@ namespace MK.Toon.Editor
 
         protected virtual void DrawNormalMap(MaterialEditor materialEditor)
         {
-            EditorGUI.BeginChangeCheck();
             if (_normalMap.textureValue == null)
                 materialEditor.TexturePropertySingleLine(UI.normalMap, _normalMap);
             else
                 materialEditor.TexturePropertySingleLine(UI.normalMap, _normalMap, _normalMapIntensity);
-            if (EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsNormalMap();
-            }
         }
 
         protected virtual void DrawEmissionFlags(MaterialEditor materialEditor)
@@ -252,14 +275,8 @@ namespace MK.Toon.Editor
 
         protected void DrawEmissionMap(MaterialEditor materialEditor)
         {
-            EditorGUI.BeginChangeCheck();
             materialEditor.TexturePropertyWithHDRColor(UI.emissionMap, _emissionMap, _emissionColor, false);
             DrawEmissionFlags(materialEditor);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsEmission();
-                ManageKeywordsEmissionMap();
-            }
         }
 
         protected override void DrawInputContent(MaterialEditor materialEditor)
@@ -307,15 +324,10 @@ namespace MK.Toon.Editor
         {
             //EditorGUILayout.LabelField("Threshold:", UnityEditor.EditorStyles.boldLabel);
             DrawLightingThresholdOffsetHeader();
-            EditorGUI.BeginChangeCheck();
             if(_thresholdMap.textureValue != null)
                 materialEditor.TexturePropertySingleLine(UI.thresholdMap, _thresholdMap, _thresholdMapScale);
             else
                 materialEditor.TexturePropertySingleLine(UI.thresholdMap, _thresholdMap);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsThresholdMap();
-            }
             if(_thresholdMap.textureValue != null)
             {
                 materialEditor.ShaderProperty(_diffuseThresholdOffset, UI.diffuseThresholdOffset);
@@ -376,12 +388,7 @@ namespace MK.Toon.Editor
         protected virtual void DrawLightingStylize(MaterialEditor materialEditor)
         {
             DrawLightingHeader();
-            EditorGUI.BeginChangeCheck();
             materialEditor.ShaderProperty(_light, UI.light);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsLight();
-            }
             if (_light.floatValue == (int)(Light.Cel) || _light.floatValue == (int)(Light.Banded))
                 materialEditor.ShaderProperty(_lightThreshold, UI.lightThreshold);
             if (_light.floatValue == (int)(Light.Banded))
@@ -413,15 +420,10 @@ namespace MK.Toon.Editor
         protected virtual void DrawGooch(MaterialEditor materialEditor)
         {
             DrawGoochHeader();
-            EditorGUI.BeginChangeCheck();
             if(_goochRamp.textureValue != null)
                 materialEditor.TexturePropertySingleLine(UI.goochRamp, _goochRamp, _goochRampIntensity);
             else
                 materialEditor.TexturePropertySingleLine(UI.goochRamp, _goochRamp);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsGoochRamp();
-            }
             materialEditor.ShaderProperty(_goochBrightColor, UI.goochBrightMap);
             materialEditor.ShaderProperty(_goochDarkColor, UI.goochDarkMap);
         }
@@ -434,14 +436,9 @@ namespace MK.Toon.Editor
         protected virtual void DrawRim(MaterialEditor materialEditor)
         {
             //DrawRimHeader();
-            EditorGUI.BeginChangeCheck();
             SetBoldFontStyle(true);
             materialEditor.ShaderProperty(_rim, UI.rim);
             SetBoldFontStyle(false);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsRim();
-            }
             if((Rim)_rim.floatValue != Rim.Off)
             {
                 if((Rim)_rim.floatValue == Rim.Default)
@@ -465,14 +462,9 @@ namespace MK.Toon.Editor
         protected virtual void DrawIridescence(MaterialEditor materialEditor)
         {
             //DrawIridescenceHeader();
-            EditorGUI.BeginChangeCheck();
             SetBoldFontStyle(true);
             materialEditor.ShaderProperty(_iridescence, UI.iridescence);
             SetBoldFontStyle(false);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsIridescence();
-            }
             if((Iridescence)_iridescence.floatValue != Iridescence.Off)
             {
                 materialEditor.TexturePropertySingleLine(UI.iridescenceRamp, _iridescenceRamp, _iridescenceColor);
@@ -488,22 +480,12 @@ namespace MK.Toon.Editor
         protected virtual void DrawArtistic(MaterialEditor materialEditor)
         {   
             //DrawArtisticHeader();
-            EditorGUI.BeginChangeCheck();
             SetBoldFontStyle(true);
             materialEditor.ShaderProperty(_artistic, UI.artistic);
             SetBoldFontStyle(false);
-            if(EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsArtistic();
-            }
             if(_artistic.floatValue != (int)(Artistic.Off))
             {
-                EditorGUI.BeginChangeCheck();
                 materialEditor.ShaderProperty(_artisticProjection, UI.artisticProjection);
-                if(EditorGUI.EndChangeCheck())
-                {
-                    ManageKeywordsArtisticProjection();
-                }
                 if(_artistic.floatValue == (int)(Artistic.Hatching))
                 {
                     if(_hatchingBrightMap.textureValue != null || _hatchingDarkMap.textureValue != null)
@@ -513,12 +495,7 @@ namespace MK.Toon.Editor
                     materialEditor.TexturePropertySingleLine(UI.hatchingDarkMap, _hatchingDarkMap);
                     if(_hatchingBrightMap.textureValue != null || _hatchingDarkMap.textureValue != null)
                     {
-                        EditorGUI.BeginChangeCheck();
                         materialEditor.ShaderProperty(_artisticFrequency, UI.artisticStutterFreqency);
-                        if(EditorGUI.EndChangeCheck())
-                        {
-                            ManageKeywordsArtisticAnimation();
-                        }
                     }
                 }
                 else if(_artistic.floatValue == (int)(Artistic.Drawn))
@@ -528,12 +505,7 @@ namespace MK.Toon.Editor
                         materialEditor.TexturePropertySingleLine(UI.drawnMap, _drawnMap, _drawnMapScale);
                         materialEditor.ShaderProperty(_drawnClampMin, UI.drawnClampMin);
                         materialEditor.ShaderProperty(_drawnClampMax, UI.drawnClampMax);
-                        EditorGUI.BeginChangeCheck();
                         materialEditor.ShaderProperty(_artisticFrequency, UI.artisticStutterFreqency);
-                        if(EditorGUI.EndChangeCheck())
-                        {
-                            ManageKeywordsArtisticAnimation();
-                        }
                     }
                     else
                         materialEditor.TexturePropertySingleLine(UI.drawnMap, _drawnMap);
@@ -543,12 +515,7 @@ namespace MK.Toon.Editor
                     if(_sketchMap.textureValue != null)
                     {
                         materialEditor.TexturePropertySingleLine(UI.sketchMap, _sketchMap, _sketchMapScale);
-                        EditorGUI.BeginChangeCheck();
                         materialEditor.ShaderProperty(_artisticFrequency, UI.artisticStutterFreqency);
-                        if(EditorGUI.EndChangeCheck())
-                        {
-                            ManageKeywordsArtisticAnimation();
-                        }
                     }
                     else
                         materialEditor.TexturePropertySingleLine(UI.sketchMap, _sketchMap);
@@ -587,32 +554,17 @@ namespace MK.Toon.Editor
         /////////////////
         protected virtual void DrawReceiveShadows(MaterialEditor materialEditor)
         { 
-            EditorGUI.BeginChangeCheck();
             materialEditor.ShaderProperty(_receiveShadows, UI.receiveShadows);
-            if (EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsReceiveShadows();
-            }
         }
 
         protected virtual void DrawWrappedLighting(MaterialEditor materialEditor)
         { 
-            EditorGUI.BeginChangeCheck();
             materialEditor.ShaderProperty(_wrappedDiffuse, UI.wrappedLighting);
-            if (EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsWrappedDiffuse();
-            }
         }
 
         protected virtual void DrawSpecularMode(MaterialEditor materialEditor)
         { 
-            EditorGUI.BeginChangeCheck();
             materialEditor.ShaderProperty(_specular, UI.specular);
-            if (EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsSpecularMode();
-            }
             if(_specular.floatValue != (int)Specular.Off)
             {
                 materialEditor.ShaderProperty(_specularIntensity, UI.specularIntensity, 1);
@@ -621,12 +573,9 @@ namespace MK.Toon.Editor
 
         protected virtual void DrawEnvironmentReflections(MaterialEditor materialEditor)
         {
-            EditorGUI.BeginChangeCheck();
             materialEditor.ShaderProperty(_environmentReflections, UI.environmentReflections);
-            if (EditorGUI.EndChangeCheck())
-            {
-                ManageKeywordsEnvironmentReflections();
-            }
+            if(_environmentReflections.floatValue != (int)EnvironmentReflection.Off)
+                materialEditor.ShaderProperty(_IndirectFade, UI.indirectFade);
         }
 
         protected virtual void DrawAdvancedLighting(MaterialEditor materialEditor)
@@ -648,7 +597,7 @@ namespace MK.Toon.Editor
             DrawRenderPriority(materialEditor);
         }
 
-        protected override void DrawAdvancedContent(MaterialEditor materialEditor)
+        protected override void DrawAdvancedContent(MaterialEditor materialEditor, Material material)
         {
             DrawAdvancedLighting(materialEditor);
             
@@ -656,193 +605,145 @@ namespace MK.Toon.Editor
             DrawPipeline(materialEditor);
 
             EditorHelper.Divider();
-            DrawStencil(materialEditor);
+            DrawStencil(materialEditor, material);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////
 		// Variants Setup                                                                          //
 		/////////////////////////////////////////////////////////////////////////////////////////////
-        private void ManageKeywordsNormalMap()
+        private void ManageKeywordsNormalMap(Material material)
         {
             //Normalmap
-            foreach (Material mat in _normalMap.targets)
-            {
-                EditorHelper.SetKeyword(Properties.normalMap.GetValue(mat), Keywords.normalMap, mat);
-            }
+            EditorHelper.SetKeyword(Properties.normalMap.GetValue(material), Keywords.normalMap, material);
         }
 
-        private void ManageKeywordsEmission()
+        private void ManageKeywordsEmission(Material material)
         {
             //emission
-            foreach (Material mat in _emissionColor.targets)
-            {
-                EmissionRealtimeSetup(mat);
-                MaterialEditor.FixupEmissiveFlag(mat);
-                //bool shouldEmissionBeEnabled = (mat.globalIlluminationFlags & MaterialGlobalIlluminationFlags.EmissiveIsBlack) == 0;
-                EditorHelper.SetKeyword(Properties.emissionColor.GetValue(mat).maxColorComponent > 0, Keywords.emission, mat);
-                //black color emissive = emission Off
-            }
+            EmissionRealtimeSetup(material);
+            MaterialEditor.FixupEmissiveFlag(material);
+            EditorHelper.SetKeyword(Properties.emissionColor.GetValue(material).maxColorComponent > 0, Keywords.emission, material);
+            //black color emissive = emission Off
         }
 
-        private void ManageKeywordsEmissionMap()
+        private void ManageKeywordsEmissionMap(Material material)
         {
             //emission
-            foreach (Material mat in _emissionMap.targets)
-            {
-                EditorHelper.SetKeyword(Properties.emissionMap.GetValue(mat), Keywords.emissionMap, mat);
-            }
+            EditorHelper.SetKeyword(Properties.emissionMap.GetValue(material), Keywords.emissionMap, material);
         }
 
-        private void ManageKeywordsSpecularMode()
+        private void ManageKeywordsSpecularMode(Material material)
         {
             //spec highlights
-            foreach (Material mat in _specular.targets)
-            {
-                EditorHelper.SetKeyword(Properties.specular.GetValue(mat) == Specular.Isotropic, Keywords.specular[1], mat);
-                EditorHelper.SetKeyword(Properties.specular.GetValue(mat) == Specular.Anisotropic, Keywords.specular[2], mat);
-                //No Keyword = Specular Off
-            }
+            EditorHelper.SetKeyword(Properties.specular.GetValue(material) == Specular.Isotropic, Keywords.specular[1], material);
+            EditorHelper.SetKeyword(Properties.specular.GetValue(material) == Specular.Anisotropic, Keywords.specular[2], material);
+            //No Keyword = Specular Off
         }
 
-        private void ManageKeywordsSpecularMap()
+        private void ManageKeywordsSpecularMap(Material material)
         {
             //Workflow
-            foreach (Material mat in _specularMap.targets)
-            {
-                EditorHelper.SetKeyword(Properties.specularMap.GetValue(mat) && _shaderTemplate == ShaderTemplate.Simple, Keywords.pbsMap0, mat);
-            }
+            EditorHelper.SetKeyword(Properties.specularMap.GetValue(material) && _shaderTemplate == ShaderTemplate.Simple, Keywords.pbsMap0, material);
         }
 
-        private void ManageKeywordsLight()
+        private void ManageKeywordsLight(Material material)
         {
             //Light Style
-            foreach (Material mat in _light.targets)
-            {
-                EditorHelper.SetKeyword(Properties.light.GetValue(mat) == Light.Cel, Keywords.light[1], mat);
-                EditorHelper.SetKeyword(Properties.light.GetValue(mat) == Light.Banded, Keywords.light[2], mat);
-                EditorHelper.SetKeyword(Properties.light.GetValue(mat) == Light.Ramp, Keywords.light[3], mat);
-                //No keyword = WorldSpace light
-            }
+            EditorHelper.SetKeyword(Properties.light.GetValue(material) == Light.Cel, Keywords.light[1], material);
+            EditorHelper.SetKeyword(Properties.light.GetValue(material) == Light.Banded, Keywords.light[2], material);
+            EditorHelper.SetKeyword(Properties.light.GetValue(material) == Light.Ramp, Keywords.light[3], material);
+            //No keyword = WorldSpace light
         }
 
-        private void ManageKeywordsArtistic()
+        private void ManageKeywordsArtistic(Material material)
         {
             //Artistic
-            foreach (Material mat in _artistic.targets)
-            {
-                EditorHelper.SetKeyword(Properties.artistic.GetValue(mat) == Artistic.Drawn , Keywords.artistic[1], mat);
-                EditorHelper.SetKeyword(Properties.artistic.GetValue(mat) == Artistic.Hatching , Keywords.artistic[2], mat);
-                EditorHelper.SetKeyword(Properties.artistic.GetValue(mat) == Artistic.Sketch , Keywords.artistic[3], mat);
-                //No keyword = no artistic
-            }
+            EditorHelper.SetKeyword(Properties.artistic.GetValue(material) == Artistic.Drawn , Keywords.artistic[1], material);
+            EditorHelper.SetKeyword(Properties.artistic.GetValue(material) == Artistic.Hatching , Keywords.artistic[2], material);
+            EditorHelper.SetKeyword(Properties.artistic.GetValue(material) == Artistic.Sketch , Keywords.artistic[3], material);
+            //No keyword = no artistic
         }
 
-        private void ManageKeywordsArtisticAnimation()
+        private void ManageKeywordsArtisticAnimation(Material material)
         {
             //Artistic Animation
-            foreach (Material mat in _artisticFrequency.targets)
-            {
-                EditorHelper.SetKeyword(Properties.artisticFrequency.GetValue(mat) != 0.0f , Keywords.artisticAnimation, mat);
-            }
+            EditorHelper.SetKeyword(Properties.artisticFrequency.GetValue(material) != 0.0f , Keywords.artisticAnimation, material);
         }
 
-        private void ManageKeywordsArtisticProjection()
+        private void ManageKeywordsArtisticProjection(Material material)
         {
             //Artistic Projection
-            foreach (Material mat in _artisticProjection.targets)
-            {
-                EditorHelper.SetKeyword(Properties.artisticProjection.GetValue(mat) == ArtisticProjection.ScreenSpace , Keywords.artisticProjection[1], mat);
-            }
+            EditorHelper.SetKeyword(Properties.artisticProjection.GetValue(material) == ArtisticProjection.ScreenSpace , Keywords.artisticProjection[1], material);
         }
 
-        private void ManageKeywordsRim()
+        private void ManageKeywordsRim(Material material)
         {
             //rim style
-            foreach (Material mat in _rim.targets)
-            {
-                EditorHelper.SetKeyword(Properties.rim.GetValue(mat) == Rim.Default, Keywords.rim[1], mat);
-                EditorHelper.SetKeyword(Properties.rim.GetValue(mat) == Rim.Split, Keywords.rim[2], mat);
-                //No keyword = rim off
-            }
+            EditorHelper.SetKeyword(Properties.rim.GetValue(material) == Rim.Default, Keywords.rim[1], material);
+            EditorHelper.SetKeyword(Properties.rim.GetValue(material) == Rim.Split, Keywords.rim[2], material);
+            //No keyword = rim off
         }
 
-        private void ManageKeywordsIridescence()
+        private void ManageKeywordsIridescence(Material material)
         {
             //Iridescence
-            foreach (Material mat in _iridescence.targets)
-            {
-                EditorHelper.SetKeyword(Properties.iridescence.GetValue(mat) == Iridescence.On, Keywords.iridescence[1], mat);
-                //No keyword = iridescence off
-            }
+            EditorHelper.SetKeyword(Properties.iridescence.GetValue(material) == Iridescence.On, Keywords.iridescence[1], material);
+            //No keyword = iridescence off
         }
 
-        private void ManageKeywordsGoochRamp()
+        private void ManageKeywordsGoochRamp(Material material)
         {
             //Gooch Ramp
-            foreach (Material mat in _goochRamp.targets)
-            {
-                EditorHelper.SetKeyword(Properties.goochRamp.GetValue(mat), Keywords.goochRamp, mat);
-                //No keyword = ramp off
-            }
+            EditorHelper.SetKeyword(Properties.goochRamp.GetValue(material), Keywords.goochRamp, material);
+            //No keyword = ramp off
         }
 
-        private void ManageKeywordsReceiveShadows()
+        private void ManageKeywordsReceiveShadows(Material material)
         {
             //env reflections
-            foreach (Material mat in _receiveShadows.targets)
-            {
-                EditorHelper.SetKeyword(Properties.receiveShadows.GetValue(mat), Keywords.receiveShadows, mat);
-            }
+            EditorHelper.SetKeyword(Properties.receiveShadows.GetValue(material), Keywords.receiveShadows, material);
         }
 
-        private void ManageKeywordsWrappedDiffuse()
+        private void ManageKeywordsWrappedDiffuse(Material material)
         {
             //env reflections
-            foreach (Material mat in _wrappedDiffuse.targets)
-            {
-                EditorHelper.SetKeyword(Properties.wrappedLighting.GetValue(mat), Keywords.wrappedLighting, mat);
-            }
+            EditorHelper.SetKeyword(Properties.wrappedLighting.GetValue(material), Keywords.wrappedLighting, material);
         }
 
-        private void ManageKeywordsEnvironmentReflections()
+        private void ManageKeywordsEnvironmentReflections(Material material)
         {
             //env reflections
-            foreach (Material mat in _environmentReflections.targets)
-            {
-                EditorHelper.SetKeyword(Properties.environmentReflections.GetValue(mat) == EnvironmentReflection.Ambient, Keywords.environmentReflections[1], mat);
-                EditorHelper.SetKeyword(Properties.environmentReflections.GetValue(mat) == EnvironmentReflection.Advanced, Keywords.environmentReflections[2], mat);
-                //No Keyword = Reflections Disabled
-            }
+            EditorHelper.SetKeyword(Properties.environmentReflections.GetValue(material) == EnvironmentReflection.Ambient, Keywords.environmentReflections[1], material);
+            EditorHelper.SetKeyword(Properties.environmentReflections.GetValue(material) == EnvironmentReflection.Advanced, Keywords.environmentReflections[2], material);
+            //No Keyword = Reflections Disabled
         }
 
-        private void ManageKeywordsThresholdMap()
+        private void ManageKeywordsThresholdMap(Material material)
         {
             //env reflections
-            foreach (Material mat in _thresholdMap.targets)
-            {
-                EditorHelper.SetKeyword(Properties.thresholdMap.GetValue(mat), Keywords.thresholdMap, mat);
-                //No Keyword = Reflections Disabled
-            }
+            EditorHelper.SetKeyword(Properties.thresholdMap.GetValue(material), Keywords.thresholdMap, material);
+            //No Keyword = Reflections Disabled
         }
 
-        protected override void UpdateKeywords()
+        protected override void UpdateKeywords(Material material)
         {
-            base.UpdateKeywords();
-            ManageKeywordsNormalMap();
-            ManageKeywordsEmission();
-            ManageKeywordsEmissionMap();
-            ManageKeywordsSpecularMode();
-            ManageKeywordsSpecularMap();
-            ManageKeywordsLight();
-            ManageKeywordsArtistic();
-            ManageKeywordsArtisticProjection();
-            ManageKeywordsRim();
-            ManageKeywordsIridescence();
-            ManageKeywordsReceiveShadows();
-            ManageKeywordsWrappedDiffuse();
-            ManageKeywordsEnvironmentReflections();
-            ManageKeywordsThresholdMap();
-            ManageKeywordsGoochRamp();
+            base.UpdateKeywords(material);
+            ManageKeywordsNormalMap(material);
+            ManageKeywordsEmission(material);
+            ManageKeywordsEmissionMap(material);
+            ManageKeywordsSpecularMode(material);
+            ManageKeywordsSpecularMap(material);
+            ManageKeywordsLight(material);
+            ManageKeywordsArtistic(material);
+            ManageKeywordsArtisticProjection(material);
+            ManageKeywordsArtisticAnimation(material);
+            ManageKeywordsRim(material);
+            ManageKeywordsIridescence(material);
+            ManageKeywordsReceiveShadows(material);
+            ManageKeywordsWrappedDiffuse(material);
+            ManageKeywordsEnvironmentReflections(material);
+            ManageKeywordsThresholdMap(material);
+            ManageKeywordsGoochRamp(material);
         }
     }
 }

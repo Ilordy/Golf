@@ -3,7 +3,7 @@
 //					                                //
 // Created by Michael Kremmel                       //
 // www.michaelkremmel.de                            //
-// Copyright © 2021 All rights reserved.            //
+// Copyright © 2020 All rights reserved.            //
 //////////////////////////////////////////////////////
 
 #ifndef MK_TOON_META
@@ -47,7 +47,7 @@
 			#endif
 		#endif
 
-		#if defined(MK_VERTCLR) || defined(MK_POLYBRUSH)
+		#ifdef MK_VERTEX_COLOR_REQUIRED
 			vertexOutput.color = vertexInput.color;
 		#endif
 
@@ -80,6 +80,7 @@
 
 		MKSurfaceData surfaceData = ComputeSurfaceData
 		(
+			vertexOutput.svPositionClip,
 			PASS_POSITION_WORLD_ARG(0)
 			PASS_FOG_FACTOR_WORLD_ARG(0)
 			PASS_BASE_UV_ARG(vertexOutput.uv)
@@ -90,7 +91,7 @@
 			PASS_TANGENT_WORLD_ARG(1)
 			PASS_VIEW_TANGENT_ARG(vertexOutput.viewTangent)
 			PASS_BITANGENT_WORLD_ARG(1)
-			PASS_POSITION_CLIP_ARG(0)
+			PASS_BARYCENTRIC_POSITION_CLIP_ARG(0)
 			PASS_NULL_CLIP_ARG(0)
 			PASS_FLIPBOOK_UV_ARG(0)
 		);
