@@ -120,6 +120,7 @@ public abstract class EnemyClass : MonoBehaviour
     {
         aliveCount++;
         transform.position = Manager.I.GetEnemySpawnPoint();
+        gameObject.layer = 10;
         if (Physics.Raycast(transform.position, -transform.up, out var hit, Mathf.Infinity))
         {
             transform.position = hit.point;

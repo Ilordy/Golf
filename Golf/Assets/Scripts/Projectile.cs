@@ -78,7 +78,9 @@ public class Projectile : MonoBehaviour
     void GetNearbyEnemy()
     {
         //these are all layers to avoid.
-        int layerMask = 1 << 6 | 1 << 8 | 1 << 7 | 1 << 12 | 1 << 14 | 1 << 11;
+        int layerMask = 1 << 6 | 
+                        1 << 8 | 1 << 7 | 
+                        1 << 12 | 1 << 14 | 1 << 11;
         int numFound = Physics.OverlapSphereNonAlloc(transform.position, 10, m_localEnemies, ~layerMask);
         if (numFound == 0)
         {

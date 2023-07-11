@@ -75,10 +75,10 @@ public class Ally : MonoBehaviour
             {
                 animator.SetBool(shootTrigger, true);
                 yield return new WaitForSecondsRealtime(animator.GetCurrentAnimatorStateInfo(0).normalizedTime / 2);
-                GameObject p = Instantiate(bullet, transform.position + new Vector3(0, .65f, 0), Quaternion.identity);
+                Projectile p = Manager.I.ProjectilePooler.Get();
+                p.transform.position = transform.position + new Vector3(0, .65f, 0);
                 p.transform.LookAt(target);
                 p.GetComponent<Rigidbody>().useGravity = true;
-                //p.GetComponent<Rigidbody>().AddForce(p.transform.forward * 25f, ForceMode.Impulse);
             }
         }
     }
