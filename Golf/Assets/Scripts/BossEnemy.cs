@@ -10,6 +10,7 @@ public class BossEnemy : MonoBehaviour
     public System.Action<BossEnemy> OnKnockedOut;
     Rigidbody rb;
     private Transform focusPoint;
+    private static readonly int GotHit = Animator.StringToHash("GotHit");
 
     void Start()
     {
@@ -37,7 +38,7 @@ public class BossEnemy : MonoBehaviour
             health--;
             if (health > 0)
             {
-                anim.SetTrigger("GotHit");
+                anim.SetTrigger(GotHit);
                 isStunned = true;
                 canBeHit = false;
                 GameEvents.current.EnemyHit();
@@ -49,7 +50,7 @@ public class BossEnemy : MonoBehaviour
                 OnKnockedOut?.Invoke(this);
             }
         }
-        else if (other.gameObject.tag.Equals("Player"))
+        else if (other.gameObject.CompareTag("Player"))
         {
             DestroyAllColliders();
             GameEvents.current.Defeat();

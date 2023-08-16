@@ -8,56 +8,39 @@ using Random = UnityEngine.Random;
 
 public class Manager : Singleton<Manager>
 {
-    [FormerlySerializedAs("player")] [SerializeField]
-    GameObject m_player;
+    [FormerlySerializedAs("player")] [SerializeField] GameObject m_player;
 
-    [FormerlySerializedAs("enemy")] [SerializeField]
-    GameObject m_enemy;
+    [FormerlySerializedAs("enemy")] [SerializeField] GameObject m_enemy;
 
-    [FormerlySerializedAs("bossEnemy")] [SerializeField]
-    GameObject m_bossEnemy;
+    [FormerlySerializedAs("bossEnemy")] [SerializeField] GameObject m_bossEnemy;
 
-    [FormerlySerializedAs("cartEnemy")] [SerializeField]
-    GameObject m_cartEnemy;
+    [FormerlySerializedAs("cartEnemy")] [SerializeField] GameObject m_cartEnemy;
 
-    [FormerlySerializedAs("shieldEnemy")] [SerializeField]
-    GameObject m_shieldEnemy;
+    [FormerlySerializedAs("shieldEnemy")] [SerializeField] GameObject m_shieldEnemy;
 
-    [FormerlySerializedAs("projectile")] [SerializeField]
-    GameObject m_projectile;
+    [FormerlySerializedAs("projectile")] [SerializeField] GameObject m_projectile;
 
-    [FormerlySerializedAs("powerUpProjectile")] [SerializeField]
-    GameObject m_powerUpProjectile;
+    [FormerlySerializedAs("powerUpProjectile")] [SerializeField] GameObject m_powerUpProjectile;
 
-    [FormerlySerializedAs("spawner")] [SerializeField]
-    GameObject m_spawner;
+    [FormerlySerializedAs("spawner")] [SerializeField] GameObject m_spawner;
 
-    [FormerlySerializedAs("runWay")] [SerializeField]
-    GameObject m_runWay;
+    [FormerlySerializedAs("runWay")] [SerializeField] GameObject m_runWay;
 
-    [FormerlySerializedAs("powerBoxes")] [SerializeField]
-    GameObject[] m_powerBoxes;
+    [FormerlySerializedAs("powerBoxes")] [SerializeField] GameObject[] m_powerBoxes;
 
-    [FormerlySerializedAs("defaultMat")] [SerializeField]
-    Material m_defaultMat;
+    [FormerlySerializedAs("defaultMat")] [SerializeField] Material m_defaultMat;
 
-    [FormerlySerializedAs("allyPrefab")] [SerializeField]
-    GameObject m_allyPrefab;
+    [FormerlySerializedAs("allyPrefab")] [SerializeField] GameObject m_allyPrefab;
 
-    [FormerlySerializedAs("allyPositions")] [SerializeField]
-    Transform[] m_allyPositions;
+    [FormerlySerializedAs("allyPositions")] [SerializeField] Transform[] m_allyPositions;
 
-    [FormerlySerializedAs("bossPosition")] [SerializeField]
-    Transform m_bossPosition;
+    [FormerlySerializedAs("bossPosition")] [SerializeField] Transform m_bossPosition;
 
-    [FormerlySerializedAs("shield")] [SerializeField]
-    GameObject m_shield;
+    [FormerlySerializedAs("shield")] [SerializeField] GameObject m_shield;
 
-    [FormerlySerializedAs("shieldHP")] [SerializeField]
-    int m_shieldHp;
+    [FormerlySerializedAs("shieldHP")] [SerializeField] int m_shieldHp;
 
-    [FormerlySerializedAs("fireBall")] [SerializeField]
-    GameObject m_fireBall;
+    [FormerlySerializedAs("fireBall")] [SerializeField] GameObject m_fireBall;
 
     Animator m_playerAnimator;
     bool m_playerDead;
@@ -88,17 +71,13 @@ public class Manager : Singleton<Manager>
     bool m_isBossFight;
 
     //Upgrades
-    [FormerlySerializedAs("powerBoxSpawnChance")] [SerializeField] [Range(0, 1)]
-    float m_powerBoxSpawnChance;
+    [FormerlySerializedAs("powerBoxSpawnChance")] [SerializeField] [Range(0, 1)] float m_powerBoxSpawnChance;
 
-    [FormerlySerializedAs("powerBoxSpawnInterval")] [SerializeField]
-    int m_powerBoxSpawnInterval;
+    [FormerlySerializedAs("powerBoxSpawnInterval")] [SerializeField] int m_powerBoxSpawnInterval;
 
-    [FormerlySerializedAs("enemySpawnPositions")] [SerializeField]
-    Transform[] m_enemySpawnPositions;
+    [FormerlySerializedAs("enemySpawnPositions")] [SerializeField] Transform[] m_enemySpawnPositions;
 
-    [FormerlySerializedAs("enemySpawnBounds")] [SerializeField]
-    BoxCollider m_enemySpawnBounds;
+    [FormerlySerializedAs("enemySpawnBounds")] [SerializeField] BoxCollider m_enemySpawnBounds;
 
     GameObject m_currentPowerBox;
     float m_fireRate = 0.5f;
@@ -125,6 +104,9 @@ public class Manager : Singleton<Manager>
     bool m_themeSet = false;
     int m_currTheme;
     int m_level = 1;
+
+
+    private MultiplierBox.CurrentMultiplier currentMultiplier = MultiplierBox.CurrentMultiplier.None;
 
     //Getters/Setters
     public bool PlayerDead => m_playerDead;
@@ -180,6 +162,12 @@ public class Manager : Singleton<Manager>
     public GameObject BossInstance => m_bossInstance;
 
     public GolfBallPooler ProjectilePooler => projectilePooler;
+
+    public MultiplierBox.CurrentMultiplier CurrentMultiplier
+    {
+        get => currentMultiplier;
+        set => currentMultiplier = value;
+    }
 
     void Start()
     {
@@ -244,13 +232,14 @@ public class Manager : Singleton<Manager>
 
     public float TotalKilledCount;
     public float AliveCount;
+
     void Update()
     {
         TotalKilledCount = EnemyClass.TotalKilledCount;
         AliveCount = EnemyClass.AliveCount;
         //Debug.Log(Mathf.InverseLerp(0, 100, m_level));
         //Gameplay
-        if (Input.GetKeyDown(KeyCode.C)) SpawnAlly();
+        if (Input.GetKeyDown(KeyCode.C))  StartCoroutine(SpawnPowerBox());;
         if (Input.GetKeyDown(KeyCode.V)) EnemyClass.KilledCount = 100;
         if (!m_playGame) return;
         if (m_startedSpawning == null && !Enemy.isPassive)
@@ -263,12 +252,13 @@ public class Manager : Singleton<Manager>
         {
             //HANDLE VICTORY
             if (Input.GetKeyDown(KeyCode.X) || (EnemyClass.TotalKilledCount == EnemyClass.AliveCount && !m_isBossFight && m_startedSpawning != null))
-            {//CHANGE BACK TO == WHEN DONE TESTING.
+            {
+                //CHANGE BACK TO == WHEN DONE TESTING.
                 // HandleVictory();
                 //put boss here and then handle victory.
                 m_isBossFight = true;
                 RemoveAllCharacters();
-                if(m_startedSpawning != null)
+                if (m_startedSpawning != null)
                     StopCoroutine(m_startedSpawning);
                 var boss = Instantiate(m_bossEnemy, m_bossPosition);
                 m_bossInstance = boss;
@@ -420,6 +410,11 @@ public class Manager : Singleton<Manager>
                     arrayToUse = arr;
                 }
 
+                if (currentMultiplier == MultiplierBox.CurrentMultiplier.Five)
+                {
+                    arrayToUse = arrayToUse.Where(p => !p.GetComponent<MultiplierBox>()).ToArray();
+                }
+
                 powerBoxToSpawn = arrayToUse[Random.Range(0, arrayToUse.Length)];
                 var randPos = new Vector3(worldPos.x, 1.8f, zPos);
                 m_currentPowerBox = Instantiate(powerBoxToSpawn, randPos, Quaternion.Euler(-90, 0, 0));
@@ -429,18 +424,40 @@ public class Manager : Singleton<Manager>
         }
     }
 
+
     //FIRE PROJECTILES
     void FireProjectile(ref float fireRateCounter, float nextFire)
     {
-        if (Time.unscaledTime > fireRateCounter)
+        if (!(Time.unscaledTime > fireRateCounter)) return;
+        var multiplier = 0;
+        fireRateCounter = Time.unscaledTime + nextFire;
+        var flatAimTarget = CalculateTarget();
+        var p = ProjectilePooler.Get();
+        p.transform.position = m_spawner.transform.position;
+        p.transform.LookAt(flatAimTarget);
+        if (m_currTrail != null)
+            p.Trail.colorGradient = m_currTrail;
+        switch (currentMultiplier)
         {
-            fireRateCounter = Time.unscaledTime + nextFire;
-            var flatAimTarget = CalculateTarget();
-            var p = ProjectilePooler.Get();
-            p.transform.position = m_spawner.transform.position;
-            p.transform.LookAt(flatAimTarget);
+            case MultiplierBox.CurrentMultiplier.Three:
+                multiplier = 3;
+                break;
+            case MultiplierBox.CurrentMultiplier.Five:
+                multiplier = 5;
+                break;
+            case MultiplierBox.CurrentMultiplier.None:
+                return;
+        }
+
+        var side = 1;
+        for (var i = 1; i < multiplier; i++)
+        {
+            var p2 = ProjectilePooler.Get();
+            p2.transform.position = p.transform.position + Vector3.right * (side * .7f * i);
+            side *= -1;
+            p2.transform.rotation = Quaternion.LookRotation(p.transform.forward);
             if (m_currTrail != null)
-                p.Trail.colorGradient = m_currTrail;
+                p2.Trail.colorGradient = m_currTrail;
         }
     }
 
@@ -646,8 +663,8 @@ public class Manager : Singleton<Manager>
         if (m_shield.activeSelf) m_shield.GetComponent<Shield>().DestroyShield();
         if (m_bossInstance) Destroy(m_bossInstance);
         GameObject.FindGameObjectsWithTag("Enemy").ToList().ForEach(e => e.SetActive(false));
-       // e = e.Concat(GameObject.FindGameObjectsWithTag("Ally")).ToArray();
-       // foreach (var i in e) Destroy(i);
+        // e = e.Concat(GameObject.FindGameObjectsWithTag("Ally")).ToArray();
+        // foreach (var i in e) Destroy(i);
     }
 
     void HandleCosmetic(int type, int i, int cost)

@@ -22,19 +22,30 @@ public class MultiplierBox : PowerBox
     {
         if (other.gameObject.CompareTag("Projectile"))
         {
-            Vector3 ballPos = other.transform.position;
-            Vector3 previousPosition = other.transform.position;
-            for (int i = 0; i < multiplier; i++)
-            {
-                float xOffSet = Vector3.Distance(ballPos, previousPosition) + m_xOffSet;
-                if (previousPosition.x < ballPos.x)
-                    xOffSet = -xOffSet;
-                Vector3 spawnPoint = new Vector3(ballPos.x + xOffSet, ballPos.y, ballPos.z);
-                GameObject p = Instantiate(other.gameObject, spawnPoint, other.gameObject.transform.rotation);;
-                previousPosition = p.transform.position;
-                //change this
-            }
+            // Vector3 ballPos = other.transform.position;
+            // Vector3 previousPosition = other.transform.position;
+            // for (int i = 0; i < multiplier; i++)
+            // {
+            //     float xOffSet = Vector3.Distance(ballPos, previousPosition) + m_xOffSet;
+            //     if (previousPosition.x < ballPos.x)
+            //         xOffSet = -xOffSet;
+            //     Vector3 spawnPoint = new Vector3(ballPos.x + xOffSet, ballPos.y, ballPos.z);
+            //     GameObject p = Instantiate(other.gameObject, spawnPoint, other.gameObject.transform.rotation);
+            //     ;
+            //     previousPosition = p.transform.position;
+            //     //change this
+            // }
+
+            Manager.I.CurrentMultiplier = (CurrentMultiplier)(int)Manager.I.CurrentMultiplier + 1;
         }
+
         base.OnCollisionEnter(other);
+    }
+
+    public enum CurrentMultiplier
+    {
+        None,
+        Three,
+        Five
     }
 }
