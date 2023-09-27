@@ -7,7 +7,7 @@ using UnityEngine.Pool;
 /// </summary>
 /// <typeparam name="T">A MonoBehaviour object you'd like to perform pooling on.</typeparam>
 [HelpURL("https://www.youtube.com/@Tarodev/videos")]
-public abstract class BasePooler<T> : MonoBehaviour where T : MonoBehaviour
+public abstract class BasePooler<T> : MonoBehaviour where T : Component
 {
     private T _prefab;
     private ObjectPool<T> _pool;

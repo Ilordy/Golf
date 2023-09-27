@@ -21,8 +21,8 @@ public class WaterSplasher : MonoBehaviour
         if (other.transform.root.name.StartsWith("Boss"))
         {
             OnBossTouchedWater?.Invoke();
-            Debug.Log("BOSS LANDED");
             splash.transform.localScale = Vector3.one * 11.2f;
+            Manager.ShakeCamera();
             StartCoroutine(NotifyWorldManager());
         }
         ps.Play();

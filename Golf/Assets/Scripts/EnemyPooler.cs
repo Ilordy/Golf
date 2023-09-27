@@ -7,7 +7,6 @@ public class EnemyPooler : Singleton<EnemyPooler>
 {
     #region Variables
     [SerializeField] EnemyPoolerData[] m_enemiesToPool;
-    private LinkedPool<EnemyClass>[] m_enemyPoolers; //change to regular object pool later.
     float m_netWeight;
     #endregion
 
@@ -15,12 +14,18 @@ public class EnemyPooler : Singleton<EnemyPooler>
     public EnemyClass SpawnEnemy(int index) => m_enemiesToPool?[index].pooler.Get();
 
     /// <summary>
-    /// Sets mob objects inactive after a delay.
+    /// Disables and plays an enemy's death particle
     /// </summary>
-    /// <param name="objectsToDisable">The mob objects to disable.</param>
-    public void SequenceMobDisable(params GameObject[] objectsToDisable)
+    /// <param name="relativeTransform">The transform of where to play the particle</param>
+    /// <param name="obj">The gameobject to disable</param>
+    public void SequenceMobDeath(Transform relativeTransform, GameObject obj)
     {
-        StartCoroutine(SequenceMobDisableInternal(objectsToDisable));
+        StartCoroutine(SequenceMobDisableInternal(relativeTransform, obj));
+    }
+    
+    public void SequenceMobItemDeath(Transform relativeTransform, GameObject obj)
+    {
+        StartCoroutine(SequenceMobItemDisableInternal(relativeTransform, obj));
     }
 
     /// <summary>
@@ -65,21 +70,25 @@ public class EnemyPooler : Singleton<EnemyPooler>
     }
 
     #region Private Methods
-    IEnumerator SequenceMobDisableInternal(params GameObject[] objectsToDisable)
+    IEnumerator SequenceMobDisableInternal(Transform pos, GameObject objectToDisable)
     {
         yield return new WaitForSeconds(1f);
-        foreach (GameObject obj in objectsToDisable)
-        {
-            obj.SetActive(false);
-        }
+        VFXManager.PlayEnemyDeathVFX(pos.position);
+        objectToDisable.SetActive(false);
     }
+    IEnumerator SequenceMobItemDisableInternal(Transform pos, GameObject objectToDisable)
+    {
+        yield return new WaitForSeconds(1f);
+        VFXManager.PlayEnemyItemVFX(pos.position);
+        objectToDisable.SetActive(false);
+    }
+    
     #endregion
 
     [System.Serializable]
     private class EnemyPoolerData
     {
-        [FormerlySerializedAs("m_enemyToPool")]
-        public EnemyClass enemyToPool;
+        [FormerlySerializedAs("m_enemyToPool")] public EnemyClass enemyToPool;
 
         public int maxSize;
         public LinkedPool<EnemyClass> pooler;

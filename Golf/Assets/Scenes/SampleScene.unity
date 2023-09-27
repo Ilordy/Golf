@@ -3756,6 +3756,7 @@ GameObject:
   m_Component:
   - component: {fileID: 287991113}
   - component: {fileID: 287991112}
+  - component: {fileID: 287991114}
   m_Layer: 0
   m_Name: CM MainCam
   m_TagString: Untagged
@@ -3817,6 +3818,29 @@ Transform:
   m_Father: {fileID: 1937031820}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 8.646, y: -26.68, z: 0}
+--- !u!114 &287991114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 287991111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00b2d199b96b516448144ab30fb26aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ApplyAfter: 2
+  m_ChannelMask: 1
+  m_Gain: 1
+  m_Use2DDistance: 0
+  m_UseCameraSpace: 1
+  m_ReactionSettings:
+    m_SecondaryNoise: {fileID: 11400000, guid: e9ce97b7a206dc64d90931ea044e0c72, type: 2}
+    m_AmplitudeGain: 1
+    m_FrequencyGain: 1
+    m_Duration: 1
+    m_NoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!1 &290550068
 GameObject:
   m_ObjectHideFlags: 0
@@ -18455,6 +18479,8 @@ GameObject:
   - component: {fileID: 981665300}
   - component: {fileID: 981665301}
   - component: {fileID: 981665302}
+  - component: {fileID: 981665303}
+  - component: {fileID: 981665304}
   m_Layer: 0
   m_Name: Manager
   m_TagString: Untagged
@@ -18633,15 +18659,15 @@ MonoBehaviour:
   - enemyToPool: {fileID: 6192333562976508991, guid: 88212c3d2d47c5840b2db2f44171e968,
       type: 3}
     maxSize: 7
-    probability: 0
+    probability: 0.05
   - enemyToPool: {fileID: 8466410024909282408, guid: 1d8cbaec165aedf408d0abc6b81437e9,
       type: 3}
     maxSize: 15
-    probability: 0
+    probability: 1
   - enemyToPool: {fileID: 5631945564213548175, guid: 2169185bb9f593748a74510ac2755df8,
       type: 3}
     maxSize: 30
-    probability: 1
+    probability: 0
 --- !u!114 &981665302
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18655,6 +18681,78 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ballPrefab: {fileID: 4944425052107227038, guid: f71373e91a63c954c8efecfdd4913ce9,
+    type: 3}
+--- !u!114 &981665303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 981665292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 180ecf9b41d478f468eb3e9083753217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ImpulseDefinition:
+    m_ImpulseChannel: 1
+    m_ImpulseShape: 3
+    m_CustomImpulseShape:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_ImpulseDuration: 0.1
+    m_ImpulseType: 0
+    m_DissipationRate: 0.25
+    m_RawSignal: {fileID: 0}
+    m_AmplitudeGain: 1
+    m_FrequencyGain: 1
+    m_RepeatMode: 0
+    m_Randomize: 1
+    m_TimeEnvelope:
+      m_AttackShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      m_DecayShape:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      m_AttackTime: 0
+      m_SustainTime: 0.2
+      m_DecayTime: 0.7
+      m_ScaleWithImpact: 1
+      m_HoldForever: 0
+    m_ImpactRadius: 100
+    m_DirectionMode: 0
+    m_DissipationMode: 2
+    m_DissipationDistance: 100
+    m_PropagationSpeed: 343
+  m_DefaultVelocity: {x: 0, y: 1, z: -1}
+--- !u!114 &981665304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 981665292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bc96a8ffc9d60944b2953bb5e6051d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _deactivateOnLoad: 0
+  _dontDestroyOnLoad: 0
+  enemyDeathVFX: {fileID: 4106847154949630044, guid: bed7852eaa376c64399734515d08ae20,
+    type: 3}
+  ballHitVFX: {fileID: 0}
+  enemyItemVFX: {fileID: 8639254554005657652, guid: 255fe0aba5d4c9a4398eb7a228d652f0,
     type: 3}
 --- !u!224 &985779038 stripped
 RectTransform:
@@ -20300,7 +20398,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1100214020}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1.67, z: 1}
@@ -35104,6 +35202,7 @@ GameObject:
   - component: {fileID: 1717616650}
   - component: {fileID: 1717616651}
   - component: {fileID: 1717616652}
+  - component: {fileID: 1717616653}
   m_Layer: 0
   m_Name: CM BossCam
   m_TagString: Untagged
@@ -35118,7 +35217,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1717616649}
-  m_LocalRotation: {x: 0.1773979, y: -0.75428957, z: 0.22677988, w: 0.5900408}
+  m_LocalRotation: {x: 0.17739788, y: -0.75428957, z: 0.22677986, w: 0.5900408}
   m_LocalPosition: {x: -46.284298, y: 47.81046, z: 13.80538}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -35212,6 +35311,29 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   heightOffset: 79.24
+--- !u!114 &1717616653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1717616649}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00b2d199b96b516448144ab30fb26aed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ApplyAfter: 2
+  m_ChannelMask: 1
+  m_Gain: 1
+  m_Use2DDistance: 0
+  m_UseCameraSpace: 1
+  m_ReactionSettings:
+    m_SecondaryNoise: {fileID: 11400000, guid: e9ce97b7a206dc64d90931ea044e0c72, type: 2}
+    m_AmplitudeGain: 1
+    m_FrequencyGain: 1
+    m_Duration: 1
+    m_NoiseOffsets: {x: 0, y: 0, z: 0}
 --- !u!224 &1730756040 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 7714087393268722216, guid: 46d8c0d29c28c7543b49941ae7c676dd,

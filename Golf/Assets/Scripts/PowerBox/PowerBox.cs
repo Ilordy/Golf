@@ -14,13 +14,15 @@ public class PowerBox : MonoBehaviour
     private float arc;
     private Vector3 startPos, endPos, maxPos, minPos, finalPos;
     private float startTime;
-    protected Collider runWayCollider;
+    private Collider runWayCollider;
     private bool reversed = false;
     private float x, y, z = 0;
     public UnityEvent OnDestroyed;
+    private Camera mainCam;
 
     protected virtual void Start()
     {
+        mainCam = Camera.main;
         runWay = Manager.I.RunWay;
         player = Manager.I.Player;
         SetRandomLightColor();
@@ -42,10 +44,7 @@ public class PowerBox : MonoBehaviour
 
     void InitMoving()
     {
-        if (finalPos == null)
-            finalPos = Random.value > .5f ? minPos : maxPos;
-        else
-            finalPos = GetFinalPosition();
+        finalPos = GetFinalPosition();
         startPos = transform.position;
         //reversed = false;
         y = 1.995f;
@@ -55,10 +54,12 @@ public class PowerBox : MonoBehaviour
         {
             reversed = true;
         }
+
         if (startPos.z >= maxPos.z && reversed)
         {
             reversed = false;
         }
+
         endPos = new Vector3(x, y, z);
         startTime = Time.time;
         arc = Vector3.Distance(startPos, endPos) / 2;
@@ -74,15 +75,16 @@ public class PowerBox : MonoBehaviour
 
     void SetMinMax()
     {
-        minPos = new Vector3(Camera.main.ViewportToWorldPoint(new Vector3(0.05f, 0,
-         Mathf.Abs(Camera.main.transform.position.z - transform.position.z))).x,
-         1.8f,
-         -76);
-        maxPos = new Vector3(Camera.main.ViewportToWorldPoint(new Vector3(0.95f, 0,
-        Mathf.Abs(Camera.main.transform.position.z - transform.position.z))).x,
-        1.8f,
-        -25);//hard coded values due to map being static.
+        minPos = new Vector3(mainCam.ViewportToWorldPoint(new Vector3(0.05f, 0,
+                Mathf.Abs(mainCam.transform.position.z - transform.position.z))).x,
+            1.8f,
+            -76);
+        maxPos = new Vector3(mainCam.ViewportToWorldPoint(new Vector3(0.95f, 0,
+                Mathf.Abs(mainCam.transform.position.z - transform.position.z))).x,
+            1.8f,
+            -25); //hard coded values due to map being static.
     }
+
     private void Move()
     {
         centorPoint = (startPos + endPos) * .5f;
@@ -94,14 +96,15 @@ public class PowerBox : MonoBehaviour
         {
             centorPoint = centorPoint - Vector3.forward - new Vector3(arc, 0, 0);
         }
-        else if (startPos.x <= maxPos.x && finalPos.z == maxPos.z)//going back
+        else if (startPos.x <= maxPos.x && finalPos.z == maxPos.z) //going back
         {
             centorPoint = centorPoint - Vector3.forward - new Vector3(arc, 0, 0);
         }
-        else if (startPos.x >= minPos.x && finalPos.z == minPos.z)//going forward
+        else if (startPos.x >= minPos.x && finalPos.z == minPos.z) //going forward
         {
             centorPoint = (centorPoint - Vector3.forward) - new Vector3(arc, 0, 0);
         }
+
         startRelCenter = startPos - centorPoint;
         endRelCenter = endPos - centorPoint;
         float fracComplete = (Time.time - startTime) / journeyTime * speed;
@@ -114,9 +117,9 @@ public class PowerBox : MonoBehaviour
 
     private Vector3 GetFinalPosition()
     {
-
         return reversed == false ? minPos : maxPos;
     }
+
     protected virtual void OnCollisionEnter(Collision other)
     {
         //play sound and destroy
@@ -134,6 +137,6 @@ public class PowerBox : MonoBehaviour
     void OnDestroy()
     {
         OnDestroyed?.Invoke();
-        OnDestroyed.RemoveAllListeners();
+        OnDestroyed?.RemoveAllListeners();
     }
 }

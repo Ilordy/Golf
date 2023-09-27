@@ -254,6 +254,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 10
   minSpeed: 2
+  mainBody: {fileID: 222494062599692231}
   frags:
   - {fileID: 8956181710207809596}
   - {fileID: 8093063751794489801}

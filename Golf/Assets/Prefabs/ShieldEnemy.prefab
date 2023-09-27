@@ -1060,6 +1060,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxSpeed: 20
   minSpeed: 2
+  mainBody: {fileID: 835195717360863504}
   tackleRange: 8
   emojiController: {fileID: 2566561674512925172}
 --- !u!136 &835195716798131513

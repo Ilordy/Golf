@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 5
+  version: 7
 --- !u!21 &2100000
 Material:
   serializedVersion: 8
@@ -23,6 +23,8 @@ Material:
   m_Name: ShieldMat
   m_Shader: {fileID: -6465566751694194690, guid: ffe8d4a25895b6e47ad5523ea5b8e18c,
     type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -31,6 +33,7 @@ Material:
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
+  m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
@@ -57,12 +60,16 @@ Material:
     - Vector1_b5b923fbcc1c4a81a93abc6a65d1b56f: 1
     - Vector1_cf86a053aa2c40e78a605292021f44c3: 3
     - Vector1_ed67862a2b324ad591353874841905ba: 2
+    - _Cell_Density: 2
     - _Disolve: 0
     - _DisplacementStrength: 0
+    - _QueueControl: 0
+    - _QueueOffset: 0
     m_Colors:
     - Color_027e4586f058443ca29389a6ccbed930: {r: 0, g: 0.7374075, b: 3.482202, a: 0}
     - Color_cf12b49411d94583a269f83e6981abd1: {r: 0, g: 2.089559, b: 6.498019, a: 0}
     - Vector2_6d629b6a76b14f7b9f3bf64e1f22ccd1: {r: 0.73, g: 2.6, b: 0, a: 0}
     - Vector2_c5f9010e885041bdbb2964747546ce47: {r: 0.16, g: 0.23, b: 0, a: 0}
+    - _DisolveEdgeColor: {r: 0, g: 0.7374075, b: 3.482202, a: 0}
     - _FresnelColor: {r: 0, g: 2.089559, b: 6.498019, a: 0}
   m_BuildTextureStacks: []

@@ -16,7 +16,7 @@ public class ShieldEnemy : Enemy
         shield = transform.Find("shield");
         shieldRb = shield.GetComponent<Rigidbody>();
         enemyRb = GetComponent<Rigidbody>();
-        enemyAnimator = GetComponent<Animator>(); //TODO refactor plsss..
+        enemyAnimator = GetComponent<Animator>();
     }
 
     protected override void Start()
@@ -26,20 +26,38 @@ public class ShieldEnemy : Enemy
         speed = 2f;
     }
 
-    protected override void OnCollisionEnter(Collision collision) {
-        base.OnCollisionEnter(collision);
-        if (shielded) {
-            shield.SetParent(null);
-            //shield.gameObject.layer = 12;
-            shieldRb.useGravity = true;
-            shieldRb.AddForce(transform.forward * Random.Range(5f,10f), ForceMode.Impulse);
-            enemyRb.isKinematic = false;
-            enemyAnimator.SetBool("run", true);
-            minSpeed = 5;
-            shielded = false;
-            SequenceDisappear(shield.gameObject);
+    protected override void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag is "Projectile" or "PowerUpProjectile")
+        {
+            if (shielded)
+            {
+                shield.SetParent(null);
+                shieldRb.isKinematic = false;
+                shieldRb.constraints = RigidbodyConstraints.None;
+                //shield.gameObject.layer = 12;
+                shieldRb.useGravity = true;
+                shieldRb.AddForce(transform.forward * Random.Range(5f, 10f), ForceMode.Impulse);
+                enemyRb.isKinematic = false;
+                enemyAnimator.SetBool("run", true);
+                minSpeed = 5;
+                shielded = false;
+                //gameObject.layer = 12;
+                EnemyPooler.I.SequenceMobItemDeath(shield.transform, shield.gameObject);
+                //enemyRb.detectCollisions = false;
+               // StartCoroutine(EnableNextFixedUpdate());
+            }
         }
+
+        base.OnCollisionEnter(collision);
     }
+
+    IEnumerator EnableNextFixedUpdate()
+    {
+        yield return new WaitForSecondsRealtime(2);
+        enemyRb.detectCollisions = true;
+    }
+
     protected override void OnEnable()
     {
         base.OnEnable();

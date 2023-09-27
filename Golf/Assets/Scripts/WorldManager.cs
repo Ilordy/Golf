@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using MobileTools;
+
 public class WorldManager : Singleton<WorldManager>
 {
     [SerializeField] GameObject oceanPrefab;
@@ -15,6 +16,7 @@ public class WorldManager : Singleton<WorldManager>
     private List<GameObject> banners = new List<GameObject>();
     private FloatingTextPooler m_pooler;
     float totalMultAmnt = 1.0f, currentMultAmnt = 1.0f;
+
     void Start()
     {
         m_pooler = GetComponent<FloatingTextPooler>();
@@ -52,6 +54,7 @@ public class WorldManager : Singleton<WorldManager>
         {
             Destroy(banner);
         }
+
         ToggleObstacles(true);
         banners.Clear();
         currentMultAmnt = 1;

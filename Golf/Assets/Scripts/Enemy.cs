@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class Enemy : EnemyClass
 {
@@ -14,7 +16,7 @@ public class Enemy : EnemyClass
     private Material emojiMat;
     public static bool isPassive = true;
     public static event System.Action OnBecameHostile;
-    
+
     protected override void Awake()
     {
         base.Awake();
@@ -32,7 +34,7 @@ public class Enemy : EnemyClass
         health = 1;
         speed = 5f;
         animator.SetInteger("IdleID", Random.Range(0, 3));
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
+        //rb.constraints = RigidbodyConstraints.FreezeRotation;
     }
 
     void Update()
@@ -40,6 +42,7 @@ public class Enemy : EnemyClass
         if (isPassive) return;
         animator.SetInteger("IdleID", -1);
         speed = EvaluateSpeed();
+
         if (health <= 0)
         {
             GameEvents.current.ProgressChange(totalKilledCount, aliveCount);
@@ -51,15 +54,16 @@ public class Enemy : EnemyClass
                     GameEvents.current.KillsChange(killedCount);
                 }
             }
+
             health = 10000;
             isDead = true;
             gameObject.tag = "Dead";
             GameEvents.current.Reward();
             col.enabled = false;
             particles.Stop(true, UnityEngine.ParticleSystemStopBehavior.StopEmittingAndClear);
-            AddRagdollForce((new Vector3(0, 1.3f, 0) + Vector3.forward) * 100);
+            //AddRagdollForce((new Vector3(0, 1.3f, 0) + Vector3.forward) * 100);
             animator.enabled = false;
-            SequenceDisappear(gameObject);
+            EnemyPooler.I.SequenceMobDeath(mainBody, gameObject);
         }
 
         if (!isDead && !Manager.I.PlayerDead)
@@ -72,6 +76,7 @@ public class Enemy : EnemyClass
             {
                 transform.LookAt(playerPos);
             }
+
             transform.Translate(0, 0, speed * Time.deltaTime);
         }
         else
@@ -97,7 +102,7 @@ public class Enemy : EnemyClass
         animator.enabled = true;
         animator.Play("Running");
     }
-    
+
     private void SetPassive()
     {
         if (!isPassive) return;

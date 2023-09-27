@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Linq;
+using Cinemachine;
 using DG.Tweening;
 using Unity.Mathematics;
 using UnityEngine;
@@ -104,7 +105,7 @@ public class Manager : Singleton<Manager>
     bool m_themeSet = false;
     int m_currTheme;
     int m_level = 1;
-
+    private CinemachineImpulseSource impulseSource;
 
     private MultiplierBox.CurrentMultiplier currentMultiplier = MultiplierBox.CurrentMultiplier.None;
 
@@ -168,9 +169,12 @@ public class Manager : Singleton<Manager>
         get => currentMultiplier;
         set => currentMultiplier = value;
     }
+    
+    
 
     void Start()
     {
+        impulseSource = GetComponent<CinemachineImpulseSource>();
         mainCam = Camera.main;
         m_enemyPooler = GetComponent<EnemyPooler>();
         projectilePooler = GetComponent<GolfBallPooler>();
@@ -239,7 +243,11 @@ public class Manager : Singleton<Manager>
         AliveCount = EnemyClass.AliveCount;
         //Debug.Log(Mathf.InverseLerp(0, 100, m_level));
         //Gameplay
-        if (Input.GetKeyDown(KeyCode.C))  StartCoroutine(SpawnPowerBox());;
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            ShakeCamera();
+            StartCoroutine(SpawnPowerBox());
+        }  
         if (Input.GetKeyDown(KeyCode.V)) EnemyClass.KilledCount = 100;
         if (!m_playGame) return;
         if (m_startedSpawning == null && !Enemy.isPassive)
@@ -731,6 +739,11 @@ public class Manager : Singleton<Manager>
             m_currTheme = n;
             GameEvents.current.SetTheme(n);
         }
+    }
+    
+    public static void ShakeCamera()
+    {
+        I.impulseSource.GenerateImpulse();
     }
 
     #region Cheat Methods

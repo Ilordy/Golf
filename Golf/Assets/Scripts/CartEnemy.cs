@@ -42,7 +42,8 @@ public class CartEnemy : EnemyClass
             }
 
             //TODO particles here maybe..
-            SequenceDisappear(gameObject);
+            EnemyPooler.I.SequenceMobDeath(transform, gameObject);
+            health = 10000;
         }
         else if (!Manager.I.PlayerDead)
         {
@@ -82,9 +83,12 @@ public class CartEnemy : EnemyClass
                 fragsRB[i].useGravity = true;
                 fragsRB[i].AddForce(new Vector3(Random.Range(-5, -1), 5, 0), ForceMode.Impulse);
             }
-            SequenceDisappear(frags);
+
+            foreach (var frag in frags)
+            {
+                EnemyPooler.I.SequenceMobItemDeath(frag.transform, frag);
+            }
         }
-        
     }
 
     protected override void OnEnable()

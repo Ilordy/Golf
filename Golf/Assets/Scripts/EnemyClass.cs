@@ -7,6 +7,7 @@ public abstract class EnemyClass : MonoBehaviour
 {
     //FIELDS
     [SerializeField] protected int maxSpeed, minSpeed;
+    [SerializeField] protected Transform mainBody;
     protected Vector3 playerPos;
     protected Manager GameManager;
     protected int health = 1;
@@ -72,8 +73,11 @@ public abstract class EnemyClass : MonoBehaviour
         }
 
         increase = tag != "PowerUpProjectile";
+    }
 
-        if (collision.gameObject.CompareTag("Player"))
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Player"))
         {
             GameEvents.current.Defeat();
         }
@@ -81,7 +85,7 @@ public abstract class EnemyClass : MonoBehaviour
 
     protected float EvaluateSpeed()
     {
-        if(!CanMove) return 0;
+        if (!CanMove) return 0;
         if (transform.position.z < m_destinationPos.z) return minSpeed;
         float distance = Vector3.Distance(transform.position, m_destinationPos);
         float maxSpeed = Mathf.Min(distance, this.maxSpeed); //will prob change max speed later.
@@ -99,7 +103,7 @@ public abstract class EnemyClass : MonoBehaviour
             rb.constraints = RigidbodyConstraints.None;
             rb.AddForce(force, ForceMode.Impulse);
         }
-    } 
+    }
 
     /// <summary>
     /// Resets the velocity and angular velocity of each rigidbody inside the game object.
@@ -110,8 +114,8 @@ public abstract class EnemyClass : MonoBehaviour
         {
             rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-            rb.constraints = RigidbodyConstraints.FreezeRotation 
-                             | RigidbodyConstraints.FreezePositionX 
+            rb.constraints = RigidbodyConstraints.FreezeRotation
+                             | RigidbodyConstraints.FreezePositionX
                              | RigidbodyConstraints.FreezePositionZ;
         }
     }
@@ -127,16 +131,27 @@ public abstract class EnemyClass : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Sets the Game Objects to inactive after 3 seconds.
-    /// </summary>
-    /// <param name="objectsToDisable">objects to disable</param>
-    protected void SequenceDisappear(params GameObject[] objectsToDisable) => EnemyPooler.I.SequenceMobDisable(objectsToDisable);
-
+    private void FixedUpdate()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            //GetComponent<Rigidbody>().position
+            //VFXManager.PlayEnemyDeathVFX(mainBody.GetComponent<Rigidbody>().position);
+        }
+    }
+    
     //TODO prob also want to do lil particle effects too...
     protected virtual void OnDisable()
     {
+        //Play on Before Disable
+       // VFXManager.PlayEnemyDeathVFX(mainBody.position);
         totalKilledCount++;
         OnDeath?.Invoke(this);
+    }
+
+    private IEnumerator InvokeNextFrame(Action action)
+    {
+        yield return null;
+        action?.Invoke();
     }
 }
