@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
-using System.Linq;
 
 public class Projectile : MonoBehaviour
 {
@@ -40,6 +38,7 @@ public class Projectile : MonoBehaviour
         GameEvents.current.BallHit();
         bounces = 0;
         StartCoroutine(Disable());
+        rb.velocity = Vector3.zero;
     }
 
     IEnumerator Disable()
@@ -53,7 +52,7 @@ public class Projectile : MonoBehaviour
     {
         if (bounces == GameManager.MaxBounces)
         {
-            StopAllCoroutines();
+            
             gameObject.SetActive(false);
         }
 
@@ -97,6 +96,7 @@ public class Projectile : MonoBehaviour
 
     void OnDisable()
     {
+        StopAllCoroutines();
         m_targettedEnemy = null;
         OnDeath?.Invoke(this);
     }

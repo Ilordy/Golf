@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 public class BossEnemy : MonoBehaviour
 {
     [SerializeField] int health;
@@ -34,6 +35,7 @@ public class BossEnemy : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Projectile"))
         {
+            other.gameObject.SetActive(false);
             if (!canBeHit) return;
             health--;
             if (health > 0)
