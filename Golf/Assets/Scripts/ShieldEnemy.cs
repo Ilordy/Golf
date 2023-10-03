@@ -38,24 +38,19 @@ public class ShieldEnemy : Enemy
                 //shield.gameObject.layer = 12;
                 shieldRb.useGravity = true;
                 shieldRb.AddForce(transform.forward * Random.Range(5f, 10f), ForceMode.Impulse);
-                enemyRb.isKinematic = false;
+                //enemyRb.isKinematic = false;
                 enemyAnimator.SetBool("run", true);
                 minSpeed = 5;
                 shielded = false;
                 //gameObject.layer = 12;
                 EnemyPooler.I.SequenceMobItemDeath(shield.transform, shield.gameObject);
+                ResetVelocities();
                 //enemyRb.detectCollisions = false;
                // StartCoroutine(EnableNextFixedUpdate());
             }
         }
 
         base.OnCollisionEnter(collision);
-    }
-
-    IEnumerator EnableNextFixedUpdate()
-    {
-        yield return new WaitForSecondsRealtime(2);
-        enemyRb.detectCollisions = true;
     }
 
     protected override void OnEnable()

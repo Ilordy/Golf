@@ -5,6 +5,7 @@ using UnityEngine;
 public class GolfBallPooler : BasePooler<Projectile>
 {
     [SerializeField] Projectile ballPrefab;
+
     void Start()
     {
         InitPool(ballPrefab);
@@ -15,7 +16,7 @@ public class GolfBallPooler : BasePooler<Projectile>
         base.GetSetup(obj);
         obj.OnDeath += Release;
     }
-    
+
     protected override void ReleaseSetup(Projectile obj)
     {
         base.ReleaseSetup(obj);
