@@ -9,6 +9,7 @@ public class WorldManager : Singleton<WorldManager>
     [SerializeField] GameObject oceanPrefab;
     [SerializeField] float bannerStartPos;
     [SerializeField] float offsetBetweenBanners;
+    [SerializeField] private WaterSplasher waterToResize;
     /// <summary>
     /// Objects to hide when boss gets launched.
     /// </summary>
@@ -27,6 +28,7 @@ public class WorldManager : Singleton<WorldManager>
         //-x is our forward direction for this game.
         //gotta get the absolute value of x first and then add it by 50% of it's area for bigger room of error.
         float finalPos = Mathf.Abs(bossLandingPoint.z);
+        ResizeWaterToBossPos(bossLandingPoint);
         ToggleObstacles(false);
         for (float i = Mathf.Abs(bannerStartPos); i < finalPos + (finalPos * .50f); i += offsetBetweenBanners)
         {
@@ -65,5 +67,14 @@ public class WorldManager : Singleton<WorldManager>
     {
         foreach (GameObject obj in m_objectsToHide)
             obj.SetActive(active);
+    }
+
+    private void ResizeWaterToBossPos(Vector3 bossPos)
+    {
+        var waterTrans = waterToResize.transform;
+        var originalPos = waterTrans.position;
+        waterTrans.position = new Vector3(originalPos.x, originalPos.y, bossPos.z);
+        var delta = waterTrans.position - originalPos;
+        waterToResize.Resize(delta.z, waterTrans.forward);
     }
 }
