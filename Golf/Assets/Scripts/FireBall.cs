@@ -12,6 +12,7 @@ public class FireBall : MonoBehaviour
         if (other.gameObject.CompareTag("Boss"))
         {
             other.gameObject.GetComponent<BossEnemy>().AddRagDollForce(_sliderForce);
+            RenderSettings.fog = true;
             Destroy(gameObject);
         }
     }
